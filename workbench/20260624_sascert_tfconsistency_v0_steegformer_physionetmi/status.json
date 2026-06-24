@@ -1,0 +1,35 @@
+{
+  "trial": "sascert_tfconsistency_v0_steegformer_physionetmi",
+  "created_at": "2026-06-24T17:00:00",
+  "completed_at": "2026-06-24T18:40:00",
+  "status": "completed",
+  "blocked": false,
+  "promoted": false,
+  "decision": "CONTINUE_TFCONSISTENCY_REPAIR",
+  "runner_reused": "workbench/20260623_sascert_softar_ls_v1_1_steegformer_physionetmi/runner_v1_1.py",
+  "experiments": [
+    "tfconsistency_regular",
+    "tfconsistency_riskmixed"
+  ],
+  "primary_output": "outputs/SASCERT_TFCONSISTENCY_V0_REPORT.md",
+  "compact_result": "outputs/compact_tfconsistency_v0_result.json",
+  "leakage_audit": "outputs/leakage_audit_tfconsistency_v0.json",
+  "regular_vs_naive": {
+    "delta_balanced_accuracy": 0.0004538216470492129,
+    "delta_macro_f1": -0.0003822989040069835,
+    "delta_ece": -0.0023472353366249255,
+    "delta_nll": -0.026090105897844218,
+    "delta_brier": -0.005532606951892394,
+    "subject_win_rate_macro_f1": 0.45,
+    "seed_win_rate_macro_f1": 0.4
+  },
+  "riskmixed_vs_naive": {
+    "delta_balanced_accuracy": 0.0026603384704391164,
+    "delta_macro_f1": 0.00019431349087850602,
+    "delta_ece": -0.0013446786286079593,
+    "delta_nll": -0.031892888879180736,
+    "delta_brier": -0.0050241786520928144,
+    "subject_win_rate_macro_f1": 0.35,
+    "seed_win_rate_macro_f1": 0.0
+  }
+}

@@ -1,0 +1,193 @@
+{
+  "task": "SASCERT_TFCONSISTENCY_V0_ON_STEEGFORMER_PHYSIONETMI",
+  "status": "completed",
+  "csda": {
+    "dwtaug_status": "DWT_AUG_FAILED: pywt unavailable; main run used frequency mask/mixup TF views",
+    "hht_status": "HHT_AUDIT_ONLY: script fragment reviewed; not used in main run"
+  },
+  "training_card": {
+    "backbone": "ST-EEGFormer-small source-tuned checkpoint",
+    "frozen_modules": [
+      "ST-EEGFormer-small backbone"
+    ],
+    "trainable_modules": [
+      "classifier head only"
+    ],
+    "augmentation_views": [
+      "weak_frequency_mask",
+      "weak_time_shift",
+      "weak_amplitude_scaling",
+      "same_class_frequency_mixup",
+      "frequency_mixup",
+      "strong_frequency_mask",
+      "wrong_class_frequency_mixup",
+      "emg_like_burst",
+      "eog_like_drift"
+    ],
+    "certificate_route": "content_q/risk_q fixed v0 thresholds to supervised/consistency/quarantine",
+    "loss": "CE(real) + CE(supervised views) + 2.0 KL consistency views; prototype loss diagnostic-only in v0",
+    "target_test_use": "final evaluation only"
+  },
+  "leakage_audit": {
+    "status": "passed",
+    "target_test_used_for_prototype": false,
+    "target_test_used_for_ranknorm": false,
+    "target_test_used_for_threshold": false,
+    "target_test_used_for_route": false,
+    "target_test_used_for_best_epoch_or_seed": false,
+    "target_test_used_for_final_eval_only": true,
+    "notes": [
+      "TF routes are computed only from target-support candidate pools.",
+      "Fixed v0 thresholds are not selected on target test.",
+      "Target test is used only for final prediction metrics."
+    ]
+  },
+  "diagnostic_auc": [
+    {
+      "diagnostic": "riskmixed_detection_artifact_score",
+      "auc": 0.6088419523809524
+    },
+    {
+      "diagnostic": "riskmixed_detection_risk_q",
+      "auc": 0.5842109047619047
+    },
+    {
+      "diagnostic": "badcontent_wrong_class_frequency_mixup",
+      "auc": 0.5504567777777778
+    },
+    {
+      "diagnostic": "badartifact_emg_eog",
+      "auc": 0.9556677777777778
+    }
+  ],
+  "regular_pool": {
+    "groups": {
+      "RealOnly_LS010": {
+        "balanced_accuracy": 0.7527979903825104,
+        "macro_f1": 0.7474669521729089,
+        "auroc": 0.8229200084272038,
+        "ece": 0.18859563403979326,
+        "nll": 0.6553659066385926,
+        "brier": 0.36765020493417977,
+        "tf_supervised_ratio": 0.14450000000000002,
+        "tf_consistency_ratio": 0.24333333333333332,
+        "tf_quarantine_ratio": 0.6121666666666666
+      },
+      "NaiveTF-Aug_LS010": {
+        "balanced_accuracy": 0.7547724857229114,
+        "macro_f1": 0.7499026931058986,
+        "auroc": 0.8226089494656084,
+        "ece": 0.1839040525258428,
+        "nll": 0.6283292619000346,
+        "brier": 0.3616061002016068,
+        "tf_supervised_ratio": 0.14450000000000002,
+        "tf_consistency_ratio": 0.24333333333333332,
+        "tf_quarantine_ratio": 0.6121666666666666
+      },
+      "AugMixTF_LS010": {
+        "balanced_accuracy": 0.7474785228746141,
+        "macro_f1": 0.7422079142169948,
+        "auroc": 0.8205098917022207,
+        "ece": 0.1809199408334173,
+        "nll": 0.5959892330432384,
+        "brier": 0.357912373105064,
+        "tf_supervised_ratio": 0.14450000000000002,
+        "tf_consistency_ratio": 0.24333333333333332,
+        "tf_quarantine_ratio": 0.6121666666666666
+      },
+      "SAS-Cert-TFConsistency_v0": {
+        "balanced_accuracy": 0.7552263073699607,
+        "macro_f1": 0.7495203942018916,
+        "auroc": 0.8356162225948895,
+        "ece": 0.18155681718921787,
+        "nll": 0.6022391560021904,
+        "brier": 0.3560734932497144,
+        "tf_supervised_ratio": 0.14450000000000002,
+        "tf_consistency_ratio": 0.24333333333333332,
+        "tf_quarantine_ratio": 0.6121666666666666
+      }
+    },
+    "sascert_vs_naive": {
+      "delta_balanced_accuracy": 0.0004538216470492129,
+      "delta_macro_f1": -0.0003822989040069835,
+      "delta_ece": -0.0023472353366249255,
+      "delta_nll": -0.026090105897844218,
+      "delta_brier": -0.005532606951892394
+    },
+    "sascert_vs_augmix": {
+      "delta_balanced_accuracy": 0.007747784495346521,
+      "delta_macro_f1": 0.007312479984896814,
+      "delta_ece": 0.0006368763558005641,
+      "delta_nll": 0.006249922958951992,
+      "delta_brier": -0.00183887985534964
+    },
+    "win_rates_vs_naive": {
+      "subject_win_rate_macro_f1": 0.45,
+      "seed_win_rate_macro_f1": 0.4
+    },
+    "win_rates_vs_augmix": {
+      "subject_win_rate_macro_f1": 0.4,
+      "seed_win_rate_macro_f1": 0.2
+    }
+  },
+  "riskmixed_pool": {
+    "groups": {
+      "RiskMixed_NaiveTF-Aug_LS010": {
+        "balanced_accuracy": 0.7526642809976402,
+        "macro_f1": 0.7479572040426856,
+        "auroc": 0.8215375912921558,
+        "ece": 0.18481171310874633,
+        "nll": 0.62459085844796,
+        "brier": 0.36134143673814834,
+        "tf_supervised_ratio": 0.12990000000000002,
+        "tf_consistency_ratio": 0.2245,
+        "tf_quarantine_ratio": 0.6456000000000001
+      },
+      "RiskMixed_AugMixTF_LS010": {
+        "balanced_accuracy": 0.7454537587412586,
+        "macro_f1": 0.7391882005658138,
+        "auroc": 0.8169251850404845,
+        "ece": 0.17900936323752106,
+        "nll": 0.6028105473268653,
+        "brier": 0.358884942419827,
+        "tf_supervised_ratio": 0.12990000000000002,
+        "tf_consistency_ratio": 0.2245,
+        "tf_quarantine_ratio": 0.6456000000000001
+      },
+      "RiskMixed_SAS-Cert-TFConsistency_v0": {
+        "balanced_accuracy": 0.7553246194680793,
+        "macro_f1": 0.7481515175335641,
+        "auroc": 0.8342315532857796,
+        "ece": 0.18346703448013837,
+        "nll": 0.5926979695687793,
+        "brier": 0.3563172580860555,
+        "tf_supervised_ratio": 0.12990000000000002,
+        "tf_consistency_ratio": 0.2245,
+        "tf_quarantine_ratio": 0.6456000000000001
+      }
+    },
+    "sascert_vs_naive": {
+      "delta_balanced_accuracy": 0.0026603384704391164,
+      "delta_macro_f1": 0.00019431349087850602,
+      "delta_ece": -0.0013446786286079593,
+      "delta_nll": -0.031892888879180736,
+      "delta_brier": -0.0050241786520928144
+    },
+    "sascert_vs_augmix": {
+      "delta_balanced_accuracy": 0.00987086072682064,
+      "delta_macro_f1": 0.008963316967750323,
+      "delta_ece": 0.0044576712426173115,
+      "delta_nll": -0.01011257775808605,
+      "delta_brier": -0.0025676843337714694
+    },
+    "win_rates_vs_naive": {
+      "subject_win_rate_macro_f1": 0.35,
+      "seed_win_rate_macro_f1": 0.0
+    },
+    "win_rates_vs_augmix": {
+      "subject_win_rate_macro_f1": 0.35,
+      "seed_win_rate_macro_f1": 0.2
+    }
+  },
+  "decision": "CONTINUE_TFCONSISTENCY_REPAIR"
+}

@@ -1,0 +1,5 @@
+diagnostic,auc
+riskmixed_detection_artifact_score,0.6088419523809524
+riskmixed_detection_risk_q,0.5842109047619047
+badcontent_wrong_class_frequency_mixup,0.5504567777777778
+badartifact_emg_eog,0.9556677777777778

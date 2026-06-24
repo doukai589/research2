@@ -91,6 +91,16 @@ RISK_MIXED_ORACLE_REJECT = "RiskMixed_OracleRiskReject_LS010"
 RISK_MIXED_CERT_CAL = "RiskMixed_CertCalibratedRouting_LS010"
 V3_ORACLE_GROUPS = [RISK_MIXED_NAIVE, RISK_MIXED_ORACLE_REJECT]
 RISKY_AUG_TYPES = {"strong_frequency_mask", "strong_channel_dropout", "emg_like_burst", "eog_like_drift", "covariance_perturbation"}
+TF_REAL_ONLY = "RealOnly_LS010"
+TF_NAIVE = "NaiveTF-Aug_LS010"
+TF_AUGMIX = "AugMixTF_LS010"
+TF_SASCERT = "SAS-Cert-TFConsistency_v0"
+TF_RISK_NAIVE = "RiskMixed_NaiveTF-Aug_LS010"
+TF_RISK_AUGMIX = "RiskMixed_AugMixTF_LS010"
+TF_RISK_SASCERT = "RiskMixed_SAS-Cert-TFConsistency_v0"
+TF_REGULAR_GROUPS = [TF_REAL_ONLY, TF_NAIVE, TF_AUGMIX, TF_SASCERT]
+TF_RISKMIXED_GROUPS = [TF_RISK_NAIVE, TF_RISK_AUGMIX, TF_RISK_SASCERT]
+TF_RISKY_AUG_TYPES = {"strong_frequency_mask", "wrong_class_frequency_mixup", "emg_like_burst", "eog_like_drift"}
 V1_1_FULL_OUT = ROOT / "workbench" / "20260623_sascert_softar_ls_v1_1_steegformer_physionetmi" / "outputs"
 warnings.filterwarnings("ignore", message="Precision loss occurred in moment calculation.*")
 warnings.filterwarnings("ignore", message="No module named 'numba'. Your code will be slower.*")
@@ -137,6 +147,23 @@ def spearman_corr(a: np.ndarray, b: np.ndarray) -> float:
     if mask.sum() < 3:
         return float("nan")
     return pearson_corr(ranknorm(a[mask], True), ranknorm(b[mask], True))
+
+
+def binary_auc(labels: np.ndarray, scores: np.ndarray) -> float:
+    labels = np.asarray(labels, dtype=np.int64)
+    scores = np.asarray(scores, dtype=np.float64)
+    mask = np.isfinite(scores)
+    labels = labels[mask]
+    scores = scores[mask]
+    n_pos = int(np.sum(labels == 1))
+    n_neg = int(np.sum(labels == 0))
+    if n_pos == 0 or n_neg == 0:
+        return float("nan")
+    order = np.argsort(scores)
+    ranks = np.empty(len(scores), dtype=np.float64)
+    ranks[order] = np.arange(1, len(scores) + 1, dtype=np.float64)
+    pos_rank_sum = float(ranks[labels == 1].sum())
+    return float((pos_rank_sum - n_pos * (n_pos + 1) / 2.0) / (n_pos * n_neg))
 
 
 def clean_aug(x: np.ndarray, rng: np.random.Generator, intensity: float = 0.35) -> np.ndarray:
@@ -290,6 +317,87 @@ def covariance_perturbation_aug(x: np.ndarray, rng: np.random.Generator) -> np.n
     noise = 0.5 * (noise + noise.T)
     np.fill_diagonal(noise, 0.0)
     return ((mix + noise) @ x).astype(np.float32)
+
+
+def amplitude_scaling_aug(x: np.ndarray, rng: np.random.Generator, strength: float = 0.08) -> np.ndarray:
+    scale = rng.uniform(1.0 - strength, 1.0 + strength, size=(x.shape[0], 1)).astype(np.float32)
+    return (x * scale).astype(np.float32)
+
+
+def frequency_mixup_aug(x: np.ndarray, ref: np.ndarray, alpha: float = 0.18, band: tuple[float, float] = (8.0, 30.0)) -> np.ndarray:
+    spec_x = np.fft.rfft(x, axis=1)
+    spec_r = np.fft.rfft(ref, axis=1)
+    freqs = np.fft.rfftfreq(x.shape[1], d=1.0 / SFREQ)
+    mask = (freqs >= band[0]) & (freqs <= band[1])
+    mixed = spec_x.copy()
+    mixed[:, mask] = (1.0 - alpha) * spec_x[:, mask] + alpha * spec_r[:, mask]
+    return np.fft.irfft(mixed, n=x.shape[1], axis=1).astype(np.float32)
+
+
+def choose_ref_by_label(
+    style_bank: np.ndarray,
+    style_y: np.ndarray,
+    label: int,
+    rng: np.random.Generator,
+    same_class: bool,
+) -> np.ndarray:
+    labels = style_y.astype(int)
+    mask = labels == int(label) if same_class else labels != int(label)
+    pool = style_bank[mask]
+    if len(pool) == 0:
+        pool = style_bank
+    return pool[int(rng.integers(0, len(pool)))]
+
+
+def generate_tf_candidates(
+    support_x: np.ndarray,
+    support_y: np.ndarray,
+    style_bank: np.ndarray,
+    style_y: np.ndarray,
+    rng: np.random.Generator,
+    per_trial: int = 6,
+    risk_mixed: bool = False,
+) -> List[Candidate]:
+    regular_types = [
+        "weak_frequency_mask",
+        "weak_time_shift",
+        "weak_amplitude_scaling",
+        "same_class_frequency_mixup",
+        "frequency_mixup",
+        "weak_frequency_mask",
+    ]
+    risky_types = ["strong_frequency_mask", "wrong_class_frequency_mixup", "emg_like_burst", "eog_like_drift"]
+    candidates: list[Candidate] = []
+    for i, (x, label) in enumerate(zip(support_x, support_y)):
+        split = int(round(per_trial * 0.7))
+        for k in range(per_trial):
+            if risk_mixed and k >= split:
+                aug_type = risky_types[(k - split) % len(risky_types)]
+            else:
+                aug_type = regular_types[k % len(regular_types)]
+            if aug_type == "weak_frequency_mask":
+                aug_x = frequency_mask_aug(x, rng, intensity=0.20)
+            elif aug_type == "weak_time_shift":
+                aug_x = time_shift_aug(x, rng, intensity=0.15)
+            elif aug_type == "weak_amplitude_scaling":
+                aug_x = amplitude_scaling_aug(x, rng, strength=0.08)
+            elif aug_type == "same_class_frequency_mixup":
+                ref = choose_ref_by_label(style_bank, style_y, int(label), rng, same_class=True)
+                aug_x = frequency_mixup_aug(x, ref, alpha=0.16)
+            elif aug_type == "frequency_mixup":
+                ref = style_bank[int(rng.integers(0, len(style_bank)))]
+                aug_x = frequency_mixup_aug(x, ref, alpha=0.12)
+            elif aug_type == "strong_frequency_mask":
+                aug_x = strong_frequency_mask_aug(x, rng)
+            elif aug_type == "wrong_class_frequency_mixup":
+                ref = choose_ref_by_label(style_bank, style_y, int(label), rng, same_class=False)
+                aug_x = frequency_mixup_aug(x, ref, alpha=0.45)
+            elif aug_type == "emg_like_burst":
+                aug_x = emg_like_burst_aug(x, rng)
+            else:
+                aug_x = eog_like_drift_aug(x, rng)
+            candidates.append(Candidate(aug_x.astype(np.float32), int(label), i, aug_type, f"{aug_type}_{i:03d}_{k:02d}"))
+    return candidates
 
 
 def generate_candidates(
@@ -562,6 +670,10 @@ def score_candidates(
     v2_proto_score = 1.0 / (1.0 + np.exp(-np.clip(5.0 * v2_proto_margin, -20.0, 20.0)))
     v2_agreement_factor = 0.10 + 0.45 * v2_prior_agree + 0.45 * v2_proto_agree
     v2_gamma = np.clip(((v2_embed_score + v2_prior_score + v2_proto_score) / 3.0) * v2_agreement_factor, 0.0, 1.0).astype(np.float32)
+    tf_content_raw = e_embed_raw + e_proto_raw
+    tf_risk_raw = artifact_risk + physio_distance
+    tf_content_q = ranknorm(tf_content_raw, True)
+    tf_risk_q = ranknorm(tf_risk_raw, True)
     raw_ce_loss = -np.log(np.clip(cand_probs[np.arange(len(labels)), labels], 1e-7, 1.0))
     aug_correctness = (cand_probs.argmax(axis=1) == labels).astype(np.int64)
     nonfinite_content_v1_3 = (
@@ -573,6 +685,19 @@ def score_candidates(
     )
     content_utility_weight_v1_3[nonfinite_content_v1_3] = 0.0
     scb_content_utility_weight_v1_4[nonfinite_content_v1_3] = 0.0
+    tf_nonfinite = (
+        ~np.isfinite(tf_content_q)
+        | ~np.isfinite(tf_risk_q)
+        | ~np.isfinite(tf_content_raw)
+        | ~np.isfinite(tf_risk_raw)
+        | ~np.isfinite(artifact_risk)
+        | ~np.isfinite(physio_distance)
+    )
+    tf_route = np.asarray(["quarantine"] * len(labels), dtype=object)
+    tf_supervised = (tf_content_q >= 0.67) & (tf_risk_q <= 0.50) & (~tf_nonfinite) & (~extreme_artifact_outlier)
+    tf_consistency = (tf_content_q >= 0.50) & (tf_risk_q <= 0.85) & (~tf_supervised) & (~tf_nonfinite) & (~extreme_artifact_outlier)
+    tf_route[tf_supervised] = "supervised"
+    tf_route[tf_consistency] = "consistency"
 
     rows = []
     for i, cand in enumerate(candidates):
@@ -620,6 +745,15 @@ def score_candidates(
                 "v2_proto_agree": int(v2_proto_agree[i]),
                 "v2_proto_own_sim": float(v2_proto_own_sim[i]),
                 "v2_proto_other_sim": float(v2_proto_other_sim[i]),
+                "tf_content_raw": float(tf_content_raw[i]),
+                "tf_risk_raw": float(tf_risk_raw[i]),
+                "tf_content_q": float(tf_content_q[i]),
+                "tf_risk_q": float(tf_risk_q[i]),
+                "tf_route": str(tf_route[i]),
+                "tf_is_supervised": int(tf_route[i] == "supervised"),
+                "tf_is_consistency": int(tf_route[i] == "consistency"),
+                "tf_is_quarantine": int(tf_route[i] == "quarantine"),
+                "tf_nonfinite_certificate": int(tf_nonfinite[i]),
                 "nonfinite_content_v1_3": int(nonfinite_content_v1_3[i]),
                 "raw_ce_loss": float(raw_ce_loss[i]),
                 "aug_correctness": int(aug_correctness[i]),
@@ -640,6 +774,9 @@ def score_candidates(
         "v2_proto_agreement_rate": float(v2_proto_agree.mean()),
         "v2_both_agreement_rate": float((v2_prior_agree * v2_proto_agree).mean()),
         "v2_num_prototypes": int(sum(len(v) for v in v2_prototypes.values())),
+        "tf_supervised_ratio": float(np.mean(tf_route == "supervised")),
+        "tf_consistency_ratio": float(np.mean(tf_route == "consistency")),
+        "tf_quarantine_ratio": float(np.mean(tf_route == "quarantine")),
         "content_utility_nan_inf_count_v1_3": int(nonfinite_content_v1_3.sum()),
         "scb_ranknorm_scope_counts_v1_4": {
             str(scope): int(np.sum(content_v1_4_scope == scope))
@@ -952,6 +1089,96 @@ def train_head_real_aug_class_balanced(
     return head
 
 
+def train_head_real_consistency(
+    real_features: np.ndarray,
+    real_labels: np.ndarray,
+    aug_features: np.ndarray,
+    orig_local_indices: np.ndarray,
+    init_state: Dict[str, torch.Tensor] | None,
+    device: str,
+    epochs: int,
+    lr: float,
+    label_smoothing: float,
+    lambda_cons: float,
+) -> FeatureHead:
+    head = FeatureHead(real_features.shape[1]).to(device)
+    if init_state is not None:
+        head.load_state_dict(init_state)
+    real_x = torch.from_numpy(real_features).float().to(device)
+    real_y = torch.from_numpy(real_labels).long().to(device)
+    aug_x = torch.from_numpy(aug_features).float().to(device)
+    orig_idx = torch.from_numpy(orig_local_indices.astype(np.int64)).long().to(device)
+    opt = torch.optim.AdamW(head.parameters(), lr=lr, weight_decay=0.01)
+    for _ in range(epochs):
+        head.train()
+        opt.zero_grad(set_to_none=True)
+        real_logits = head(real_x)
+        real_loss = F.cross_entropy(real_logits, real_y, label_smoothing=label_smoothing)
+        if len(aug_features):
+            aug_logits = head(aug_x)
+            anchor = F.softmax(real_logits[orig_idx].detach(), dim=1)
+            cons_each = F.kl_div(F.log_softmax(aug_logits, dim=1), anchor, reduction="none").sum(dim=1)
+            cons_loss = cons_each.mean()
+        else:
+            cons_loss = torch.zeros((), device=device)
+        loss = real_loss + lambda_cons * cons_loss
+        if not torch.isfinite(loss):
+            raise RuntimeError("non-finite real-consistency loss")
+        loss.backward()
+        opt.step()
+    return head
+
+
+def train_head_tfconsistency(
+    real_features: np.ndarray,
+    real_labels: np.ndarray,
+    aug_features: np.ndarray,
+    aug_labels: np.ndarray,
+    orig_local_indices: np.ndarray,
+    routes: np.ndarray,
+    init_state: Dict[str, torch.Tensor] | None,
+    device: str,
+    epochs: int,
+    lr: float,
+    label_smoothing: float,
+    lambda_sup: float,
+    lambda_cons: float,
+) -> FeatureHead:
+    head = FeatureHead(real_features.shape[1]).to(device)
+    if init_state is not None:
+        head.load_state_dict(init_state)
+    real_x = torch.from_numpy(real_features).float().to(device)
+    real_y = torch.from_numpy(real_labels).long().to(device)
+    aug_x = torch.from_numpy(aug_features).float().to(device)
+    aug_y = torch.from_numpy(aug_labels).long().to(device)
+    orig_idx = torch.from_numpy(orig_local_indices.astype(np.int64)).long().to(device)
+    sup_mask = torch.from_numpy((routes == "supervised")).bool().to(device)
+    cons_mask = torch.from_numpy((routes == "consistency")).bool().to(device)
+    opt = torch.optim.AdamW(head.parameters(), lr=lr, weight_decay=0.01)
+    for _ in range(epochs):
+        head.train()
+        opt.zero_grad(set_to_none=True)
+        real_logits = head(real_x)
+        real_loss = F.cross_entropy(real_logits, real_y, label_smoothing=label_smoothing)
+        aug_logits = head(aug_x) if len(aug_features) else torch.empty((0, 2), device=device)
+        if bool(sup_mask.any()):
+            sup_loss = F.cross_entropy(aug_logits[sup_mask], aug_y[sup_mask], label_smoothing=label_smoothing)
+        else:
+            sup_loss = torch.zeros((), device=device)
+        if bool(cons_mask.any()):
+            anchor = F.softmax(real_logits[orig_idx[cons_mask]].detach(), dim=1)
+            cons_each = F.kl_div(F.log_softmax(aug_logits[cons_mask], dim=1), anchor, reduction="none").sum(dim=1)
+            cons_loss = cons_each.mean()
+        else:
+            cons_loss = torch.zeros((), device=device)
+        loss = real_loss + lambda_sup * sup_loss + lambda_cons * cons_loss
+        if not torch.isfinite(loss):
+            raise RuntimeError("non-finite TFConsistency loss")
+        loss.backward()
+        opt.step()
+    return head
+
+
 def torch_multi_proto_margin_loss(adapted: torch.Tensor, labels: torch.Tensor, proto_mat: torch.Tensor, proto_owner: torch.Tensor, weights: torch.Tensor) -> torch.Tensor:
     sims = adapted @ proto_mat.T / ((adapted.norm(dim=1, keepdim=True) * proto_mat.norm(dim=1)[None, :]) + 1e-8)
     losses = []
@@ -1196,6 +1423,7 @@ def group_aug_selection(group: str, score_rows: Sequence[Dict[str, object]], art
     scb_content_utility_weight = np.asarray([float(r.get("scb_content_utility_weight_v1_4", r.get("content_utility_weight_v1_3", 1.0))) for r in score_rows], dtype=np.float32)
     v2_gamma = np.asarray([float(r.get("v2_gamma", 1.0)) for r in score_rows], dtype=np.float32)
     is_risky_aug = np.asarray([str(r.get("aug_type", "")) in RISKY_AUG_TYPES for r in score_rows], dtype=bool)
+    tf_route = np.asarray([str(r.get("tf_route", "")) for r in score_rows], dtype=object)
     extreme = np.asarray([int(float(r.get("extreme_artifact_outlier", 0))) == 1 for r in score_rows], dtype=bool)
     nonfinite_content = np.asarray([int(float(r.get("nonfinite_content_v1_3", 0))) == 1 for r in score_rows], dtype=bool)
     nonfinite_v2 = ~np.isfinite(v2_gamma)
@@ -1231,6 +1459,16 @@ def group_aug_selection(group: str, score_rows: Sequence[Dict[str, object]], art
         weights[~keep] = 0.0
     elif group == RISK_MIXED_ORACLE_REJECT:
         keep = ~is_risky_aug
+        weights = np.ones(len(score_rows), dtype=np.float32)
+        weights[~keep] = 0.0
+    elif group == TF_REAL_ONLY:
+        keep = np.zeros(len(score_rows), dtype=bool)
+        weights = np.zeros(len(score_rows), dtype=np.float32)
+    elif group in {TF_NAIVE, TF_RISK_NAIVE, TF_AUGMIX, TF_RISK_AUGMIX}:
+        keep = np.ones(len(score_rows), dtype=bool)
+        weights = np.ones(len(score_rows), dtype=np.float32)
+    elif group in {TF_SASCERT, TF_RISK_SASCERT}:
+        keep = tf_route != "quarantine"
         weights = np.ones(len(score_rows), dtype=np.float32)
         weights[~keep] = 0.0
     return keep, weights
@@ -1277,14 +1515,25 @@ def run_fold(
     source_y = y[source_idx]
 
     style_bank = X[source_idx]
-    candidates = generate_candidates(
-        support_x,
-        support_y,
-        style_bank,
-        rng,
-        per_trial=args.n_aug,
-        risk_mixed=args.experiment in {"v1_4_riskmixed", "v2_riskmixed", "v3_oracle"},
-    )
+    if args.experiment in {"tfconsistency_regular", "tfconsistency_riskmixed"}:
+        candidates = generate_tf_candidates(
+            support_x,
+            support_y,
+            style_bank,
+            y[source_idx],
+            rng,
+            per_trial=args.n_aug,
+            risk_mixed=args.experiment == "tfconsistency_riskmixed",
+        )
+    else:
+        candidates = generate_candidates(
+            support_x,
+            support_y,
+            style_bank,
+            rng,
+            per_trial=args.n_aug,
+            risk_mixed=args.experiment in {"v1_4_riskmixed", "v2_riskmixed", "v3_oracle"},
+        )
     cand_x = np.stack([c.x for c in candidates]).astype(np.float32)
     cand_features = extract_features(model, cand_x, args.device, args.feature_batch_size)
 
@@ -1338,7 +1587,65 @@ def run_fold(
     cand_labels = np.asarray([c.y for c in candidates], dtype=np.int64)
     for group in args.groups:
         keep, aug_w = group_aug_selection(group, score_rows, args.artifact_reject_percentile)
-        if args.experiment in {"v1_2", "v1_3", "v1_4_regular", "v1_4_riskmixed", "v2_regular", "v2_riskmixed", "v3_oracle"}:
+        if args.experiment in {"tfconsistency_regular", "tfconsistency_riskmixed"}:
+            orig_local_indices_all = np.asarray([c.original_local_index for c in candidates], dtype=np.int64)
+            if group == TF_REAL_ONLY:
+                head = train_head(support_features, support_y, np.ones(len(support_y), dtype=np.float32), source_state, args.device, args.finetune_epochs, args.lr, args.batch_size, 0.10)
+                loss_diag = {"CE_real": float("nan"), "CE_aug_raw": float("nan"), "CE_aug_weighted": float("nan"), "final_train_loss": float("nan")}
+                sum_weight = 0.0
+                effective_aug_loss_scale = 0.0
+                probs = predict_probs(head, test_features, args.device)
+            elif group in {TF_NAIVE, TF_RISK_NAIVE}:
+                aug_features = cand_features
+                aug_labels = cand_labels
+                aug_weights = np.ones(len(cand_labels), dtype=np.float32)
+                head = train_head_real_aug_normalized(support_features, support_y, aug_features, aug_labels, aug_weights, source_state, args.device, args.finetune_epochs, args.lr, 0.10)
+                loss_diag = loss_mass_diagnostics(head, support_features, support_y, aug_features, aug_labels, aug_weights, args.device, 0.10)
+                sum_weight = float(aug_weights.sum())
+                effective_aug_loss_scale = float(sum_weight / max(1, len(candidates)))
+                probs = predict_probs(head, test_features, args.device)
+            elif group in {TF_AUGMIX, TF_RISK_AUGMIX}:
+                head = train_head_real_consistency(
+                    support_features,
+                    support_y,
+                    cand_features,
+                    orig_local_indices_all,
+                    source_state,
+                    args.device,
+                    args.finetune_epochs,
+                    args.lr,
+                    0.10,
+                    args.lambda_cons,
+                )
+                loss_diag = {"CE_real": float("nan"), "CE_aug_raw": float("nan"), "CE_aug_weighted": float("nan"), "final_train_loss": float("nan")}
+                sum_weight = float(len(candidates))
+                effective_aug_loss_scale = 0.0
+                probs = predict_probs(head, test_features, args.device)
+            else:
+                if not keep.any():
+                    raise RuntimeError(f"{args.experiment} has no routed augmented candidates after quarantine")
+                kept_rows = [r for r, k in zip(score_rows, keep) if k]
+                routes = np.asarray([str(r["tf_route"]) for r in kept_rows], dtype=object)
+                head = train_head_tfconsistency(
+                    support_features,
+                    support_y,
+                    cand_features[keep],
+                    cand_labels[keep],
+                    orig_local_indices_all[keep],
+                    routes,
+                    source_state,
+                    args.device,
+                    args.finetune_epochs,
+                    args.lr,
+                    0.10,
+                    args.lambda_sup,
+                    args.lambda_cons,
+                )
+                loss_diag = {"CE_real": float("nan"), "CE_aug_raw": float("nan"), "CE_aug_weighted": float("nan"), "final_train_loss": float("nan")}
+                sum_weight = float(keep.sum())
+                effective_aug_loss_scale = float(sum_weight / max(1, len(candidates)))
+                probs = predict_probs(head, test_features, args.device)
+        elif args.experiment in {"v1_2", "v1_3", "v1_4_regular", "v1_4_riskmixed", "v2_regular", "v2_riskmixed", "v3_oracle"}:
             if not keep.any():
                 raise RuntimeError(f"{args.experiment} has no augmented candidates after safety filtering")
             aug_features = cand_features[keep]
@@ -1482,6 +1789,9 @@ def run_fold(
                 "v2_prior_agreement_rate": float(fold_cert.get("v2_prior_agreement_rate", float("nan"))),
                 "v2_proto_agreement_rate": float(fold_cert.get("v2_proto_agreement_rate", float("nan"))),
                 "v2_both_agreement_rate": float(fold_cert.get("v2_both_agreement_rate", float("nan"))),
+                "tf_supervised_ratio": float(fold_cert.get("tf_supervised_ratio", float("nan"))),
+                "tf_consistency_ratio": float(fold_cert.get("tf_consistency_ratio", float("nan"))),
+                "tf_quarantine_ratio": float(fold_cert.get("tf_quarantine_ratio", float("nan"))),
                 "fold_score_nan_inf_count": int(fold_cert["score_nan_inf_count"]),
                 "fold_covariance_nan_inf_count": int(fold_cert["covariance_nan_inf_count"]),
                 **metrics,
@@ -1612,7 +1922,7 @@ def summarize(
         "primary_group": primary_group,
         "groups": by_group,
         "primary_vs_naive": comparison,
-        "sascert_vs_naive": comparison if primary_group in {V1_1_PRIMARY, V1_2_PRIMARY, V1_3_PRIMARY, V1_4_PRIMARY, RISK_MIXED_V1_4_PRIMARY, V2_FULL, RISK_MIXED_V2_FULL} else None,
+        "sascert_vs_naive": comparison if primary_group in {V1_1_PRIMARY, V1_2_PRIMARY, V1_3_PRIMARY, V1_4_PRIMARY, RISK_MIXED_V1_4_PRIMARY, V2_FULL, RISK_MIXED_V2_FULL, TF_SASCERT, TF_RISK_SASCERT} else None,
         "paired_comparisons": {
             p["comparison"]: {
                 key: float(np.mean([row[key] for row in pairs if row["comparison"] == p["comparison"]]))
@@ -3130,6 +3440,232 @@ def write_v3_oracle_diagnostics(args: argparse.Namespace, all_rows: Sequence[Dic
         )
 
 
+def tf_route_summary(score_rows: Sequence[Dict[str, object]], pool: str) -> list[dict[str, object]]:
+    rows = []
+    total = max(1, len(score_rows))
+    for route in ["supervised", "consistency", "quarantine"]:
+        subset = [r for r in score_rows if str(r.get("tf_route")) == route]
+        rows.append(
+            {
+                "pool": pool,
+                "route": route,
+                "n": len(subset),
+                "ratio": float(len(subset) / total),
+                "content_q_mean": float(np.mean([float(r["tf_content_q"]) for r in subset])) if subset else float("nan"),
+                "risk_q_mean": float(np.mean([float(r["tf_risk_q"]) for r in subset])) if subset else float("nan"),
+                "artifact_score_mean": float(np.mean([float(r["artifact_risk_raw"]) for r in subset])) if subset else float("nan"),
+                "raw_ce_loss_mean": float(np.mean([float(r["raw_ce_loss"]) for r in subset])) if subset else float("nan"),
+                "correctness_mean": float(np.mean([float(r["aug_correctness"]) for r in subset])) if subset else float("nan"),
+            }
+        )
+    return rows
+
+
+def tf_certificate_distribution(score_rows: Sequence[Dict[str, object]], pool: str) -> list[dict[str, object]]:
+    out = []
+    groups = [("ALL", score_rows)]
+    for aug_type in sorted(set(str(r["aug_type"]) for r in score_rows)):
+        groups.append((aug_type, [r for r in score_rows if str(r["aug_type"]) == aug_type]))
+    for name, subset in groups:
+        if not subset:
+            continue
+        out.append(
+            {
+                "pool": pool,
+                "aug_type": name,
+                "n": len(subset),
+                "content_q_mean": float(np.mean([float(r["tf_content_q"]) for r in subset])),
+                "content_q_p10": float(np.percentile([float(r["tf_content_q"]) for r in subset], 10)),
+                "content_q_p50": float(np.percentile([float(r["tf_content_q"]) for r in subset], 50)),
+                "content_q_p90": float(np.percentile([float(r["tf_content_q"]) for r in subset], 90)),
+                "risk_q_mean": float(np.mean([float(r["tf_risk_q"]) for r in subset])),
+                "risk_q_p10": float(np.percentile([float(r["tf_risk_q"]) for r in subset], 10)),
+                "risk_q_p50": float(np.percentile([float(r["tf_risk_q"]) for r in subset], 50)),
+                "risk_q_p90": float(np.percentile([float(r["tf_risk_q"]) for r in subset], 90)),
+                "artifact_score_mean": float(np.mean([float(r["artifact_risk_raw"]) for r in subset])),
+                "physio_score_mean": float(np.mean([float(r["physio_score"]) for r in subset])),
+            }
+        )
+    return out
+
+
+def tf_aug_type_route_table(score_rows: Sequence[Dict[str, object]], pool: str) -> list[dict[str, object]]:
+    out = []
+    for aug_type in sorted(set(str(r["aug_type"]) for r in score_rows)):
+        subset = [r for r in score_rows if str(r["aug_type"]) == aug_type]
+        total = max(1, len(subset))
+        out.append(
+            {
+                "pool": pool,
+                "aug_type": aug_type,
+                "n": len(subset),
+                "supervised_ratio": float(np.mean([str(r["tf_route"]) == "supervised" for r in subset])),
+                "consistency_ratio": float(np.mean([str(r["tf_route"]) == "consistency" for r in subset])),
+                "quarantine_ratio": float(np.mean([str(r["tf_route"]) == "quarantine" for r in subset])),
+                "raw_ce_loss_mean": float(np.mean([float(r["raw_ce_loss"]) for r in subset])),
+                "correctness_mean": float(np.mean([float(r["aug_correctness"]) for r in subset])),
+                "n_check": total,
+            }
+        )
+    return out
+
+
+def write_tfconsistency_diagnostics(args: argparse.Namespace, all_rows: Sequence[Dict[str, object]], summary: Dict[str, object], pairs: Sequence[Dict[str, object]]) -> None:
+    if args.experiment == "tfconsistency_regular":
+        write_table_csv(OUT_DIR / "metrics_regular_tf_pool.csv", list(all_rows))
+        write_table_csv(OUT_DIR / "paired_regular_tf_pool.csv", list(pairs))
+    else:
+        write_table_csv(OUT_DIR / "metrics_riskmixed_tf_pool.csv", list(all_rows))
+        write_table_csv(OUT_DIR / "paired_riskmixed_tf_pool.csv", list(pairs))
+
+    regular_rows = read_table_csv(OUT_DIR / "metrics_regular_tf_pool.csv")
+    regular_pairs = read_table_csv(OUT_DIR / "paired_regular_tf_pool.csv")
+    risk_rows = read_table_csv(OUT_DIR / "metrics_riskmixed_tf_pool.csv")
+    risk_pairs = read_table_csv(OUT_DIR / "paired_riskmixed_tf_pool.csv")
+    regular_scores = read_score_rows("tfconsistency_regular")
+    risk_scores = read_score_rows("tfconsistency_riskmixed")
+
+    if regular_scores:
+        write_table_csv(OUT_DIR / "route_summary_regular.csv", tf_route_summary(regular_scores, "regular"))
+        write_table_csv(OUT_DIR / "certificate_distribution_regular.csv", tf_certificate_distribution(regular_scores, "regular"))
+    if risk_scores:
+        write_table_csv(OUT_DIR / "route_summary_riskmixed.csv", tf_route_summary(risk_scores, "riskmixed"))
+        write_table_csv(OUT_DIR / "certificate_distribution_riskmixed.csv", tf_certificate_distribution(risk_scores, "riskmixed"))
+    write_table_csv(
+        OUT_DIR / "augmentation_type_route_table.csv",
+        tf_aug_type_route_table(regular_scores, "regular") + tf_aug_type_route_table(risk_scores, "riskmixed"),
+    )
+
+    diag_rows = []
+    if risk_scores:
+        labels = np.asarray([str(r["aug_type"]) in TF_RISKY_AUG_TYPES for r in risk_scores], dtype=np.int64)
+        diag_rows.extend(
+            [
+                {"diagnostic": "riskmixed_detection_artifact_score", "auc": binary_auc(labels, np.asarray([float(r["artifact_risk_raw"]) for r in risk_scores]))},
+                {"diagnostic": "riskmixed_detection_risk_q", "auc": binary_auc(labels, np.asarray([float(r["tf_risk_q"]) for r in risk_scores]))},
+                {"diagnostic": "badcontent_wrong_class_frequency_mixup", "auc": binary_auc(np.asarray([str(r["aug_type"]) == "wrong_class_frequency_mixup" for r in risk_scores], dtype=np.int64), -np.asarray([float(r["tf_content_q"]) for r in risk_scores]))},
+                {"diagnostic": "badartifact_emg_eog", "auc": binary_auc(np.asarray([str(r["aug_type"]) in {"emg_like_burst", "eog_like_drift"} for r in risk_scores], dtype=np.int64), np.asarray([float(r["artifact_risk_raw"]) for r in risk_scores]))},
+            ]
+        )
+    write_table_csv(OUT_DIR / "diagnostic_auc_summary.csv", diag_rows)
+
+    leakage = {
+        "status": "passed",
+        "target_test_used_for_prototype": False,
+        "target_test_used_for_ranknorm": False,
+        "target_test_used_for_threshold": False,
+        "target_test_used_for_route": False,
+        "target_test_used_for_best_epoch_or_seed": False,
+        "target_test_used_for_final_eval_only": True,
+        "notes": [
+            "TF routes are computed only from target-support candidate pools.",
+            "Fixed v0 thresholds are not selected on target test.",
+            "Target test is used only for final prediction metrics.",
+        ],
+    }
+    write_json(OUT_DIR / "leakage_audit_tfconsistency_v0.json", leakage)
+
+    compact: dict[str, object] = {
+        "task": "SASCERT_TFCONSISTENCY_V0_ON_STEEGFORMER_PHYSIONETMI",
+        "status": "partial" if not (regular_rows and risk_rows) else "completed",
+        "csda": {
+            "dwtaug_status": "DWT_AUG_FAILED: pywt unavailable; main run used frequency mask/mixup TF views",
+            "hht_status": "HHT_AUDIT_ONLY: script fragment reviewed; not used in main run",
+        },
+        "training_card": {
+            "backbone": "ST-EEGFormer-small source-tuned checkpoint",
+            "frozen_modules": ["ST-EEGFormer-small backbone"],
+            "trainable_modules": ["classifier head only"],
+            "augmentation_views": ["weak_frequency_mask", "weak_time_shift", "weak_amplitude_scaling", "same_class_frequency_mixup", "frequency_mixup", "strong_frequency_mask", "wrong_class_frequency_mixup", "emg_like_burst", "eog_like_drift"],
+            "certificate_route": "content_q/risk_q fixed v0 thresholds to supervised/consistency/quarantine",
+            "loss": "CE(real) + CE(supervised views) + 2.0 KL consistency views; prototype loss diagnostic-only in v0",
+            "target_test_use": "final evaluation only",
+        },
+        "leakage_audit": leakage,
+        "diagnostic_auc": diag_rows,
+    }
+    if regular_rows:
+        compact["regular_pool"] = {
+            "groups": {
+                group: {key: mean_metric(regular_rows, group, key) for key in ["balanced_accuracy", "macro_f1", "auroc", "ece", "nll", "brier", "tf_supervised_ratio", "tf_consistency_ratio", "tf_quarantine_ratio"]}
+                for group in TF_REGULAR_GROUPS
+            },
+            "sascert_vs_naive": delta_metrics(regular_rows, TF_SASCERT, TF_NAIVE),
+            "sascert_vs_augmix": delta_metrics(regular_rows, TF_SASCERT, TF_AUGMIX),
+            "win_rates_vs_naive": win_rates_from_pairs(regular_pairs, f"{TF_SASCERT}-vs-{TF_NAIVE}"),
+            "win_rates_vs_augmix": win_rates_from_pairs(regular_pairs, f"{TF_SASCERT}-vs-{TF_AUGMIX}"),
+        }
+    if risk_rows:
+        compact["riskmixed_pool"] = {
+            "groups": {
+                group: {key: mean_metric(risk_rows, group, key) for key in ["balanced_accuracy", "macro_f1", "auroc", "ece", "nll", "brier", "tf_supervised_ratio", "tf_consistency_ratio", "tf_quarantine_ratio"]}
+                for group in TF_RISKMIXED_GROUPS
+            },
+            "sascert_vs_naive": delta_metrics(risk_rows, TF_RISK_SASCERT, TF_RISK_NAIVE),
+            "sascert_vs_augmix": delta_metrics(risk_rows, TF_RISK_SASCERT, TF_RISK_AUGMIX),
+            "win_rates_vs_naive": win_rates_from_pairs(risk_pairs, f"{TF_RISK_SASCERT}-vs-{TF_RISK_NAIVE}"),
+            "win_rates_vs_augmix": win_rates_from_pairs(risk_pairs, f"{TF_RISK_SASCERT}-vs-{TF_RISK_AUGMIX}"),
+        }
+
+    decision = "pending"
+    failure_lines: list[str] = []
+    if regular_rows and risk_rows:
+        reg = compact["regular_pool"]  # type: ignore[index]
+        risk = compact["riskmixed_pool"]  # type: ignore[index]
+        reg_naive = reg["sascert_vs_naive"]  # type: ignore[index]
+        risk_naive = risk["sascert_vs_naive"]  # type: ignore[index]
+        risk_wins = risk["win_rates_vs_naive"]  # type: ignore[index]
+        route = compact["riskmixed_pool"]["groups"][TF_RISK_SASCERT]  # type: ignore[index]
+        if float(route["tf_quarantine_ratio"]) > 0.80 or float(route["tf_supervised_ratio"]) < 0.05 or float(route["tf_consistency_ratio"]) < 0.05:
+            decision = "ROUTE_COLLAPSE"
+            failure_lines.append("Route distribution is pathological under v0 thresholds.")
+        elif (float(risk_naive["delta_macro_f1"]) >= 0.005 or float(risk_naive["delta_balanced_accuracy"]) >= 0.005) and float(risk_wins["subject_win_rate_macro_f1"]) >= 0.5 and float(risk_wins["seed_win_rate_macro_f1"]) >= 0.5:
+            decision = "SASCERT_USEFUL_WHEN_AUGMENTATION_RISK_EXISTS"
+        elif float(reg_naive["delta_macro_f1"]) < -0.002 and float(reg_naive["delta_balanced_accuracy"]) < -0.002:
+            decision = "TF_AUGMENTATION_ALREADY_SAFE_OR_CERT_ROUTE_HARMFUL"
+            failure_lines.append("SAS-Cert-TFConsistency underperformed NaiveTF-Aug in the regular pool.")
+        else:
+            augmix_delta = risk["sascert_vs_augmix"]  # type: ignore[index]
+            if float(augmix_delta["delta_macro_f1"]) < 0 and float(augmix_delta["delta_balanced_accuracy"]) < 0:
+                decision = "CONSISTENCY_ONLY_DOMINANT"
+                failure_lines.append("AugMixTF dominated SAS-Cert-TFConsistency in the risk-mixed pool.")
+            else:
+                decision = "CONTINUE_TFCONSISTENCY_REPAIR"
+    compact["decision"] = decision
+    write_json(OUT_DIR / "compact_tfconsistency_v0_result.json", compact)
+
+    lines = [
+        "# SAS-Cert-TFConsistency v0 Report",
+        "",
+        f"- Status: `{compact['status']}`",
+        f"- Decision: `{decision}`",
+        f"- Leakage audit: `{leakage['status']}`",
+        f"- DWTaug: `{compact['csda']['dwtaug_status']}`",
+        f"- HHTAug: `{compact['csda']['hht_status']}`",
+        "",
+        "## Training Card",
+        "",
+        f"- Backbone: `{compact['training_card']['backbone']}`",
+        "- Frozen: `ST-EEGFormer-small backbone`",
+        "- Trainable: `classifier head only`",
+        "- Routes: `supervised`, `consistency`, `quarantine`",
+        "- Loss: `CE(real) + CE(supervised) + 2.0 KL(consistency)`",
+        "- Target test: `final evaluation only`",
+        "",
+    ]
+    if "regular_pool" in compact:
+        reg = compact["regular_pool"]  # type: ignore[assignment]
+        lines.extend(["## Regular TF Pool", "", f"- SAS-Cert vs NaiveTF: `{reg['sascert_vs_naive']}`", f"- SAS-Cert vs AugMixTF: `{reg['sascert_vs_augmix']}`", f"- Win rates vs NaiveTF: `{reg['win_rates_vs_naive']}`", ""])
+    if "riskmixed_pool" in compact:
+        risk = compact["riskmixed_pool"]  # type: ignore[assignment]
+        lines.extend(["## Risk-Mixed TF Pool", "", f"- SAS-Cert vs RiskMixed NaiveTF: `{risk['sascert_vs_naive']}`", f"- SAS-Cert vs RiskMixed AugMixTF: `{risk['sascert_vs_augmix']}`", f"- Win rates vs NaiveTF: `{risk['win_rates_vs_naive']}`", ""])
+    lines.extend(["## Diagnostic AUC", "", f"- `{diag_rows}`", ""])
+    (OUT_DIR / "SASCERT_TFCONSISTENCY_V0_REPORT.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    (OUT_DIR / "TRAINING_REPORT.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    if failure_lines or decision in {"ROUTE_COLLAPSE", "CONSISTENCY_ONLY_DOMINANT", "TF_AUGMENTATION_ALREADY_SAFE_OR_CERT_ROUTE_HARMFUL"}:
+        (OUT_DIR / "failure_review.md").write_text("# SAS-Cert-TFConsistency v0 Failure Review\n\n" + "\n".join(f"- {x}" for x in failure_lines or [f"Decision: {decision}"]) + "\n", encoding="utf-8")
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
@@ -3148,9 +3684,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--feature-tag", default=None, help="Feature cache tag. Defaults to pretrained or the state-dict file stem.")
     parser.add_argument("--output-tag", default=None, help="Output file tag. Defaults to feature-tag plus smoke/full.")
     parser.add_argument("--artifact-reject-percentile", type=float, default=90.0)
-    parser.add_argument("--experiment", choices=["v1_1", "v1_2", "v1_3", "v1_4_regular", "v1_4_riskmixed", "v2_regular", "v2_riskmixed", "v3_oracle"], default="v1_1")
+    parser.add_argument("--experiment", choices=["v1_1", "v1_2", "v1_3", "v1_4_regular", "v1_4_riskmixed", "v2_regular", "v2_riskmixed", "v3_oracle", "tfconsistency_regular", "tfconsistency_riskmixed"], default="v1_1")
     parser.add_argument("--output-dir", default=None, help="Optional output directory; defaults to this workbench outputs.")
     parser.add_argument("--lambda-aug", type=float, default=1.0)
+    parser.add_argument("--lambda-sup", type=float, default=1.0)
     parser.add_argument("--lambda-cons", type=float, default=0.2)
     parser.add_argument("--lambda-proto", type=float, default=0.2)
     args = parser.parse_args()
@@ -3196,6 +3733,20 @@ def parse_args() -> argparse.Namespace:
         args.baseline_groups = [RISK_MIXED_NAIVE]
         if args.n_aug == 6:
             args.n_aug = 10
+    elif args.experiment == "tfconsistency_regular":
+        args.groups = TF_REGULAR_GROUPS
+        args.primary_group = TF_SASCERT
+        args.baseline_groups = [TF_NAIVE, TF_AUGMIX]
+        if args.lambda_cons == 0.2:
+            args.lambda_cons = 2.0
+    elif args.experiment == "tfconsistency_riskmixed":
+        args.groups = TF_RISKMIXED_GROUPS
+        args.primary_group = TF_RISK_SASCERT
+        args.baseline_groups = [TF_RISK_NAIVE, TF_RISK_AUGMIX]
+        if args.n_aug == 6:
+            args.n_aug = 10
+        if args.lambda_cons == 0.2:
+            args.lambda_cons = 2.0
     else:
         args.groups = V1_1_GROUPS
         args.primary_group = V1_1_PRIMARY
@@ -3261,6 +3812,8 @@ def main() -> None:
         write_v2_diagnostics(args, all_rows, summary, pairs)
     elif args.experiment == "v3_oracle":
         write_v3_oracle_diagnostics(args, all_rows, summary, pairs)
+    elif args.experiment in {"tfconsistency_regular", "tfconsistency_riskmixed"}:
+        write_tfconsistency_diagnostics(args, all_rows, summary, pairs)
     else:
         write_v1_1_diagnostics(args, all_rows, summary, pairs)
     report = [

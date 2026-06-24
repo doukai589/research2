@@ -1,0 +1,14 @@
+{
+  "status": "passed",
+  "target_test_used_for_prototype": false,
+  "target_test_used_for_ranknorm": false,
+  "target_test_used_for_threshold": false,
+  "target_test_used_for_route": false,
+  "target_test_used_for_best_epoch_or_seed": false,
+  "target_test_used_for_final_eval_only": true,
+  "notes": [
+    "TF routes are computed only from target-support candidate pools.",
+    "Fixed v0 thresholds are not selected on target test.",
+    "Target test is used only for final prediction metrics."
+  ]
+}

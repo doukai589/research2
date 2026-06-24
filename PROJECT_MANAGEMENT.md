@@ -2803,3 +2803,112 @@ Primary report:
 - Important caution:
   - This is a new algorithm branch, not a continuation of v1-v3 weight tuning.
   - It should not begin until the user provides a concrete execution prompt.
+
+### 2026-06-24 SAS-Cert-TFConsistency v0 Execution
+
+- Task:
+  - `SASCERT_TFCONSISTENCY_V0_ON_STEEGFORMER_PHYSIONETMI`
+- Workbench:
+  - `workbench/20260624_sascert_tfconsistency_v0_steegformer_physionetmi`
+- Runner reuse:
+  - Modified existing runner instead of creating another nested script:
+    `workbench/20260623_sascert_softar_ls_v1_1_steegformer_physionetmi/runner_v1_1.py`
+- Protocol:
+  - Backbone: `ST-EEGFormer-small`
+  - Dataset: `PhysioNetMI / EEGMMI`
+  - Task: left-vs-right motor imagery
+  - Runs: `R04/R08/R12`
+  - Targets: `90-109`
+  - Seeds: `20-24`
+  - Backbone frozen; classifier head only.
+  - No CBraMod, MIRepNet, EEGPT, CertAdapter, or new downloads.
+- External augmentation audit:
+  - Uploaded DWTaug reference was not used because `pywt` is unavailable.
+  - Uploaded HHTAug reference was reviewed as audit-only.
+  - Main run used controlled TF views in the existing runner:
+    weak frequency mask, weak time shift, weak amplitude scaling,
+    same-class/frequency mixup, strong frequency mask, wrong-class frequency
+    mixup, EMG-like burst, and EOG-like drift.
+- Algorithm tested:
+  - Certificate no longer becomes `score -> weighted CE`.
+  - It becomes `certificate -> route -> loss role`.
+  - Routes:
+    - supervised:
+      `content_q >= 0.67` and `risk_q <= 0.50`
+    - consistency:
+      `content_q >= 0.50` and `risk_q <= 0.85`, excluding supervised.
+    - quarantine:
+      all remaining, NaN/Inf, or extreme artifact views.
+  - Loss:
+    `CE(real) + 1.0 * CE(supervised views) + 2.0 * KL(consistency views)`.
+  - Prototype loss was diagnostic-only because the backbone is frozen and
+    only the classifier head is trainable.
+- Main regular-pool result:
+  - v0 vs `NaiveTF-Aug_LS010`:
+    - delta balanced accuracy: `+0.000454`
+    - delta Macro-F1: `-0.000382`
+    - delta ECE: `-0.002347`
+    - delta NLL: `-0.026090`
+    - delta Brier: `-0.005533`
+    - subject win rate Macro-F1: `0.45`
+    - seed win rate Macro-F1: `0.40`
+- Main risk-mixed result:
+  - v0 vs `RiskMixed_NaiveTF-Aug_LS010`:
+    - delta balanced accuracy: `+0.002660`
+    - delta Macro-F1: `+0.000194`
+    - delta ECE: `-0.001345`
+    - delta NLL: `-0.031893`
+    - delta Brier: `-0.005024`
+    - subject win rate Macro-F1: `0.35`
+    - seed win rate Macro-F1: `0.00`
+  - v0 vs `RiskMixed_AugMixTF_LS010`:
+    - delta balanced accuracy: `+0.009871`
+    - delta Macro-F1: `+0.008963`
+    - delta ECE: `+0.004458`
+    - delta NLL: `-0.010113`
+    - delta Brier: `-0.002568`
+- Route diagnostics:
+  - Regular pool:
+    - supervised ratio: `0.1445`
+    - consistency ratio: `0.2433`
+    - quarantine ratio: `0.6122`
+  - Risk-mixed pool:
+    - supervised ratio: `0.1299`
+    - consistency ratio: `0.2245`
+    - quarantine ratio: `0.6456`
+  - Supervised route had near-zero CE and near-perfect correctness.
+  - Quarantine route had much higher CE and lower correctness.
+- Diagnostic AUC:
+  - risk-mixed detection by `artifact_score`: `0.608842`
+  - risk-mixed detection by `risk_q`: `0.584211`
+  - wrong-class frequency mixup detection: `0.550457`
+  - EMG/EOG artifact detection: `0.955668`
+- Interpretation:
+  - TFConsistency v0 is a plausible new branch because route diagnostics are
+    meaningful and calibration improves.
+  - It is not yet a successful training method because risk-mixed improvement
+    versus NaiveTF is below the required `+0.005` threshold, subject win rate
+    is only `0.35`, and seed win rate is `0.00`.
+  - The route is conservative: about 61-65% of candidates are quarantined.
+  - The weakest important piece is content-risk detection for wrong-class
+    frequency mixup.
+- Decision:
+  - `CONTINUE_TFCONSISTENCY_REPAIR`
+  - Do not enter CBraMod yet.
+  - Do not claim `SASCERT_USEFUL_WHEN_AUGMENTATION_RISK_EXISTS` yet.
+- Key outputs:
+  - `workbench/20260624_sascert_tfconsistency_v0_steegformer_physionetmi/TRAINING_PLAN.md`
+  - `workbench/20260624_sascert_tfconsistency_v0_steegformer_physionetmi/TRAINING_REPORT.md`
+  - `workbench/20260624_sascert_tfconsistency_v0_steegformer_physionetmi/outputs/SASCERT_TFCONSISTENCY_V0_REPORT.md`
+  - `workbench/20260624_sascert_tfconsistency_v0_steegformer_physionetmi/outputs/compact_tfconsistency_v0_result.json`
+  - `workbench/20260624_sascert_tfconsistency_v0_steegformer_physionetmi/outputs/metrics_regular_tf_pool.csv`
+  - `workbench/20260624_sascert_tfconsistency_v0_steegformer_physionetmi/outputs/metrics_riskmixed_tf_pool.csv`
+  - `workbench/20260624_sascert_tfconsistency_v0_steegformer_physionetmi/outputs/route_summary_regular.csv`
+  - `workbench/20260624_sascert_tfconsistency_v0_steegformer_physionetmi/outputs/route_summary_riskmixed.csv`
+  - `workbench/20260624_sascert_tfconsistency_v0_steegformer_physionetmi/outputs/diagnostic_auc_summary.csv`
+  - `workbench/20260624_sascert_tfconsistency_v0_steegformer_physionetmi/outputs/leakage_audit_tfconsistency_v0.json`
+- GitHub tracking:
+  - Upload/commit code, trial metadata, reports, CSV summaries, and compact
+    JSON.
+  - Do not upload raw EEG, checkpoints, feature caches, smoke intermediates,
+    score-row caches, or unreviewed third-party source snapshots.

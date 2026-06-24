@@ -1,0 +1,14 @@
+pool,aug_type,n,supervised_ratio,consistency_ratio,quarantine_ratio,raw_ce_loss_mean,correctness_mean,n_check
+regular,frequency_mixup,1000,0.079,0.386,0.535,1.1296736992768421,0.783,1000
+regular,same_class_frequency_mixup,1000,0.019,0.373,0.608,1.1590601683522859,0.78,1000
+regular,weak_amplitude_scaling,1000,0.021,0.235,0.744,1.1031158610342369,0.793,1000
+regular,weak_frequency_mask,2000,0.2535,0.1485,0.598,1.1627741438255208,0.788,2000
+regular,weak_time_shift,1000,0.241,0.169,0.59,1.131117315284129,0.796,1000
+riskmixed,emg_like_burst,1000,0.06,0.018,0.922,1.099968276131189,0.801,1000
+riskmixed,frequency_mixup,1000,0.049,0.44,0.511,1.155160846496987,0.779,1000
+riskmixed,same_class_frequency_mixup,1000,0.013,0.463,0.524,1.1898439047702958,0.779,1000
+riskmixed,strong_frequency_mask,1000,0.209,0.177,0.614,1.263927476883479,0.777,1000
+riskmixed,weak_amplitude_scaling,1000,0.007,0.327,0.666,1.0952074149288702,0.797,1000
+riskmixed,weak_frequency_mask,3000,0.23966666666666667,0.163,0.5973333333333334,1.1730309448022187,0.783,3000
+riskmixed,weak_time_shift,1000,0.242,0.175,0.583,1.1867002431453284,0.802,1000
+riskmixed,wrong_class_frequency_mixup,1000,0.0,0.156,0.844,1.5297019251117459,0.752,1000
