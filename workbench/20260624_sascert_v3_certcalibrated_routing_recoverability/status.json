@@ -1,0 +1,14 @@
+{
+  "trial": "sascert_v3_certcalibrated_routing_recoverability",
+  "created_at": "2026-06-24T15:30:00",
+  "status": "completed",
+  "promoted": false,
+  "runner_reused": "workbench/20260623_sascert_softar_ls_v1_1_steegformer_physionetmi/runner_v1_1.py",
+  "experiments": [
+    "v3_oracle"
+  ],
+  "primary_output": "outputs/SASCERT_V3_RECOVERABILITY_REPORT.md",
+  "compact_result": "outputs/compact_sascert_v3_result.json",
+  "decision": "NO_RECOVERABLE_TRAINING_GAIN",
+  "completed_at": "2026-06-24T16:20:00"
+}

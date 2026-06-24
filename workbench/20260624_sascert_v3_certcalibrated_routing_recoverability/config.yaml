@@ -1,0 +1,16 @@
+task_name: SASCERT_V3_CERTIFICATE_CALIBRATED_ROUTING_RECOVERABILITY_TEST
+backbone: ST-EEGFormer-small
+dataset: PhysioNetMI_EEGMMI
+task: left_vs_right_motor_imagery
+runs: [R04, R08, R12]
+targets: [90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109]
+seeds: [20, 21, 22, 23, 24]
+runner: workbench/20260623_sascert_softar_ls_v1_1_steegformer_physionetmi/runner_v1_1.py
+source_tuned_checkpoint: outputs/foundation_physio_mi_fullfinetune/checkpoints/st_eegformer_small_seed3407_best.pt
+experiment: v3_oracle
+oracle_route:
+  mild: supervised_ce
+  risky: quarantine
+calibrator:
+  status: run_only_if_oracle_succeeds
+target_test_use: final_evaluation_only

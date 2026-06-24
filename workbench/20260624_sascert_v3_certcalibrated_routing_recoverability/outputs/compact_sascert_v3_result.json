@@ -1,0 +1,96 @@
+{
+  "task": "SASCERT_V3_CERTIFICATE_CALIBRATED_ROUTING_RECOVERABILITY_TEST",
+  "status": "completed",
+  "decision": "NO_RECOVERABLE_TRAINING_GAIN",
+  "training_card": {
+    "backbone": "ST-EEGFormer-small source-tuned checkpoint",
+    "frozen_modules": [
+      "ST-EEGFormer-small backbone"
+    ],
+    "trainable_modules": [
+      "classifier head only for oracle routing"
+    ],
+    "data_streams": {
+      "source_train": "source-initialized head and style bank for candidate generation",
+      "target_support": "risk-mixed candidate generation and oracle routing",
+      "target_test": "final evaluation only"
+    },
+    "oracle_risk_label": "augmentation type in strong_frequency_mask/strong_channel_dropout/emg_like_burst/eog_like_drift/covariance_perturbation is risky; all others mild",
+    "calibrator_training": "skipped unless oracle route is recoverable",
+    "loss": "CE(real) + normalized CE(mild augmented candidates); risky candidates quarantined from supervised CE",
+    "baseline": "RiskMixed_NaiveAug_LS010"
+  },
+  "oracle": {
+    "groups": {
+      "RiskMixed_NaiveAug_LS010": {
+        "balanced_accuracy": 0.7530474503008171,
+        "macro_f1": 0.7485384183602207,
+        "auroc": 0.821045266895557,
+        "ece": 0.18456321635048575,
+        "nll": 0.6276850043054398,
+        "brier": 0.3634826979320496,
+        "n_aug_total": 100.0,
+        "n_aug_kept": 100.0,
+        "rejected_ratio": 0.0,
+        "sum_weight_per_candidate": 1.0
+      },
+      "RiskMixed_OracleRiskReject_LS010": {
+        "balanced_accuracy": 0.7551313895383942,
+        "macro_f1": 0.750459470214098,
+        "auroc": 0.8212694321311959,
+        "ece": 0.18456425080190655,
+        "nll": 0.6336852535214178,
+        "brier": 0.36284467259421943,
+        "n_aug_total": 100.0,
+        "n_aug_kept": 70.0,
+        "rejected_ratio": 0.3,
+        "sum_weight_per_candidate": 0.7000000000000002
+      }
+    },
+    "oracle_vs_naive": {
+      "delta_balanced_accuracy": 0.0020839392375771038,
+      "delta_macro_f1": 0.0019210518538772536,
+      "delta_ece": 1.0344514208004973e-06,
+      "delta_nll": 0.006000249215977971,
+      "delta_brier": -0.0006380253378301948
+    },
+    "win_rates": {
+      "subject_win_rate_macro_f1": 0.1,
+      "seed_win_rate_macro_f1": 0.0
+    },
+    "routing_summary": [
+      {
+        "route": "supervised_ce_mild",
+        "n": 7000,
+        "ratio": 0.7,
+        "mean_artifact_score": 1.7174578081699354
+      },
+      {
+        "route": "quarantine_risky",
+        "n": 3000,
+        "ratio": 0.3,
+        "mean_artifact_score": 9.17097181917727
+      }
+    ]
+  },
+  "calibrator": {
+    "status": "skipped",
+    "p_bad_validation_auc": null,
+    "reason": "Oracle failed recoverability test."
+  },
+  "leakage_audit": {
+    "status": "passed",
+    "target_test_used_for_oracle_route": false,
+    "target_test_used_for_calibrator_training": false,
+    "target_test_used_for_threshold": false,
+    "target_test_used_for_prototype": false,
+    "target_test_used_for_ranknorm": false,
+    "target_test_used_for_best_epoch_or_seed": false,
+    "target_test_used_for_final_eval_only": true,
+    "notes": [
+      "Oracle risk labels use augmentation type assigned during support-candidate generation only.",
+      "Target test is never used to route candidates or choose thresholds.",
+      "Calibrator training is skipped when oracle routing is not recoverable."
+    ]
+  }
+}

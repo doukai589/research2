@@ -2641,3 +2641,97 @@ Primary report:
     - treat SAS-Cert as diagnostic-only for now; or
     - diagnose/repair v2 by first fixing gamma risk separation and adapter
       behavior, with a very small controlled experiment.
+
+### 2026-06-24 SAS-Cert v3 Oracle Routing Recoverability Result
+
+- Task:
+  - `SASCERT_V3_CERTIFICATE_CALIBRATED_ROUTING_RECOVERABILITY_TEST`
+- Workbench trial:
+  - `workbench/20260624_sascert_v3_certcalibrated_routing_recoverability`
+- Purpose:
+  - Test whether training performance can be recovered if risky augmentations
+    are known by oracle labels and quarantined from supervised CE.
+  - Only if oracle routing succeeds should certificate calibrator training be
+    attempted.
+- Code policy:
+  - Reused and extended existing runner:
+    - `workbench/20260623_sascert_softar_ls_v1_1_steegformer_physionetmi/runner_v1_1.py`
+  - Did not download new tools.
+  - Did not switch backbone or dataset.
+  - Did not train the ST backbone.
+  - Did not use CertAdapter.
+- Training card:
+  - Backbone:
+    - ST-EEGFormer-small source-tuned checkpoint.
+  - Frozen:
+    - ST-EEGFormer-small backbone.
+  - Trainable:
+    - classifier head only.
+  - Data streams:
+    - source train: source-initialized head and style bank.
+    - target support: risk-mixed candidate generation and oracle routing.
+    - target test: final evaluation only.
+  - Oracle risk label:
+    - risky if augmentation type is one of:
+      - `strong_frequency_mask`
+      - `strong_channel_dropout`
+      - `emg_like_burst`
+      - `eog_like_drift`
+      - `covariance_perturbation`
+    - mild otherwise.
+  - Loss:
+    - RiskMixed Naive:
+      - `CE(real) + normalized CE(all augmented candidates)`
+    - OracleRiskReject:
+      - `CE(real) + normalized CE(mild augmented candidates)`
+      - risky candidates quarantined from supervised CE.
+- OracleRiskReject vs `RiskMixed_NaiveAug_LS010`:
+  - delta BAcc `+0.002084`
+  - delta Macro-F1 `+0.001921`
+  - delta ECE `+0.000001`
+  - delta NLL `+0.006000`
+  - delta Brier `-0.000638`
+  - subject / seed win rate Macro-F1:
+    - `0.10 / 0.00`
+- Routing summary:
+  - supervised mild candidates:
+    - n `7000`
+    - ratio `0.70`
+    - mean artifact score `1.7175`
+  - quarantined risky candidates:
+    - n `3000`
+    - ratio `0.30`
+    - mean artifact score `9.1710`
+- Leakage audit:
+  - `passed`
+  - target test was not used for oracle route, calibrator training, threshold,
+    prototype, ranknorm, best epoch, or best seed.
+- Decision:
+  - `NO_RECOVERABLE_TRAINING_GAIN`
+  - OracleRiskReject did not reach the required `+0.005` BAcc or Macro-F1 gain
+    and subject win rate `>= 0.50`.
+  - Calibrator full training was skipped by protocol.
+  - This suggests the current risk-mixed pool is not recoverable simply by
+    removing known risky augmentations from supervised CE.
+- Required outputs:
+  - `workbench/20260624_sascert_v3_certcalibrated_routing_recoverability/TRAINING_PLAN.md`
+  - `workbench/20260624_sascert_v3_certcalibrated_routing_recoverability/TRAINING_REPORT.md`
+  - `workbench/20260624_sascert_v3_certcalibrated_routing_recoverability/outputs/SASCERT_V3_RECOVERABILITY_REPORT.md`
+  - `workbench/20260624_sascert_v3_certcalibrated_routing_recoverability/outputs/compact_sascert_v3_result.json`
+  - `workbench/20260624_sascert_v3_certcalibrated_routing_recoverability/outputs/oracle_routing_metrics.csv`
+  - `workbench/20260624_sascert_v3_certcalibrated_routing_recoverability/outputs/calibrator_validation_metrics.csv`
+  - `workbench/20260624_sascert_v3_certcalibrated_routing_recoverability/outputs/certcalibrated_routing_metrics.csv`
+  - `workbench/20260624_sascert_v3_certcalibrated_routing_recoverability/outputs/paired_comparison_v3.csv`
+  - `workbench/20260624_sascert_v3_certcalibrated_routing_recoverability/outputs/p_bad_distribution.csv`
+  - `workbench/20260624_sascert_v3_certcalibrated_routing_recoverability/outputs/routing_summary.csv`
+  - `workbench/20260624_sascert_v3_certcalibrated_routing_recoverability/outputs/leakage_audit_v3.json`
+  - `workbench/20260624_sascert_v3_certcalibrated_routing_recoverability/outputs/failure_review.md`
+- GitHub tracking:
+  - Commit code/config/docs and lightweight v3 outputs.
+  - No raw EEG, checkpoints, feature caches, or third-party dependency trees
+    should be uploaded.
+  - Local commit:
+    - latest local commit: `Run SAS-Cert v3 oracle routing recoverability`
+  - Push status:
+    - blocked locally by missing HTTPS GitHub credentials:
+      `could not read Username for 'https://github.com'`

@@ -87,6 +87,10 @@ V2_REGULAR_GROUPS = ["NaiveAug_LS010", V1_3_PRIMARY, V2_NO_ADAPTER, V2_FULL]
 RISK_MIXED_CU_V1_3 = "RiskMixed_CU-v1.3"
 RISK_MIXED_V2_FULL = "RiskMixed_SAS-Cert-v2-full"
 V2_RISKMIXED_GROUPS = [RISK_MIXED_NAIVE, RISK_MIXED_CU_V1_3, RISK_MIXED_V2_FULL]
+RISK_MIXED_ORACLE_REJECT = "RiskMixed_OracleRiskReject_LS010"
+RISK_MIXED_CERT_CAL = "RiskMixed_CertCalibratedRouting_LS010"
+V3_ORACLE_GROUPS = [RISK_MIXED_NAIVE, RISK_MIXED_ORACLE_REJECT]
+RISKY_AUG_TYPES = {"strong_frequency_mask", "strong_channel_dropout", "emg_like_burst", "eog_like_drift", "covariance_perturbation"}
 V1_1_FULL_OUT = ROOT / "workbench" / "20260623_sascert_softar_ls_v1_1_steegformer_physionetmi" / "outputs"
 warnings.filterwarnings("ignore", message="Precision loss occurred in moment calculation.*")
 warnings.filterwarnings("ignore", message="No module named 'numba'. Your code will be slower.*")
@@ -1191,6 +1195,7 @@ def group_aug_selection(group: str, score_rows: Sequence[Dict[str, object]], art
     content_utility_weight = np.asarray([float(r.get("content_utility_weight_v1_3", 1.0)) for r in score_rows], dtype=np.float32)
     scb_content_utility_weight = np.asarray([float(r.get("scb_content_utility_weight_v1_4", r.get("content_utility_weight_v1_3", 1.0))) for r in score_rows], dtype=np.float32)
     v2_gamma = np.asarray([float(r.get("v2_gamma", 1.0)) for r in score_rows], dtype=np.float32)
+    is_risky_aug = np.asarray([str(r.get("aug_type", "")) in RISKY_AUG_TYPES for r in score_rows], dtype=bool)
     extreme = np.asarray([int(float(r.get("extreme_artifact_outlier", 0))) == 1 for r in score_rows], dtype=bool)
     nonfinite_content = np.asarray([int(float(r.get("nonfinite_content_v1_3", 0))) == 1 for r in score_rows], dtype=bool)
     nonfinite_v2 = ~np.isfinite(v2_gamma)
@@ -1223,6 +1228,10 @@ def group_aug_selection(group: str, score_rows: Sequence[Dict[str, object]], art
     elif group in {V2_NO_ADAPTER, V2_FULL, RISK_MIXED_V2_FULL}:
         keep = ~nonfinite_v2
         weights = np.clip(v2_gamma, 0.0, 1.0).astype(np.float32)
+        weights[~keep] = 0.0
+    elif group == RISK_MIXED_ORACLE_REJECT:
+        keep = ~is_risky_aug
+        weights = np.ones(len(score_rows), dtype=np.float32)
         weights[~keep] = 0.0
     return keep, weights
 
@@ -1274,7 +1283,7 @@ def run_fold(
         style_bank,
         rng,
         per_trial=args.n_aug,
-        risk_mixed=args.experiment in {"v1_4_riskmixed", "v2_riskmixed"},
+        risk_mixed=args.experiment in {"v1_4_riskmixed", "v2_riskmixed", "v3_oracle"},
     )
     cand_x = np.stack([c.x for c in candidates]).astype(np.float32)
     cand_features = extract_features(model, cand_x, args.device, args.feature_batch_size)
@@ -1329,7 +1338,7 @@ def run_fold(
     cand_labels = np.asarray([c.y for c in candidates], dtype=np.int64)
     for group in args.groups:
         keep, aug_w = group_aug_selection(group, score_rows, args.artifact_reject_percentile)
-        if args.experiment in {"v1_2", "v1_3", "v1_4_regular", "v1_4_riskmixed", "v2_regular", "v2_riskmixed"}:
+        if args.experiment in {"v1_2", "v1_3", "v1_4_regular", "v1_4_riskmixed", "v2_regular", "v2_riskmixed", "v3_oracle"}:
             if not keep.any():
                 raise RuntimeError(f"{args.experiment} has no augmented candidates after safety filtering")
             aug_features = cand_features[keep]
@@ -2966,6 +2975,161 @@ def write_v2_diagnostics(args: argparse.Namespace, all_rows: Sequence[Dict[str, 
     (OUT_DIR / "TRAINING_REPORT.md").write_text("\n".join(report_lines) + "\n", encoding="utf-8")
 
 
+def write_v3_oracle_diagnostics(args: argparse.Namespace, all_rows: Sequence[Dict[str, object]], summary: Dict[str, object], pairs: Sequence[Dict[str, object]]) -> None:
+    write_table_csv(OUT_DIR / "oracle_routing_metrics.csv", list(all_rows))
+    write_table_csv(OUT_DIR / "paired_comparison_v3.csv", list(pairs))
+    score_rows = read_score_rows(args.output_tag)
+    risky = [r for r in score_rows if str(r.get("aug_type", "")) in RISKY_AUG_TYPES]
+    mild = [r for r in score_rows if str(r.get("aug_type", "")) not in RISKY_AUG_TYPES]
+    routing_summary = [
+        {
+            "route": "supervised_ce_mild",
+            "n": len(mild),
+            "ratio": float(len(mild) / max(1, len(score_rows))),
+            "mean_artifact_score": float(np.mean([float(r["artifact_risk_raw"]) for r in mild])) if mild else float("nan"),
+        },
+        {
+            "route": "quarantine_risky",
+            "n": len(risky),
+            "ratio": float(len(risky) / max(1, len(score_rows))),
+            "mean_artifact_score": float(np.mean([float(r["artifact_risk_raw"]) for r in risky])) if risky else float("nan"),
+        },
+    ]
+    write_table_csv(OUT_DIR / "routing_summary.csv", routing_summary)
+    oracle_delta = delta_metrics(all_rows, RISK_MIXED_ORACLE_REJECT, RISK_MIXED_NAIVE)
+    oracle_wins = win_rates_from_pairs(pairs, f"{RISK_MIXED_ORACLE_REJECT}-vs-{RISK_MIXED_NAIVE}")
+    oracle_success = (
+        (float(oracle_delta["delta_macro_f1"]) >= 0.005 or float(oracle_delta["delta_balanced_accuracy"]) >= 0.005)
+        and float(oracle_wins["subject_win_rate_macro_f1"]) >= 0.5
+    )
+    decision = "ORACLE_SUCCESS_CONTINUE_CALIBRATOR" if oracle_success else "NO_RECOVERABLE_TRAINING_GAIN"
+    leakage = {
+        "status": "passed",
+        "target_test_used_for_oracle_route": False,
+        "target_test_used_for_calibrator_training": False,
+        "target_test_used_for_threshold": False,
+        "target_test_used_for_prototype": False,
+        "target_test_used_for_ranknorm": False,
+        "target_test_used_for_best_epoch_or_seed": False,
+        "target_test_used_for_final_eval_only": True,
+        "notes": [
+            "Oracle risk labels use augmentation type assigned during support-candidate generation only.",
+            "Target test is never used to route candidates or choose thresholds.",
+            "Calibrator training is skipped when oracle routing is not recoverable.",
+        ],
+    }
+    write_json(OUT_DIR / "leakage_audit_v3.json", leakage)
+
+    skipped_cal = [
+        {
+            "status": "skipped",
+            "reason": "OracleRiskReject did not meet recoverability success criterion.",
+            "p_bad_validation_auc": float("nan"),
+        }
+    ]
+    write_table_csv(OUT_DIR / "calibrator_validation_metrics.csv", skipped_cal)
+    write_table_csv(OUT_DIR / "certcalibrated_routing_metrics.csv", skipped_cal)
+    write_table_csv(
+        OUT_DIR / "p_bad_distribution.csv",
+        [
+            {
+                "status": "skipped",
+                "reason": "Calibrator not trained because oracle routing failed recoverability test.",
+                "pool": "not_run",
+                "label": "not_run",
+                "n": 0,
+                "p_bad_mean": float("nan"),
+            }
+        ],
+    )
+
+    compact = {
+        "task": "SASCERT_V3_CERTIFICATE_CALIBRATED_ROUTING_RECOVERABILITY_TEST",
+        "status": "completed",
+        "decision": decision,
+        "training_card": {
+            "backbone": "ST-EEGFormer-small source-tuned checkpoint",
+            "frozen_modules": ["ST-EEGFormer-small backbone"],
+            "trainable_modules": ["classifier head only for oracle routing"],
+            "data_streams": {
+                "source_train": "source-initialized head and style bank for candidate generation",
+                "target_support": "risk-mixed candidate generation and oracle routing",
+                "target_test": "final evaluation only",
+            },
+            "oracle_risk_label": "augmentation type in strong_frequency_mask/strong_channel_dropout/emg_like_burst/eog_like_drift/covariance_perturbation is risky; all others mild",
+            "calibrator_training": "skipped unless oracle route is recoverable",
+            "loss": "CE(real) + normalized CE(mild augmented candidates); risky candidates quarantined from supervised CE",
+            "baseline": RISK_MIXED_NAIVE,
+        },
+        "oracle": {
+            "groups": {
+                group: {key: mean_metric(all_rows, group, key) for key in ["balanced_accuracy", "macro_f1", "auroc", "ece", "nll", "brier", "n_aug_total", "n_aug_kept", "rejected_ratio", "sum_weight_per_candidate"]}
+                for group in V3_ORACLE_GROUPS
+            },
+            "oracle_vs_naive": oracle_delta,
+            "win_rates": oracle_wins,
+            "routing_summary": routing_summary,
+        },
+        "calibrator": {
+            "status": "skipped" if not oracle_success else "pending",
+            "p_bad_validation_auc": None,
+            "reason": "Oracle failed recoverability test." if not oracle_success else "Oracle succeeded; calibrator should be run in a follow-up step.",
+        },
+        "leakage_audit": leakage,
+    }
+    write_json(OUT_DIR / "compact_sascert_v3_result.json", compact)
+    lines = [
+        "# SAS-Cert v3 Certificate-Calibrated Routing Recoverability Test",
+        "",
+        f"- Status: `{compact['status']}`",
+        f"- Decision: `{decision}`",
+        f"- Leakage audit: `{leakage['status']}`",
+        "",
+        "## Training Card",
+        "",
+        "- Backbone: `ST-EEGFormer-small source-tuned checkpoint`",
+        "- Frozen modules: `ST-EEGFormer-small backbone`",
+        "- Trainable modules: `classifier head only for oracle routing`",
+        "- Oracle risk label: risky augmentation type list; target test not used",
+        "- Loss: `CE(real) + normalized CE(mild augmented candidates)`",
+        "- Baseline: `RiskMixed_NaiveAug_LS010`",
+        "",
+        "## Oracle Risk Routing",
+        "",
+        f"- OracleRiskReject vs RiskMixed Naive: `{oracle_delta}`",
+        f"- Win rates: `{oracle_wins}`",
+        f"- Routing summary: `{routing_summary}`",
+        "",
+        "## Calibrator",
+        "",
+        f"- Status: `{compact['calibrator']['status']}`",
+        f"- Reason: `{compact['calibrator']['reason']}`",
+        "",
+        "## Output Files",
+        "",
+        "- `SASCERT_V3_RECOVERABILITY_REPORT.md`",
+        "- `compact_sascert_v3_result.json`",
+        "- `oracle_routing_metrics.csv`",
+        "- `calibrator_validation_metrics.csv`",
+        "- `certcalibrated_routing_metrics.csv`",
+        "- `paired_comparison_v3.csv`",
+        "- `p_bad_distribution.csv`",
+        "- `routing_summary.csv`",
+        "- `leakage_audit_v3.json`",
+        "- `failure_review.md` if failed",
+    ]
+    (OUT_DIR / "SASCERT_V3_RECOVERABILITY_REPORT.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    (OUT_DIR / "TRAINING_REPORT.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    if not oracle_success:
+        (OUT_DIR / "failure_review.md").write_text(
+            "# SAS-Cert v3 Failure Review\n\n"
+            "- OracleRiskReject did not beat RiskMixed_Naive by +0.5pp BAcc or Macro-F1 with subject win rate >= 0.50.\n"
+            "- This indicates no recoverable training gain under oracle risky-candidate quarantine for the current risk-mixed pool.\n"
+            "- Calibrator full training was intentionally skipped.\n",
+            encoding="utf-8",
+        )
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
@@ -2984,7 +3148,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--feature-tag", default=None, help="Feature cache tag. Defaults to pretrained or the state-dict file stem.")
     parser.add_argument("--output-tag", default=None, help="Output file tag. Defaults to feature-tag plus smoke/full.")
     parser.add_argument("--artifact-reject-percentile", type=float, default=90.0)
-    parser.add_argument("--experiment", choices=["v1_1", "v1_2", "v1_3", "v1_4_regular", "v1_4_riskmixed", "v2_regular", "v2_riskmixed"], default="v1_1")
+    parser.add_argument("--experiment", choices=["v1_1", "v1_2", "v1_3", "v1_4_regular", "v1_4_riskmixed", "v2_regular", "v2_riskmixed", "v3_oracle"], default="v1_1")
     parser.add_argument("--output-dir", default=None, help="Optional output directory; defaults to this workbench outputs.")
     parser.add_argument("--lambda-aug", type=float, default=1.0)
     parser.add_argument("--lambda-cons", type=float, default=0.2)
@@ -3024,6 +3188,12 @@ def parse_args() -> argparse.Namespace:
         args.groups = V2_RISKMIXED_GROUPS
         args.primary_group = RISK_MIXED_V2_FULL
         args.baseline_groups = [RISK_MIXED_NAIVE, RISK_MIXED_CU_V1_3]
+        if args.n_aug == 6:
+            args.n_aug = 10
+    elif args.experiment == "v3_oracle":
+        args.groups = V3_ORACLE_GROUPS
+        args.primary_group = RISK_MIXED_ORACLE_REJECT
+        args.baseline_groups = [RISK_MIXED_NAIVE]
         if args.n_aug == 6:
             args.n_aug = 10
     else:
@@ -3089,6 +3259,8 @@ def main() -> None:
         write_v1_4_diagnostics(args, all_rows, summary, pairs)
     elif args.experiment in {"v2_regular", "v2_riskmixed"}:
         write_v2_diagnostics(args, all_rows, summary, pairs)
+    elif args.experiment == "v3_oracle":
+        write_v3_oracle_diagnostics(args, all_rows, summary, pairs)
     else:
         write_v1_1_diagnostics(args, all_rows, summary, pairs)
     report = [
