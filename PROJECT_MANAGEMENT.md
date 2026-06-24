@@ -2021,3 +2021,27 @@ Primary report:
   - Full desired state including lightweight outputs and new tracking rules:
     not yet complete until `.gitignore`, `PROJECT_MANAGEMENT.md`, and the
     lightweight output files are committed and pushed.
+
+### 2026-06-24 GitHub Upload Verified After User Push
+
+- User reported `git status -sb` as clean with `main...origin/main`.
+- Local re-check results:
+  - Latest synchronized commit:
+    - `20cd6ad` `Track lightweight experiment outputs`
+  - Branch:
+    - `main`
+  - Tracking:
+    - `main` tracks `origin/main`
+- Interpretation:
+  - The curated project upload has been pushed.
+  - The lightweight experiment outputs and revised tracking policy have also
+    been pushed.
+- Remaining local-only file:
+  - `github上传命令`
+  - This is a temporary command note, not a project source/output artifact.
+  - It was added to `.gitignore` instead of being deleted or uploaded.
+- Current GitHub policy remains:
+  - upload code/config/docs
+  - upload lightweight output files (`md/csv/json/txt/yaml/yml`)
+  - do not upload raw data, checkpoints, large caches, third-party downloads,
+    dependency snapshots, or local personal notes
