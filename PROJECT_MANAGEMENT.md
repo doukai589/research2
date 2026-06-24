@@ -2752,3 +2752,54 @@ Primary report:
   - optional ready-to-paste explanation for another ChatGPT when useful.
 - Avoid giving only deltas without explaining whether they are meaningful,
   stable, or sufficient for the stated success criterion.
+
+### 2026-06-24 SAS-Cert-TFConsistency Planning Note
+
+- User provided a PPT-style design idea and asked to understand it without
+  taking implementation action yet.
+- Proposed direction:
+  - `SAS-Cert-TFConsistency`
+  - Time-Frequency Augmentation Certification with Consistency Training.
+- Core hypothesis:
+  - An EEG augmentation is not automatically a label-preserving training
+    sample.
+  - It should be treated as an augmented view whose training role depends on
+    certificate evidence.
+- Key route shift:
+  - old:
+    - `score -> weight -> CE`
+  - new:
+    - `certificate -> route -> different loss`
+- Three routes:
+  - supervised route:
+    - high content confidence, low artifact/physio risk.
+    - train with supervised CE.
+  - consistency route:
+    - content likely preserved but artifact/physio/style risk is medium.
+    - train with KL/JSD consistency instead of hard label CE.
+  - quarantine route:
+    - low content, extreme artifact, extreme physio drift, or wrong-class
+      prototype drift.
+    - no training, diagnostic report only.
+- Why this follows from previous experiments:
+  - v1.1 showed hard reject can remove useful samples.
+  - v1.2 showed artifact/physio/style direct weighting did not help.
+  - v1.3 showed content utility has signal but weak stability.
+  - v2 showed CertAdapter hurts Macro-F1.
+  - v3 showed oracle risky-sample quarantine alone is not enough.
+  - Therefore the next credible training route is not better deletion, but
+    assigning uncertain views to consistency training.
+- Suggested first implementation should remain controlled:
+  - no action yet.
+  - later prompt should define a workbench trial.
+  - first version should compare:
+    - `RealOnly`
+    - `NaiveTF-Aug`
+    - `AugMixTF`
+    - `SAS-Cert-TFConsistency`
+  - keep HHTaug for later if too complex.
+  - start with structured TF views such as weak/strong frequency mask,
+    frequency mixup, EMG-like burst, and EOG-like drift.
+- Important caution:
+  - This is a new algorithm branch, not a continuation of v1-v3 weight tuning.
+  - It should not begin until the user provides a concrete execution prompt.
