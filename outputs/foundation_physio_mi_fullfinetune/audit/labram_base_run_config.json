@@ -1,0 +1,16 @@
+{
+  "model_name": "labram_base",
+  "epochs": 30,
+  "batch_size": 16,
+  "lr": 0.0001,
+  "weight_decay": 0.05,
+  "seed": 3407,
+  "device": "cuda",
+  "patience": 10,
+  "input_shape": [
+    4917,
+    64,
+    4,
+    200
+  ]
+}

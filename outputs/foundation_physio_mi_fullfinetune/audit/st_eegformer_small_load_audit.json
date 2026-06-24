@@ -1,0 +1,15 @@
+{
+  "checkpoint_keys": 160,
+  "model_keys": 106,
+  "loaded_keys": 101,
+  "skipped_missing_name": 59,
+  "skipped_shape": [],
+  "missing_after_load": [
+    "pos_embed",
+    "fc_norm.weight",
+    "fc_norm.bias",
+    "head.weight",
+    "head.bias"
+  ],
+  "unexpected_after_load": []
+}

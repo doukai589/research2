@@ -1,0 +1,13 @@
+model,dataset,protocol_name,protocol_type,entrypoint,executable_now,status,notes
+CBraMod,PhysioNet-MI,code_exact,code_exact,/ai/224duibishiyan/615新研究/third_party/CBraMod-main/finetune_main.py,True,available_but_requires_processed_lmdb,Official entry defaults are code behavior; requires LMDB datasets_dir with train/val/test keys.
+CBraMod,PhysioNet-MI,paper_exact,paper_exact,paper raw EDF preprocessing + CBraMod full finetune,False,needs_paper_preprocessing_lmdb,Raw EDF split 1-70/71-89/90-109 must be converted to exact LMDB before exact run.
+CBraMod,PhysioNet-MI,executable_hybrid,executable_hybrid,Step1 mapped/cropped forward smoke,True,forward_only_not_reproduction,"Can forward with 22-channel mapping, but this is not paper exact because paper uses 64 channels."
+CBraMod,BCIC-IV-2a,code_exact,code_exact,/ai/224duibishiyan/615新研究/third_party/CBraMod-main/finetune_main.py,True,available_but_requires_processed_lmdb,Official code uses LMDB dataset class; default CLI is not BCIC.
+CBraMod,BCIC-IV-2a,paper_exact,paper_exact,paper raw MAT preprocessing + CBraMod full finetune,False,needs_paper_preprocessing_lmdb,"Need exact [2,6]s, 0.3-40Hz, 200Hz, 1-5/6-7/8-9 split before exact run."
+CBraMod,BCIC-IV-2a,executable_hybrid,executable_hybrid,Step1 raw MAT loader + CBraMod forward smoke,True,forward_only_not_reproduction,"Forward works, but not full fine-tuning reproduction."
+MIRepNet,BNCI2014001,code_exact,code_exact,/ai/224duibishiyan/615新研究/third_party/backbones/MIRepNet/finetune.py,False,code_not_released_for_dataset,README command supports BNCI2014004; README says code for other datasets will be released.
+MIRepNet,BNCI2014001,paper_exact,paper_exact,paper 45-channel template + EA + 30% target fine-tune,False,needs_adapter_and_dependencies,Requires adapter to X.npy/labels.npy and local dependencies wandb/einops.
+MIRepNet,BNCI2014001,executable_hybrid,executable_hybrid,local adapter audit only,False,not_ready,Hybrid cannot be scored until adapter is validated.
+MIRepNet,BNCI2014001-4,code_exact,code_exact,/ai/224duibishiyan/615新研究/third_party/backbones/MIRepNet/finetune.py,False,code_not_released_for_dataset,Repository dataset.py has BNCI2014001-4 branch but README says other dataset code to be released; dependency/preprocessed files missing.
+MIRepNet,BNCI2014001-4,paper_exact,paper_exact,paper 45-channel template + EA + 30% target fine-tune,False,needs_adapter_and_dependencies,Requires validated inverse-distance channel interpolation and EA behavior.
+MIRepNet,BNCI2014001-4,executable_hybrid,executable_hybrid,local adapter audit only,False,not_ready,Hybrid cannot be scored until adapter is validated.

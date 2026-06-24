@@ -1,0 +1,13 @@
+backbone,component,comparison,auc_high_score_is_clean,direction,n
+CBraMod_frozen,content_score,clean_vs_all_bad,0.3044444444444444,bad_high_or_inverted,300
+CBraMod_frozen,style_score,clean_vs_all_bad,0.6408333333333334,clean_high,300
+CBraMod_frozen,physio_score,clean_vs_all_bad,0.8444444444444444,clean_high,300
+CBraMod_frozen,artifact_safe_score,clean_vs_all_bad,0.33333333333333337,bad_high_or_inverted,300
+CBraMod_frozen,sas_score,clean_vs_all_bad,0.19689814814814816,bad_high_or_inverted,300
+CBraMod_frozen,score_artifact_gate_physio,clean_vs_all_bad,0.9022222222222221,clean_high,300
+ST-EEGFormer-small_source_tuned,content_score,clean_vs_all_bad,0.2722222222222222,bad_high_or_inverted,300
+ST-EEGFormer-small_source_tuned,style_score,clean_vs_all_bad,0.6408333333333334,clean_high,300
+ST-EEGFormer-small_source_tuned,physio_score,clean_vs_all_bad,0.8444444444444444,clean_high,300
+ST-EEGFormer-small_source_tuned,artifact_safe_score,clean_vs_all_bad,0.33333333333333337,bad_high_or_inverted,300
+ST-EEGFormer-small_source_tuned,sas_score,clean_vs_all_bad,0.16620370370370371,bad_high_or_inverted,300
+ST-EEGFormer-small_source_tuned,score_artifact_gate_physio,clean_vs_all_bad,0.9022222222222221,clean_high,300

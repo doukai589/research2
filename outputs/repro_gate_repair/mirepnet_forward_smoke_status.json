@@ -1,0 +1,18 @@
+{
+  "adapter_smoke_ready": true,
+  "checkpoint_path": "/ai/224duibishiyan/615新研究/third_party/backbones/MIRepNet/weight/MIRepNet.pth",
+  "dependency_status": "local_install_ok",
+  "forward_success": true,
+  "logits_shape": [
+    2,
+    4
+  ],
+  "note": "Forward smoke only; no training and no full reproduction.",
+  "pooled_shape": [
+    2,
+    256
+  ],
+  "status": "adapter_smoke_ready",
+  "wandb_global_installed": false,
+  "wandb_stub_used_for_smoke": true
+}

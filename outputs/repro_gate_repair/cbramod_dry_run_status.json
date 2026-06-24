@@ -1,0 +1,15 @@
+{
+  "checkpoint_paths": [],
+  "checkpoint_saved": false,
+  "code_exact_ready": false,
+  "dependency_status": "local_install_ok",
+  "dry_run_success": false,
+  "forward_backward_observed": true,
+  "local_dependency_path": "/ai/224duibishiyan/615新研究/outputs/repro_gate_repair/local_python_deps",
+  "loss_nan_detected": false,
+  "metric_output_observed": false,
+  "note": "1-epoch tiny LMDB dry run only; not a performance result.",
+  "reason": "official_dry_run_failed_or_no_checkpoint",
+  "returncode": 1,
+  "status": "blocked"
+}

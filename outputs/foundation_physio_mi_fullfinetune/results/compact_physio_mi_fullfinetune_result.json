@@ -1,0 +1,85 @@
+{
+  "status": "completed",
+  "protocol": "paper_aligned_common_protocol",
+  "dataset": "PhysioNetMI",
+  "task": "left/right motor imagery",
+  "runs": [
+    4,
+    8,
+    12
+  ],
+  "split": "subjects 1-70 train, 71-89 val, 90-109 test",
+  "models_requested": [
+    "st_eegformer_small",
+    "labram_base",
+    "eegpt_large4e"
+  ],
+  "models_completed": [
+    "st_eegformer_small",
+    "labram_base",
+    "eegpt_large4e"
+  ],
+  "epochs": 30,
+  "seed": 3407,
+  "raw_data_copied": false,
+  "metrics_csv": "/ai/224duibishiyan/615新研究/outputs/foundation_physio_mi_fullfinetune/results/physio_mi_fullfinetune_metrics.csv",
+  "results": [
+    {
+      "model": "st_eegformer_small",
+      "protocol": "paper_aligned_common_protocol",
+      "seed": 3407,
+      "epochs_requested": 30,
+      "best_epoch": 11,
+      "batch_size": 16,
+      "lr": 0.0001,
+      "total_params": 25405442,
+      "trainable_params": 25405442,
+      "val_balanced_accuracy": 0.7408365261813538,
+      "test_accuracy": 0.7666666666666667,
+      "test_balanced_accuracy": 0.766927244085156,
+      "test_macro_f1": 0.7635087789545336,
+      "test_kappa": 0.5335751832383209,
+      "test_auroc": 0.8712215862794385,
+      "test_nll": 0.9054199511822736,
+      "test_ece": 0.18161622355381649
+    },
+    {
+      "model": "labram_base",
+      "protocol": "paper_aligned_common_protocol",
+      "seed": 3407,
+      "epochs_requested": 30,
+      "best_epoch": 11,
+      "batch_size": 16,
+      "lr": 0.0001,
+      "total_params": 5815538,
+      "trainable_params": 5815538,
+      "val_balanced_accuracy": 0.6209051724137931,
+      "test_accuracy": 0.6544444444444445,
+      "test_balanced_accuracy": 0.654746443192312,
+      "test_macro_f1": 0.648083444079969,
+      "test_kappa": 0.3093050113018331,
+      "test_auroc": 0.712240554274342,
+      "test_nll": 0.6452928244308078,
+      "test_ece": 0.061979796753989326
+    },
+    {
+      "model": "eegpt_large4e",
+      "protocol": "paper_aligned_common_protocol",
+      "seed": 3407,
+      "epochs_requested": 30,
+      "best_epoch": 20,
+      "batch_size": 4,
+      "lr": 0.0001,
+      "total_params": 51040972,
+      "trainable_params": 51040956,
+      "val_balanced_accuracy": 0.5396791187739464,
+      "test_accuracy": 0.5211111111111111,
+      "test_balanced_accuracy": 0.5210667707001022,
+      "test_macro_f1": 0.5208975852200797,
+      "test_kappa": 0.04213707885145346,
+      "test_auroc": 0.5383582141146377,
+      "test_nll": 2.8740691550344075,
+      "test_ece": 0.4613832306861877
+    }
+  ]
+}

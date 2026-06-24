@@ -1,0 +1,2 @@
+model,dataset,run_protocol,seed,epochs,batch_size,val_split,metric,run_value,paper_mean,paper_std,delta,within_2std,notes
+MIRepNet,BNCI2014001-4,executable_hybrid_gpu_batch64_subject_filtered_adapter,666,10,64,0.7,accuracy_full_finetune,0.5837720677,0.6414,0.0031,-0.0576279323,false,"Official MIRepNet finetune code with repaired subject filtering and generated BNCI2014001 X/labels/subjects adapter; batch_size changed from default 8 to 64 for feasible GPU execution."

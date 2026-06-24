@@ -1,0 +1,62 @@
+{
+  "stage": "steegformer_sascert_core_workbench",
+  "status": "completed",
+  "groups": {
+    "NaiveAug_LS010": {
+      "accuracy": 0.6664661654135339,
+      "balanced_accuracy": 0.6665093981307646,
+      "macro_f1": 0.6620622327802094,
+      "kappa": 0.3327433901258182,
+      "auroc": 0.7300292869968255,
+      "ece": 0.23502507502289705,
+      "nll": 0.8118655092937113,
+      "brier": 0.4867930402881221
+    },
+    "ArtifactReject_LS010": {
+      "accuracy": 0.6660182370820668,
+      "balanced_accuracy": 0.6660243777546346,
+      "macro_f1": 0.6616280612769123,
+      "kappa": 0.3318331108768663,
+      "auroc": 0.7311809397973328,
+      "ece": 0.23040067489424473,
+      "nll": 0.8121065712379799,
+      "brier": 0.4864313393831253
+    },
+    "SoftWeight_noReject_LS010": {
+      "accuracy": 0.6701455767077267,
+      "balanced_accuracy": 0.6700309863196151,
+      "macro_f1": 0.6649319250531943,
+      "kappa": 0.3398165497834787,
+      "auroc": 0.7366954046060996,
+      "ece": 0.23161419591213714,
+      "nll": 0.8090580859763316,
+      "brier": 0.48221297648392225
+    },
+    "SASCert_SoftAR_LS010": {
+      "accuracy": 0.670139177731563,
+      "balanced_accuracy": 0.670023778711372,
+      "macro_f1": 0.6654309409565888,
+      "kappa": 0.3397743225128094,
+      "auroc": 0.7344796628354664,
+      "ece": 0.23331706519060907,
+      "nll": 0.8062314115154045,
+      "brier": 0.4813257996581103
+    }
+  },
+  "sascert_vs_naive": {
+    "delta_balanced_accuracy": 0.003514380580607379,
+    "delta_macro_f1": 0.0033687081763794646,
+    "delta_ece": -0.001708009832287971,
+    "delta_nll": -0.0056340977783068125,
+    "delta_brier": -0.005467240630011805,
+    "subject_win_rate_macro_f1": 0.2631578947368421,
+    "seed_win_rate_macro_f1": 0.0
+  },
+  "component_ablation": {
+    "beats_artifact_reject_macro_f1": true,
+    "beats_softweight_no_reject_macro_f1": true,
+    "mean_delta_macro_f1_vs_artifact_reject": 0.0038028796796765693,
+    "mean_delta_macro_f1_vs_softweight_no_reject": 0.0004990159033945665
+  },
+  "n_rows": 380
+}

@@ -1,0 +1,27 @@
+{
+  "task": "SASCERT_DIRECT_USE_ALGORITHM_AUDIT_AND_V1_BLUEPRINT",
+  "completed": true,
+  "output_dir": "/ai/224duibishiyan/615新研究/outputs/reference_algorithm_audit",
+  "third_party_dir": "/ai/224duibishiyan/615新研究/third_party/reference_algorithms",
+  "use_now": [
+    "pyRiemann",
+    "MNE-Features"
+  ],
+  "use_offline_only": [
+    "Autoreject"
+  ],
+  "use_later": [
+    "EEG-DLite",
+    "MOABB",
+    "Channel Reflection"
+  ],
+  "cite_only": [],
+  "blocked": [
+    "MNE-ICALabel",
+    "Braindecode"
+  ],
+  "no_training": true,
+  "no_raw_data_copy": true,
+  "channel_reflection_source_note": "wzwvv/EEGAug README claims official implementation; arXiv HTML v1 also footnotes sylyoung/DeepTransferEEG. Sparse clone used for wzwvv/EEGAug and data/ was excluded.",
+  "next_experiment_allowed_after_user_approval": "ST-EEGFormer-small + PhysioNetMI: NaiveAug_LS010, ArtifactReject_LS010, SoftWeight_noReject_LS010, SAS-Cert-SoftAR-LS-v1.1"
+}

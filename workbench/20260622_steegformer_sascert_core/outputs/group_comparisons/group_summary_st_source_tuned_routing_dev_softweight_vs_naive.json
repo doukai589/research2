@@ -1,0 +1,16 @@
+{
+  "status": "completed",
+  "output_tag": "st_source_tuned_routing_dev",
+  "comparison": "SoftWeight_noReject_LS010-vs-NaiveAug_LS010",
+  "n_pairs": 95,
+  "delta_accuracy": 0.0036794112941929275,
+  "delta_balanced_accuracy": 0.003521588188850554,
+  "delta_macro_f1": 0.0028696922729849477,
+  "delta_kappa": 0.007073159657660394,
+  "delta_auroc": 0.00666611760927423,
+  "delta_ece": -0.0034108791107598183,
+  "delta_nll": -0.002807423317379564,
+  "delta_brier": -0.004580063804199821,
+  "subject_win_rate_macro_f1": 0.2631578947368421,
+  "seed_win_rate_macro_f1": 0.0
+}

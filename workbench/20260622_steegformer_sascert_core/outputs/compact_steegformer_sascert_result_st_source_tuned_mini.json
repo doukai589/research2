@@ -1,0 +1,62 @@
+{
+  "stage": "steegformer_sascert_core_workbench",
+  "status": "completed",
+  "groups": {
+    "NaiveAug_LS010": {
+      "accuracy": 0.7898682877406281,
+      "balanced_accuracy": 0.7868855218855219,
+      "macro_f1": 0.7862171868786362,
+      "kappa": 0.5765232053394982,
+      "auroc": 0.8842305407011288,
+      "ece": 0.14133807441414065,
+      "nll": 0.5065228275094602,
+      "brier": 0.3134641523162524
+    },
+    "ArtifactReject_LS010": {
+      "accuracy": 0.7696048632218845,
+      "balanced_accuracy": 0.766435927906516,
+      "macro_f1": 0.7640686468366379,
+      "kappa": 0.5353559419692177,
+      "auroc": 0.8763022380669439,
+      "ece": 0.15854445205814569,
+      "nll": 0.5229636561087688,
+      "brier": 0.3282044405738513
+    },
+    "SoftWeight_noReject_LS010": {
+      "accuracy": 0.7934143870314084,
+      "balanced_accuracy": 0.7902188552188552,
+      "macro_f1": 0.7897617935513281,
+      "kappa": 0.5835250083915815,
+      "auroc": 0.8913190730837789,
+      "ece": 0.14712529734094093,
+      "nll": 0.49078660939702234,
+      "brier": 0.2959353302915891
+    },
+    "SASCert_SoftAR_LS010": {
+      "accuracy": 0.7886524822695035,
+      "balanced_accuracy": 0.786043771043771,
+      "macro_f1": 0.785206972804052,
+      "kappa": 0.5744889404060356,
+      "auroc": 0.8862943157060803,
+      "ece": 0.1459079500782212,
+      "nll": 0.49660080907037246,
+      "brier": 0.30117328464984894
+    }
+  },
+  "sascert_vs_naive": {
+    "delta_balanced_accuracy": -0.0008417508417508657,
+    "delta_macro_f1": -0.001010214074584126,
+    "delta_ece": 0.004569875664080542,
+    "delta_nll": -0.009922018439087743,
+    "delta_brier": -0.012290867666403471,
+    "subject_win_rate_macro_f1": 0.0,
+    "seed_win_rate_macro_f1": 0.0
+  },
+  "component_ablation": {
+    "beats_artifact_reject_macro_f1": true,
+    "beats_softweight_no_reject_macro_f1": false,
+    "mean_delta_macro_f1_vs_artifact_reject": 0.021138325967414273,
+    "mean_delta_macro_f1_vs_softweight_no_reject": -0.0045548207472759965
+  },
+  "n_rows": 24
+}

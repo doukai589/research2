@@ -1,0 +1,13 @@
+comparison,mean_delta,metric,n,positive_folds
+SASCertTop50_minus_NaiveAug,-0.02366255144032922,acc,27,8
+SASCertTop50_minus_NaiveAug,-0.044732513963169324,macro_f1,27,8
+SASCertTop50_minus_NaiveAug,-0.013917024900807153,ece,27,8
+SASCertTop50_minus_NaiveAug,0.004435570151717575,nll,27,22
+SASCertTop50_minus_Random50,0.00913065843621399,acc,27,13
+SASCertTop50_minus_Random50,0.016672778949323952,macro_f1,27,14
+SASCertTop50_minus_Random50,-0.010936497209532327,ece,27,13
+SASCertTop50_minus_Random50,-0.005182932924341272,nll,27,9
+SASCertTop50_minus_NoAug,-0.02160493827160494,acc,27,6
+SASCertTop50_minus_NoAug,-0.03843432877167755,macro_f1,27,7
+SASCertTop50_minus_NoAug,-0.011644935946329016,ece,27,10
+SASCertTop50_minus_NoAug,0.0029240360966435184,nll,27,18

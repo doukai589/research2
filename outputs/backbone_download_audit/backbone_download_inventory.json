@@ -1,0 +1,138 @@
+{
+  "stage": "download_general_fm_backbones",
+  "created_at": "2026-06-22T17:27:46",
+  "workspace_root": "/ai/224duibishiyan/615新研究",
+  "target_root": "/ai/224duibishiyan/615新研究/third_party/backbones",
+  "rows": [
+    {
+      "model_name": "STEEGFormer",
+      "priority": "1_highest",
+      "repo_url": "https://github.com/LiuyinYang1101/STEEGFormer",
+      "local_path": "/ai/224duibishiyan/615新研究/third_party/backbones/STEEGFormer",
+      "git_commit": "542ee17918c3c2c36ba1d4ea02bedff5eb149370",
+      "code_exists": true,
+      "has_readme": true,
+      "has_requirements": false,
+      "expected_weight_location": "/ai/224duibishiyan/615新研究/third_party/backbones/STEEGFormer/pretrained_weights/ST-EEGFormer-{small,base,large}",
+      "weight_exists": true,
+      "weight_files": "/ai/224duibishiyan/615新研究/third_party/backbones/STEEGFormer/pretrained_weights/ST-EEGFormer-small/checkpoint-300.pth;/ai/224duibishiyan/615新研究/third_party/backbones/STEEGFormer/pretrained_weights/ST-EEGFormer-base/checkpoint-288.pth;/ai/224duibishiyan/615新研究/third_party/backbones/STEEGFormer/pretrained_weights/ST-EEGFormer-large/large_weights_only_196.pth",
+      "weight_total_size_gb": 2.8349,
+      "download_method": "git clone + GitHub Releases API",
+      "status": "ready",
+      "notes": "small/base/large downloaded; largeV2 release recorded but not downloaded for first smoke; input hint 128Hz <=6s up to 142 channels; recommend small first, base next."
+    },
+    {
+      "model_name": "LaBraM",
+      "priority": "2_high",
+      "repo_url": "https://github.com/935963004/LaBraM",
+      "local_path": "/ai/224duibishiyan/615新研究/third_party/backbones/LaBraM",
+      "git_commit": "c431221e6cfd23dbfa9950e0180682fb322b0548",
+      "code_exists": true,
+      "has_readme": true,
+      "has_requirements": true,
+      "expected_weight_location": "/ai/224duibishiyan/615新研究/third_party/backbones/LaBraM/checkpoints/labram-base.pth; checkpoints/vqnsp.pth",
+      "weight_exists": true,
+      "weight_files": "/ai/224duibishiyan/615新研究/third_party/backbones/LaBraM/checkpoints/labram-base.pth;/ai/224duibishiyan/615新研究/third_party/backbones/LaBraM/checkpoints/vqnsp.pth",
+      "weight_total_size_gb": 0.1783,
+      "download_method": "existing official repository checkpoints; git pull ff-only",
+      "status": "ready",
+      "notes": "labram-base.pth and vqnsp.pth exist and torch.load succeeds; files are not Git LFS pointers; README requires channel order list and 200Hz resampling."
+    },
+    {
+      "model_name": "EEGPT",
+      "priority": "3_medium_high",
+      "repo_url": "https://github.com/BINE022/EEGPT",
+      "local_path": "/ai/224duibishiyan/615新研究/third_party/backbones/EEGPT",
+      "git_commit": "a0e0a8fad729e2ecf4eedb3a81548a6e6d48a705",
+      "code_exists": true,
+      "has_readme": true,
+      "has_requirements": true,
+      "expected_weight_location": "/ai/224duibishiyan/615新研究/third_party/backbones/EEGPT/checkpoint/eegpt_mcae_58chs_4s_large4E.ckpt",
+      "weight_exists": false,
+      "weight_files": "",
+      "weight_total_size_gb": 0.0,
+      "download_method": "code git pull ff-only; official Figshare link checked but blocked by WAF challenge",
+      "status": "manual_download_required",
+      "notes": "README points to Figshare EEG_large; programmatic request returned HTTP 202 x-amzn-waf-action=challenge. Do not use non-official mirrors. Expected input 58 channels, 256Hz, 4s, patch size 64."
+    }
+  ],
+  "st_eegformer_releases_found": [
+    {
+      "tag_name": "ST-EEGFormer-small",
+      "name": "ST-EEGFormer-small",
+      "assets": [
+        {
+          "name": "checkpoint-300.pth",
+          "size": 393972208,
+          "url": "https://github.com/LiuyinYang1101/STEEGFormer/releases/download/ST-EEGFormer-small/checkpoint-300.pth"
+        }
+      ]
+    },
+    {
+      "tag_name": "ST-EEGFormer-large",
+      "name": "ST-EEGFormer-large",
+      "assets": [
+        {
+          "name": "large_weights_only_196.pth",
+          "size": 1316497385,
+          "url": "https://github.com/LiuyinYang1101/STEEGFormer/releases/download/ST-EEGFormer-large/large_weights_only_196.pth"
+        }
+      ]
+    },
+    {
+      "tag_name": "ST-EEGFormer-base",
+      "name": "ST-EEGFormer-base",
+      "assets": [
+        {
+          "name": "checkpoint-288.pth",
+          "size": 1333478786,
+          "url": "https://github.com/LiuyinYang1101/STEEGFormer/releases/download/ST-EEGFormer-base/checkpoint-288.pth"
+        }
+      ]
+    },
+    {
+      "tag_name": "ST-EEGFormer-largeV2",
+      "name": "ST-EEGFormer-large: further pre-trained on HBN for the EEG 2025 Foundation challenge",
+      "assets": [
+        {
+          "name": "large_weights_only_210.pth",
+          "size": 1317179369,
+          "url": "https://github.com/LiuyinYang1101/STEEGFormer/releases/download/ST-EEGFormer-largeV2/large_weights_only_210.pth"
+        }
+      ]
+    }
+  ],
+  "details": {
+    "STEEGFormer": {
+      "readme_exists": true,
+      "requirements_files": [],
+      "simple_example_exists": true,
+      "bci_iv2a_tutorial_exists": true,
+      "model_input_hint": "128 Hz, <=6 seconds, up to 142 EEG channels",
+      "small_weight_size_bytes": 393972208,
+      "base_weight_size_bytes": 1333478786,
+      "large_weight_size_bytes": 1316497385,
+      "largeV2_recorded_not_downloaded": true,
+      "recommended_first_smoke": "ST-EEGFormer-small"
+    },
+    "LaBraM": {
+      "checkpoints_dir_exists": true,
+      "modeling_finetune_exists": true,
+      "run_class_finetuning_exists": true,
+      "requirements_exists": true,
+      "expected_input_hint": "resample to 200 Hz; provide channel order list; likely downstream model labram_base_patch200_200",
+      "labram_base_size_bytes": 96612769,
+      "vqnsp_size_bytes": 94805201
+    },
+    "EEGPT": {
+      "checkpoint_dir": "/ai/224duibishiyan/615新研究/third_party/backbones/EEGPT/checkpoint",
+      "checkpoint_exists": false,
+      "downstream_exists": true,
+      "finetune_model_exists": true,
+      "requirements_exists": true,
+      "official_figshare_url": "https://figshare.com/s/e37df4f8a907a866df4b",
+      "expected_input_hint": "58 channels, 256 Hz, 4 s, patch size 64",
+      "manual_download_required": true
+    }
+  }
+}

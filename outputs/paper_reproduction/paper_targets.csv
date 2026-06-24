@@ -1,0 +1,14 @@
+model,dataset,task,paper_protocol,metric,paper_mean,paper_std,notes
+CBraMod,PhysioNet-MI,4-class,paper_exact,balanced_accuracy,0.6417,0.0091,"subjects 1-70 train, 71-89 val, 90-109 test; 4s; 200Hz"
+CBraMod,PhysioNet-MI,4-class,paper_exact,cohen_kappa,0.5222,0.0169,"subjects 1-70 train, 71-89 val, 90-109 test; 4s; 200Hz"
+CBraMod,PhysioNet-MI,4-class,paper_exact,weighted_f1,0.6427,0.01,"subjects 1-70 train, 71-89 val, 90-109 test; 4s; 200Hz"
+CBraMod,BCIC-IV-2a,E.9 4-class,paper_exact,balanced_accuracy,0.5138,0.0066,"[2,6]s; 0.3-40Hz; 200Hz; subjects 1-5 train, 6-7 val, 8-9 test"
+CBraMod,BCIC-IV-2a,E.9 4-class,paper_exact,cohen_kappa,0.3518,0.0094,"[2,6]s; 0.3-40Hz; 200Hz; subjects 1-5 train, 6-7 val, 8-9 test"
+CBraMod,BCIC-IV-2a,E.9 4-class,paper_exact,weighted_f1,0.4984,0.0085,"[2,6]s; 0.3-40Hz; 200Hz; subjects 1-5 train, 6-7 val, 8-9 test"
+CBraMod,BCIC-IV-2a LOSO key ingredients,LOSO key ingredients,paper_exact,balanced_accuracy,0.7405,0.0635,"LOSO with EA, session statistics, Mixup, subject-wise regularization"
+CBraMod,BCIC-IV-2a LOSO key ingredients,LOSO key ingredients,paper_exact,auc_pr,0.5997,0.0833,"LOSO with EA, session statistics, Mixup, subject-wise regularization"
+CBraMod,BCIC-IV-2a LOSO key ingredients,LOSO key ingredients,paper_exact,auroc,0.7195,0.0682,"LOSO with EA, session statistics, Mixup, subject-wise regularization"
+MIRepNet,BNCI2014001,likely 2-class left/right,paper_exact,accuracy_full_finetune,0.8177,0.0027,30% target-session trials; 8-30Hz; 250Hz; 45-channel template; EA
+MIRepNet,BNCI2014001,likely 2-class left/right,paper_exact,accuracy_linear_probe,0.7536,0.0226,30% target-session trials; 8-30Hz; 250Hz; 45-channel template; EA
+MIRepNet,BNCI2014001-4,4-class full,paper_exact,accuracy_full_finetune,0.6414,0.0031,30% target-session trials; 8-30Hz; 250Hz; 45-channel template; EA
+MIRepNet,BNCI2014001-4,4-class full,paper_exact,accuracy_linear_probe,0.5194,0.0184,30% target-session trials; 8-30Hz; 250Hz; 45-channel template; EA

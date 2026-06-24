@@ -1,0 +1,23 @@
+{
+  "EA_behavior": "tiny sample EA over generated tiny_X only; validation smoke, not official reproduction split behavior",
+  "adapter_smoke_ready": false,
+  "adapter_status": "adapter_preprocessing_ready",
+  "channel_template_mapping": "inverse-distance interpolation from 22 BNCI channels to 45-channel MIRepNet template",
+  "compatibility_with_official_code": "shape-compatible [N,45,1000], but not full official dataset package",
+  "generated_file_paths": [
+    "/ai/224duibishiyan/615新研究/outputs/repro_gate_repair/mirepnet_tiny_adapter/tiny_X.npy",
+    "/ai/224duibishiyan/615新研究/outputs/repro_gate_repair/mirepnet_tiny_adapter/tiny_labels.npy",
+    "/ai/224duibishiyan/615新研究/outputs/repro_gate_repair/mirepnet_tiny_adapter/metadata.json",
+    "/ai/224duibishiyan/615新研究/outputs/repro_gate_repair/mirepnet_tiny_adapter/subject_split.json",
+    "/ai/224duibishiyan/615新研究/outputs/repro_gate_repair/mirepnet_tiny_adapter/protocol_manifest.json"
+  ],
+  "tiny_generated": true,
+  "tiny_labels_shape": [
+    8
+  ],
+  "tiny_x_shape": [
+    8,
+    45,
+    1000
+  ]
+}

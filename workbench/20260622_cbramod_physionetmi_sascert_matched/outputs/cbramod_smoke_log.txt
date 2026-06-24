@@ -1,0 +1,98 @@
+{
+  "status": "passed",
+  "dataset": "PhysioNetMI",
+  "raw_data_copied": false,
+  "cache_path": "/ai/224duibishiyan/615\u65b0\u7814\u7a76/outputs/foundation_physio_mi_fullfinetune/data/physionetmi_lr_r04_r08_r12_160hz_4s_zscore.npz",
+  "cache_shape": [
+    4917,
+    64,
+    640
+  ],
+  "sample_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "sample_subjects": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+  ],
+  "sample_labels": [
+    1,
+    0,
+    0,
+    1,
+    1,
+    0,
+    1,
+    0
+  ],
+  "raw_shape": [
+    8,
+    64,
+    640
+  ],
+  "cbramod_input_shape": [
+    8,
+    64,
+    4,
+    200
+  ],
+  "representation_shape": [
+    8,
+    64,
+    4,
+    200
+  ],
+  "pooled_feature_shape": [
+    8,
+    200
+  ],
+  "pooled_feature_dim": 200,
+  "feature_nan_count": 0,
+  "feature_inf_count": 0,
+  "feature_mean": 0.002860103501006961,
+  "feature_std": 0.1109992265701294,
+  "device": "cuda",
+  "split_counts": {
+    "train": 3150,
+    "val": 867,
+    "test": 900
+  },
+  "checkpoint_audit": {
+    "checkpoint_path": "/ai/224duibishiyan/\u65b0\u7814\u7a76/CBraMod-main/pretrained_weights/pretrained_weights.pth",
+    "checkpoint_keys": 211,
+    "model_keys": 211,
+    "loaded_keys": 211,
+    "missing_in_checkpoint": [],
+    "missing_after_load": [],
+    "unexpected_after_load": [],
+    "shape_mismatch": [],
+    "unexpected_checkpoint_keys": [],
+    "code_path": "/ai/224duibishiyan/615\u65b0\u7814\u7a76/third_party/CBraMod-main",
+    "n_channels": 64,
+    "target_samples": 800,
+    "patch_size": 200,
+    "patch_num": 4,
+    "proj_out_replaced_with_identity": true,
+    "frozen_backbone": true
+  },
+  "protocol_checks": {
+    "physionet_loader_reused": true,
+    "target_samples_resampled_to_800_for_cbramod": true,
+    "input_is_64_channels_4_patches_200_samples": true,
+    "backbone_frozen": true,
+    "no_nan_inf": true
+  }
+}

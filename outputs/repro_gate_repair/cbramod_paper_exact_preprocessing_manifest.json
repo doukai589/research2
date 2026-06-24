@@ -1,0 +1,61 @@
+{
+  "bcic_iv_2a_e9": {
+    "bandpass": "0.3-40Hz",
+    "can_generate": true,
+    "estimated_lmdb_size_mb": 348.046875,
+    "estimated_trials": 5184,
+    "files": 18,
+    "patch_shape": "[channels,4,200]",
+    "raw_path": "/ai/224duibishiyan/CBraMod-main/tmp_in/BCIC2a/MNE-bnci-data/database/data-sets/001-2014",
+    "resample": "200Hz",
+    "split": {
+      "test_subjects": [
+        8,
+        9
+      ],
+      "train_subjects": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "val_subjects": [
+        6,
+        7
+      ]
+    },
+    "window": "[2,6] seconds"
+  },
+  "code_vs_paper_gap": "small if exact LMDB is generated with paper split/preprocessing; large if existing opaque LMDB or Step1 22-channel PhysioNet mapping is used",
+  "estimated_preprocessing_time": "BCIC minutes; PhysioNetMI tens of minutes depending IO",
+  "full_lmdb_generated": false,
+  "needs_lmdb_generation": true,
+  "output_format_required_by_code": "LMDB",
+  "paper_exact_preprocessing_ready": true,
+  "physionet_mi": {
+    "can_generate": true,
+    "estimated_lmdb_size_mb": 1916.015625,
+    "estimated_trials": 9810,
+    "mi_runs": [
+      4,
+      6,
+      8,
+      10,
+      12,
+      14
+    ],
+    "patch_shape": "[64,4,200]",
+    "raw_path": "/ai/224duibishiyan/CBraMod-main/tmp_in/MI/files",
+    "resample": "200Hz",
+    "split": {
+      "test_subjects": "90-109",
+      "train_subjects": "1-70",
+      "val_subjects": "71-89"
+    },
+    "subjects": 109,
+    "task": "4-class left fist/right fist/both fists/both feet",
+    "window": "4 seconds"
+  },
+  "tiny_lmdb_sample_allowed": true
+}

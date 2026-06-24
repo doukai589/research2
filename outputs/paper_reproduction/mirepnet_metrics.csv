@@ -1,0 +1,9 @@
+model,dataset,protocol_name,protocol_type,task,metric,paper_mean,paper_std,local_mean,local_std,status,likely_reason,notes
+MIRepNet,BNCI2014001,code_exact,code_exact,official_code_default,not_run,,,,,failed,official_repo_behavior_unclear,Official README only documents BNCI2014004; target dataset code/preprocessed arrays absent.
+MIRepNet,BNCI2014001,paper_exact,paper_exact,likely 2-class left/right,accuracy_full_finetune,0.8177,0.0027,,,failed,adapter_needed,Paper-exact run blocked because MIRepNet adapter is not ready; no 45-channel X.npy/labels.npy generated.
+MIRepNet,BNCI2014001,paper_exact,paper_exact,likely 2-class left/right,accuracy_linear_probe,0.7536,0.0226,,,failed,adapter_needed,Paper-exact run blocked because MIRepNet adapter is not ready; no 45-channel X.npy/labels.npy generated.
+MIRepNet,BNCI2014001,executable_hybrid,executable_hybrid,adapter_hybrid,not_run,,,,,failed,adapter_needed,Hybrid intentionally not created until adapter is validated.
+MIRepNet,BNCI2014001-4,code_exact,code_exact,official_code_default,not_run,,,,,failed,official_repo_behavior_unclear,Official README only documents BNCI2014004; target dataset code/preprocessed arrays absent.
+MIRepNet,BNCI2014001-4,paper_exact,paper_exact,4-class full,accuracy_full_finetune,0.6414,0.0031,,,failed,adapter_needed,Paper-exact run blocked because MIRepNet adapter is not ready; no 45-channel X.npy/labels.npy generated.
+MIRepNet,BNCI2014001-4,paper_exact,paper_exact,4-class full,accuracy_linear_probe,0.5194,0.0184,,,failed,adapter_needed,Paper-exact run blocked because MIRepNet adapter is not ready; no 45-channel X.npy/labels.npy generated.
+MIRepNet,BNCI2014001-4,executable_hybrid,executable_hybrid,adapter_hybrid,not_run,,,,,failed,adapter_needed,Hybrid intentionally not created until adapter is validated.

@@ -1,0 +1,13 @@
+{
+  "blocked": false,
+  "blocker": "",
+  "project_mat_file_count": 0,
+  "required_files": {
+    "/ai/224duibishiyan/615\u65b0\u7814\u7a76/sas_cert_cbramod_mve/outputs/audit/protocol_audit.json": true,
+    "/ai/224duibishiyan/615\u65b0\u7814\u7a76/sas_cert_cbramod_mve/outputs/features/original_features.npz": true,
+    "/ai/224duibishiyan/615\u65b0\u7814\u7a76/sas_cert_cbramod_mve/outputs/layer2/cert_scores.csv": true,
+    "/ai/224duibishiyan/615\u65b0\u7814\u7a76/sas_cert_cbramod_mve/outputs/layer2_v2/layer2_v2_summary.json": true,
+    "/ai/224duibishiyan/615\u65b0\u7814\u7a76/sas_cert_cbramod_mve/outputs/layer2_v2/score_variant_auc.csv": true,
+    "/ai/224duibishiyan/615\u65b0\u7814\u7a76/sas_cert_cbramod_mve/outputs/layer3_v2/layer3_v2_metrics.csv": true
+  }
+}

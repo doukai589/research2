@@ -1,0 +1,10 @@
+model,dataset,protocol_name,metric,paper_mean,paper_std,local_mean,local_std,absolute_diff,relative_diff,within_2pp,within_5pp,status,likely_reason
+CBraMod,PhysioNet-MI,paper_exact,balanced_accuracy,0.6417,0.0091,,,,,False,False,failed,needs_paper_preprocessing_lmdb
+CBraMod,PhysioNet-MI,paper_exact,cohen_kappa,0.5222,0.0169,,,,,False,False,failed,needs_paper_preprocessing_lmdb
+CBraMod,PhysioNet-MI,paper_exact,weighted_f1,0.6427,0.01,,,,,False,False,failed,needs_paper_preprocessing_lmdb
+CBraMod,BCIC-IV-2a,paper_exact,balanced_accuracy,0.5138,0.0066,,,,,False,False,failed,needs_paper_preprocessing_lmdb
+CBraMod,BCIC-IV-2a,paper_exact,cohen_kappa,0.3518,0.0094,,,,,False,False,failed,needs_paper_preprocessing_lmdb
+CBraMod,BCIC-IV-2a,paper_exact,weighted_f1,0.4984,0.0085,,,,,False,False,failed,needs_paper_preprocessing_lmdb
+CBraMod,BCIC-IV-2a LOSO key ingredients,paper_exact,balanced_accuracy,0.7405,0.0635,,,,,False,False,failed,not_run_missing_key_ingredients_implementation
+CBraMod,BCIC-IV-2a LOSO key ingredients,paper_exact,auc_pr,0.5997,0.0833,,,,,False,False,failed,not_run_missing_key_ingredients_implementation
+CBraMod,BCIC-IV-2a LOSO key ingredients,paper_exact,auroc,0.7195,0.0682,,,,,False,False,failed,not_run_missing_key_ingredients_implementation

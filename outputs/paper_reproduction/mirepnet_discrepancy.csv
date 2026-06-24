@@ -1,0 +1,5 @@
+model,dataset,protocol_name,metric,paper_mean,paper_std,local_mean,local_std,absolute_diff,relative_diff,within_2pp,within_5pp,status,likely_reason
+MIRepNet,BNCI2014001,paper_exact,accuracy_full_finetune,0.8177,0.0027,,,,,False,False,failed,adapter_needed
+MIRepNet,BNCI2014001,paper_exact,accuracy_linear_probe,0.7536,0.0226,,,,,False,False,failed,adapter_needed
+MIRepNet,BNCI2014001-4,paper_exact,accuracy_full_finetune,0.6414,0.0031,,,,,False,False,failed,adapter_needed
+MIRepNet,BNCI2014001-4,paper_exact,accuracy_linear_probe,0.5194,0.0184,,,,,False,False,failed,adapter_needed

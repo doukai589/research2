@@ -1,0 +1,3 @@
+backbone,best_variant,best_auc,current_sas_auc,current_sas_direction
+CBraMod_frozen,score_artifact_gate_physio,0.9022222222222221,0.19689814814814816,bad_high_or_inverted
+ST-EEGFormer-small_source_tuned,score_artifact_gate_physio,0.9022222222222221,0.16620370370370371,bad_high_or_inverted

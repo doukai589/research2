@@ -1,0 +1,16 @@
+{
+  "created": true,
+  "paths": {
+    "tiny_X": "/ai/224duibishiyan/615新研究/outputs/repro_gate_repair/mirepnet_tiny_adapter/tiny_X.npy",
+    "tiny_labels": "/ai/224duibishiyan/615新研究/outputs/repro_gate_repair/mirepnet_tiny_adapter/tiny_labels.npy"
+  },
+  "status": "adapter_preprocessing_ready",
+  "tiny_labels_shape": [
+    8
+  ],
+  "tiny_x_shape": [
+    8,
+    45,
+    1000
+  ]
+}

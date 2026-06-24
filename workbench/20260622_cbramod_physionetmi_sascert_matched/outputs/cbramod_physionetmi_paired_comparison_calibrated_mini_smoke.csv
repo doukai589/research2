@@ -1,0 +1,4 @@
+target_subject,seed,comparison,delta_balanced_accuracy,delta_macro_f1,delta_ece,delta_nll,delta_brier,win_macro_f1
+90,20,RepairedSoftWeightTemp_artifact_gate_physio_LS010-vs-NoAug_LS010,0.02614379084967322,0.01107763204537393,-0.030829548835754395,-0.0015168766609603423,-0.001516878604888916,1
+90,20,RepairedSoftWeightTemp_artifact_gate_physio_LS010-vs-NaiveAug_LS010,-0.0016339869281045694,-0.013095238095238104,-0.00254666805267334,-0.0016110139442533367,-0.0016109347343444824,0
+90,20,RepairedSoftWeightTemp_artifact_gate_physio_LS010-vs-RepairedSoftWeight_artifact_gate_physio_LS010,0.0,0.0,-0.0026166439056396484,-0.0015462868609275038,-0.0015462040901184082,0

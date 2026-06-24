@@ -1,0 +1,15 @@
+{
+  "model_name": "eegpt_large4e",
+  "epochs": 30,
+  "batch_size": 4,
+  "lr": 0.0001,
+  "weight_decay": 0.05,
+  "seed": 3407,
+  "device": "cuda",
+  "patience": 10,
+  "input_shape": [
+    4917,
+    64,
+    1024
+  ]
+}

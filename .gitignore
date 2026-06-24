@@ -1,14 +1,51 @@
-# Large/generated experiment outputs
+# Experiment outputs
+# Track lightweight audit/report/result files so GitHub records what each run did.
+# Heavy binary/cache outputs remain blocked by the binary patterns below.
 outputs/**
 !outputs/
-!outputs/README.md
-!outputs/runs/
-!outputs/runs/README.md
+!outputs/**/
+!outputs/**/*.md
+!outputs/**/*.csv
+!outputs/**/*.json
+!outputs/**/*.txt
+!outputs/**/*.yaml
+!outputs/**/*.yml
 
 workbench/*/outputs/**
+!workbench/*/outputs/
+!workbench/*/outputs/**/
+!workbench/*/outputs/**/*.md
+!workbench/*/outputs/**/*.csv
+!workbench/*/outputs/**/*.json
+!workbench/*/outputs/**/*.txt
+!workbench/*/outputs/**/*.yaml
+!workbench/*/outputs/**/*.yml
 
 sas_cert_mve_outputs/**
+!sas_cert_mve_outputs/
+!sas_cert_mve_outputs/**/
+!sas_cert_mve_outputs/**/*.md
+!sas_cert_mve_outputs/**/*.csv
+!sas_cert_mve_outputs/**/*.json
+!sas_cert_mve_outputs/**/*.txt
+
 sas_cert_cbramod_mve/outputs/**
+!sas_cert_cbramod_mve/outputs/
+!sas_cert_cbramod_mve/outputs/**/
+!sas_cert_cbramod_mve/outputs/**/*.md
+!sas_cert_cbramod_mve/outputs/**/*.csv
+!sas_cert_cbramod_mve/outputs/**/*.json
+!sas_cert_cbramod_mve/outputs/**/*.txt
+
+# Do not version vendored dependency snapshots inside output folders.
+outputs/**/local_python_deps/**
+outputs/**/python_target/**
+workbench/*/outputs/**/local_python_deps/**
+workbench/*/outputs/**/python_target/**
+sas_cert_mve_outputs/**/local_python_deps/**
+sas_cert_mve_outputs/**/python_target/**
+sas_cert_cbramod_mve/outputs/**/local_python_deps/**
+sas_cert_cbramod_mve/outputs/**/python_target/**
 
 # External repositories and downloaded artifacts
 third_party/**

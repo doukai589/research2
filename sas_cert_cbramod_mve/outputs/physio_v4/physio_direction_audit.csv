@@ -1,0 +1,5 @@
+bad_type,direction_maybe_wrong,inverted_auc,n,original_auc,subscore,usable_physio_component
+BadPhysio_bandpower,False,0.3620768518518519,3600,0.6379231481481481,physio_bandpower,False
+BadPhysio_covariance,False,7.901234567897486e-05,3600,0.999920987654321,physio_covariance,True
+BadPhysio_topology,False,0.3068811728395062,3600,0.6931188271604938,physio_topology,False
+BadPhysio_channel_order,True,0.8850716049382716,3600,0.11492839506172839,physio_channel_order,False

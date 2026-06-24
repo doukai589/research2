@@ -1,0 +1,7 @@
+{
+  "bottom30_bad_rate": 0.4166666666666667,
+  "bottom30_mean_total": -0.13461537410815558,
+  "clean_vs_bad_auc": 0.6675,
+  "top30_bad_rate": 0.0,
+  "top30_mean_total": 1.9893162250518799
+}

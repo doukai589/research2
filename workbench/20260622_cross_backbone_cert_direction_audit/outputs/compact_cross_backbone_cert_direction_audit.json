@@ -1,0 +1,1202 @@
+{
+  "status": "completed",
+  "scope": {
+    "dataset": "PhysioNetMI",
+    "targets": [
+      90,
+      91,
+      92
+    ],
+    "seeds": [
+      20,
+      21
+    ],
+    "sources": {
+      "ST-EEGFormer-small_source_tuned": {
+        "score_dir": "/ai/224duibishiyan/615\u65b0\u7814\u7a76/workbench/20260622_steegformer_sascert_core/outputs/score_rows/st_source_tuned_full",
+        "note": "source-tuned ST feature extractor, final target score rows"
+      },
+      "CBraMod_frozen": {
+        "score_dir": "/ai/224duibishiyan/615\u65b0\u7814\u7a76/workbench/20260622_cbramod_physionetmi_sascert_matched/outputs/score_rows/mini",
+        "note": "frozen CBraMod mini matrix score rows"
+      }
+    },
+    "uses_existing_score_rows_only": true,
+    "no_retraining": true,
+    "no_new_augmentation_generation": true,
+    "target_test_labels_used": false
+  },
+  "component_auc_by_backbone": [
+    {
+      "backbone": "CBraMod_frozen",
+      "component": "content_score",
+      "comparison": "clean_vs_all_bad",
+      "auc_high_score_is_clean": 0.3044444444444444,
+      "direction": "bad_high_or_inverted",
+      "n": 300
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "component": "style_score",
+      "comparison": "clean_vs_all_bad",
+      "auc_high_score_is_clean": 0.6408333333333334,
+      "direction": "clean_high",
+      "n": 300
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "component": "physio_score",
+      "comparison": "clean_vs_all_bad",
+      "auc_high_score_is_clean": 0.8444444444444444,
+      "direction": "clean_high",
+      "n": 300
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "component": "artifact_safe_score",
+      "comparison": "clean_vs_all_bad",
+      "auc_high_score_is_clean": 0.33333333333333337,
+      "direction": "bad_high_or_inverted",
+      "n": 300
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "component": "sas_score",
+      "comparison": "clean_vs_all_bad",
+      "auc_high_score_is_clean": 0.19689814814814816,
+      "direction": "bad_high_or_inverted",
+      "n": 300
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "component": "score_artifact_gate_physio",
+      "comparison": "clean_vs_all_bad",
+      "auc_high_score_is_clean": 0.9022222222222221,
+      "direction": "clean_high",
+      "n": 300
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "component": "content_score",
+      "comparison": "clean_vs_all_bad",
+      "auc_high_score_is_clean": 0.2722222222222222,
+      "direction": "bad_high_or_inverted",
+      "n": 300
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "component": "style_score",
+      "comparison": "clean_vs_all_bad",
+      "auc_high_score_is_clean": 0.6408333333333334,
+      "direction": "clean_high",
+      "n": 300
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "component": "physio_score",
+      "comparison": "clean_vs_all_bad",
+      "auc_high_score_is_clean": 0.8444444444444444,
+      "direction": "clean_high",
+      "n": 300
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "component": "artifact_safe_score",
+      "comparison": "clean_vs_all_bad",
+      "auc_high_score_is_clean": 0.33333333333333337,
+      "direction": "bad_high_or_inverted",
+      "n": 300
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "component": "sas_score",
+      "comparison": "clean_vs_all_bad",
+      "auc_high_score_is_clean": 0.16620370370370371,
+      "direction": "bad_high_or_inverted",
+      "n": 300
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "component": "score_artifact_gate_physio",
+      "comparison": "clean_vs_all_bad",
+      "auc_high_score_is_clean": 0.9022222222222221,
+      "direction": "clean_high",
+      "n": 300
+    }
+  ],
+  "component_auc_by_bad_type": [
+    {
+      "backbone": "CBraMod_frozen",
+      "bad_type": "bad_artifact",
+      "component": "content_score",
+      "auc_high_score_is_clean": 0.005416666666666668,
+      "direction": "bad_high_or_inverted",
+      "n": 180
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "bad_type": "bad_artifact",
+      "component": "style_score",
+      "auc_high_score_is_clean": 0.65,
+      "direction": "clean_high",
+      "n": 180
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "bad_type": "bad_artifact",
+      "component": "physio_score",
+      "auc_high_score_is_clean": 0.6530555555555555,
+      "direction": "clean_high",
+      "n": 180
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "bad_type": "bad_artifact",
+      "component": "artifact_safe_score",
+      "auc_high_score_is_clean": 1.0,
+      "direction": "clean_high",
+      "n": 180
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "bad_type": "bad_artifact",
+      "component": "sas_score",
+      "auc_high_score_is_clean": 0.5084722222222222,
+      "direction": "weak_or_mixed",
+      "n": 180
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "bad_type": "bad_artifact",
+      "component": "score_artifact_gate_physio",
+      "auc_high_score_is_clean": 0.8263888888888888,
+      "direction": "clean_high",
+      "n": 180
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "bad_type": "bad_content",
+      "component": "content_score",
+      "auc_high_score_is_clean": 0.9025000000000002,
+      "direction": "clean_high",
+      "n": 180
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "bad_type": "bad_content",
+      "component": "style_score",
+      "auc_high_score_is_clean": 0.65,
+      "direction": "clean_high",
+      "n": 180
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "bad_type": "bad_content",
+      "component": "physio_score",
+      "auc_high_score_is_clean": 0.9406944444444445,
+      "direction": "clean_high",
+      "n": 180
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "bad_type": "bad_content",
+      "component": "artifact_safe_score",
+      "auc_high_score_is_clean": 0.0,
+      "direction": "bad_high_or_inverted",
+      "n": 180
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "bad_type": "bad_content",
+      "component": "sas_score",
+      "auc_high_score_is_clean": 0.08194444444444446,
+      "direction": "bad_high_or_inverted",
+      "n": 180
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "bad_type": "bad_content",
+      "component": "score_artifact_gate_physio",
+      "auc_high_score_is_clean": 0.9406944444444445,
+      "direction": "clean_high",
+      "n": 180
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "bad_type": "bad_physio",
+      "component": "content_score",
+      "auc_high_score_is_clean": 0.0054166666666666695,
+      "direction": "bad_high_or_inverted",
+      "n": 180
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "bad_type": "bad_physio",
+      "component": "style_score",
+      "auc_high_score_is_clean": 0.6225,
+      "direction": "clean_high",
+      "n": 180
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "bad_type": "bad_physio",
+      "component": "physio_score",
+      "auc_high_score_is_clean": 0.9395833333333334,
+      "direction": "clean_high",
+      "n": 180
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "bad_type": "bad_physio",
+      "component": "artifact_safe_score",
+      "auc_high_score_is_clean": 0.0,
+      "direction": "bad_high_or_inverted",
+      "n": 180
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "bad_type": "bad_physio",
+      "component": "sas_score",
+      "auc_high_score_is_clean": 0.00027777777777777864,
+      "direction": "bad_high_or_inverted",
+      "n": 180
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "bad_type": "bad_physio",
+      "component": "score_artifact_gate_physio",
+      "auc_high_score_is_clean": 0.9395833333333334,
+      "direction": "clean_high",
+      "n": 180
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "bad_type": "bad_artifact",
+      "component": "content_score",
+      "auc_high_score_is_clean": 0.031250000000000035,
+      "direction": "bad_high_or_inverted",
+      "n": 180
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "bad_type": "bad_artifact",
+      "component": "style_score",
+      "auc_high_score_is_clean": 0.65,
+      "direction": "clean_high",
+      "n": 180
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "bad_type": "bad_artifact",
+      "component": "physio_score",
+      "auc_high_score_is_clean": 0.6530555555555555,
+      "direction": "clean_high",
+      "n": 180
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "bad_type": "bad_artifact",
+      "component": "artifact_safe_score",
+      "auc_high_score_is_clean": 1.0,
+      "direction": "clean_high",
+      "n": 180
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "bad_type": "bad_artifact",
+      "component": "sas_score",
+      "auc_high_score_is_clean": 0.3057638888888889,
+      "direction": "bad_high_or_inverted",
+      "n": 180
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "bad_type": "bad_artifact",
+      "component": "score_artifact_gate_physio",
+      "auc_high_score_is_clean": 0.8263888888888888,
+      "direction": "clean_high",
+      "n": 180
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "bad_type": "bad_content",
+      "component": "content_score",
+      "auc_high_score_is_clean": 0.2629861111111111,
+      "direction": "bad_high_or_inverted",
+      "n": 180
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "bad_type": "bad_content",
+      "component": "style_score",
+      "auc_high_score_is_clean": 0.65,
+      "direction": "clean_high",
+      "n": 180
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "bad_type": "bad_content",
+      "component": "physio_score",
+      "auc_high_score_is_clean": 0.9406944444444445,
+      "direction": "clean_high",
+      "n": 180
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "bad_type": "bad_content",
+      "component": "artifact_safe_score",
+      "auc_high_score_is_clean": 0.0,
+      "direction": "bad_high_or_inverted",
+      "n": 180
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "bad_type": "bad_content",
+      "component": "sas_score",
+      "auc_high_score_is_clean": 0.018263888888888885,
+      "direction": "bad_high_or_inverted",
+      "n": 180
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "bad_type": "bad_content",
+      "component": "score_artifact_gate_physio",
+      "auc_high_score_is_clean": 0.9406944444444445,
+      "direction": "clean_high",
+      "n": 180
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "bad_type": "bad_physio",
+      "component": "content_score",
+      "auc_high_score_is_clean": 0.5224305555555555,
+      "direction": "weak_or_mixed",
+      "n": 180
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "bad_type": "bad_physio",
+      "component": "style_score",
+      "auc_high_score_is_clean": 0.6225,
+      "direction": "clean_high",
+      "n": 180
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "bad_type": "bad_physio",
+      "component": "physio_score",
+      "auc_high_score_is_clean": 0.9395833333333334,
+      "direction": "clean_high",
+      "n": 180
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "bad_type": "bad_physio",
+      "component": "artifact_safe_score",
+      "auc_high_score_is_clean": 0.0,
+      "direction": "bad_high_or_inverted",
+      "n": 180
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "bad_type": "bad_physio",
+      "component": "sas_score",
+      "auc_high_score_is_clean": 0.1745833333333333,
+      "direction": "bad_high_or_inverted",
+      "n": 180
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "bad_type": "bad_physio",
+      "component": "score_artifact_gate_physio",
+      "auc_high_score_is_clean": 0.9395833333333334,
+      "direction": "clean_high",
+      "n": 180
+    }
+  ],
+  "direction_conflict_table": [
+    {
+      "component": "artifact_safe_score",
+      "backbone_a": "CBraMod_frozen",
+      "auc_a": 0.33333333333333337,
+      "direction_a": "bad_high_or_inverted",
+      "backbone_b": "ST-EEGFormer-small_source_tuned",
+      "auc_b": 0.33333333333333337,
+      "direction_b": "bad_high_or_inverted",
+      "abs_auc_gap": 0.0,
+      "direction_conflict": false
+    },
+    {
+      "component": "content_score",
+      "backbone_a": "CBraMod_frozen",
+      "auc_a": 0.3044444444444444,
+      "direction_a": "bad_high_or_inverted",
+      "backbone_b": "ST-EEGFormer-small_source_tuned",
+      "auc_b": 0.2722222222222222,
+      "direction_b": "bad_high_or_inverted",
+      "abs_auc_gap": 0.03222222222222221,
+      "direction_conflict": false
+    },
+    {
+      "component": "physio_score",
+      "backbone_a": "CBraMod_frozen",
+      "auc_a": 0.8444444444444444,
+      "direction_a": "clean_high",
+      "backbone_b": "ST-EEGFormer-small_source_tuned",
+      "auc_b": 0.8444444444444444,
+      "direction_b": "clean_high",
+      "abs_auc_gap": 0.0,
+      "direction_conflict": false
+    },
+    {
+      "component": "sas_score",
+      "backbone_a": "CBraMod_frozen",
+      "auc_a": 0.19689814814814816,
+      "direction_a": "bad_high_or_inverted",
+      "backbone_b": "ST-EEGFormer-small_source_tuned",
+      "auc_b": 0.16620370370370371,
+      "direction_b": "bad_high_or_inverted",
+      "abs_auc_gap": 0.03069444444444444,
+      "direction_conflict": false
+    },
+    {
+      "component": "score_artifact_gate_physio",
+      "backbone_a": "CBraMod_frozen",
+      "auc_a": 0.9022222222222221,
+      "direction_a": "clean_high",
+      "backbone_b": "ST-EEGFormer-small_source_tuned",
+      "auc_b": 0.9022222222222221,
+      "direction_b": "clean_high",
+      "abs_auc_gap": 0.0,
+      "direction_conflict": false
+    },
+    {
+      "component": "style_score",
+      "backbone_a": "CBraMod_frozen",
+      "auc_a": 0.6408333333333334,
+      "direction_a": "clean_high",
+      "backbone_b": "ST-EEGFormer-small_source_tuned",
+      "auc_b": 0.6408333333333334,
+      "direction_b": "clean_high",
+      "abs_auc_gap": 0.0,
+      "direction_conflict": false
+    }
+  ],
+  "bad_type_direction_conflict_table": [
+    {
+      "bad_type": "bad_artifact",
+      "component": "artifact_safe_score",
+      "backbone_a": "CBraMod_frozen",
+      "auc_a": 1.0,
+      "direction_a": "clean_high",
+      "backbone_b": "ST-EEGFormer-small_source_tuned",
+      "auc_b": 1.0,
+      "direction_b": "clean_high",
+      "abs_auc_gap": 0.0,
+      "direction_conflict": false
+    },
+    {
+      "bad_type": "bad_artifact",
+      "component": "content_score",
+      "backbone_a": "CBraMod_frozen",
+      "auc_a": 0.005416666666666668,
+      "direction_a": "bad_high_or_inverted",
+      "backbone_b": "ST-EEGFormer-small_source_tuned",
+      "auc_b": 0.031250000000000035,
+      "direction_b": "bad_high_or_inverted",
+      "abs_auc_gap": 0.025833333333333368,
+      "direction_conflict": false
+    },
+    {
+      "bad_type": "bad_artifact",
+      "component": "physio_score",
+      "backbone_a": "CBraMod_frozen",
+      "auc_a": 0.6530555555555555,
+      "direction_a": "clean_high",
+      "backbone_b": "ST-EEGFormer-small_source_tuned",
+      "auc_b": 0.6530555555555555,
+      "direction_b": "clean_high",
+      "abs_auc_gap": 0.0,
+      "direction_conflict": false
+    },
+    {
+      "bad_type": "bad_artifact",
+      "component": "sas_score",
+      "backbone_a": "CBraMod_frozen",
+      "auc_a": 0.5084722222222222,
+      "direction_a": "weak_or_mixed",
+      "backbone_b": "ST-EEGFormer-small_source_tuned",
+      "auc_b": 0.3057638888888889,
+      "direction_b": "bad_high_or_inverted",
+      "abs_auc_gap": 0.20270833333333332,
+      "direction_conflict": false
+    },
+    {
+      "bad_type": "bad_artifact",
+      "component": "score_artifact_gate_physio",
+      "backbone_a": "CBraMod_frozen",
+      "auc_a": 0.8263888888888888,
+      "direction_a": "clean_high",
+      "backbone_b": "ST-EEGFormer-small_source_tuned",
+      "auc_b": 0.8263888888888888,
+      "direction_b": "clean_high",
+      "abs_auc_gap": 0.0,
+      "direction_conflict": false
+    },
+    {
+      "bad_type": "bad_artifact",
+      "component": "style_score",
+      "backbone_a": "CBraMod_frozen",
+      "auc_a": 0.65,
+      "direction_a": "clean_high",
+      "backbone_b": "ST-EEGFormer-small_source_tuned",
+      "auc_b": 0.65,
+      "direction_b": "clean_high",
+      "abs_auc_gap": 0.0,
+      "direction_conflict": false
+    },
+    {
+      "bad_type": "bad_content",
+      "component": "artifact_safe_score",
+      "backbone_a": "CBraMod_frozen",
+      "auc_a": 0.0,
+      "direction_a": "bad_high_or_inverted",
+      "backbone_b": "ST-EEGFormer-small_source_tuned",
+      "auc_b": 0.0,
+      "direction_b": "bad_high_or_inverted",
+      "abs_auc_gap": 0.0,
+      "direction_conflict": false
+    },
+    {
+      "bad_type": "bad_content",
+      "component": "content_score",
+      "backbone_a": "CBraMod_frozen",
+      "auc_a": 0.9025000000000002,
+      "direction_a": "clean_high",
+      "backbone_b": "ST-EEGFormer-small_source_tuned",
+      "auc_b": 0.2629861111111111,
+      "direction_b": "bad_high_or_inverted",
+      "abs_auc_gap": 0.6395138888888892,
+      "direction_conflict": true
+    },
+    {
+      "bad_type": "bad_content",
+      "component": "physio_score",
+      "backbone_a": "CBraMod_frozen",
+      "auc_a": 0.9406944444444445,
+      "direction_a": "clean_high",
+      "backbone_b": "ST-EEGFormer-small_source_tuned",
+      "auc_b": 0.9406944444444445,
+      "direction_b": "clean_high",
+      "abs_auc_gap": 0.0,
+      "direction_conflict": false
+    },
+    {
+      "bad_type": "bad_content",
+      "component": "sas_score",
+      "backbone_a": "CBraMod_frozen",
+      "auc_a": 0.08194444444444446,
+      "direction_a": "bad_high_or_inverted",
+      "backbone_b": "ST-EEGFormer-small_source_tuned",
+      "auc_b": 0.018263888888888885,
+      "direction_b": "bad_high_or_inverted",
+      "abs_auc_gap": 0.06368055555555557,
+      "direction_conflict": false
+    },
+    {
+      "bad_type": "bad_content",
+      "component": "score_artifact_gate_physio",
+      "backbone_a": "CBraMod_frozen",
+      "auc_a": 0.9406944444444445,
+      "direction_a": "clean_high",
+      "backbone_b": "ST-EEGFormer-small_source_tuned",
+      "auc_b": 0.9406944444444445,
+      "direction_b": "clean_high",
+      "abs_auc_gap": 0.0,
+      "direction_conflict": false
+    },
+    {
+      "bad_type": "bad_content",
+      "component": "style_score",
+      "backbone_a": "CBraMod_frozen",
+      "auc_a": 0.65,
+      "direction_a": "clean_high",
+      "backbone_b": "ST-EEGFormer-small_source_tuned",
+      "auc_b": 0.65,
+      "direction_b": "clean_high",
+      "abs_auc_gap": 0.0,
+      "direction_conflict": false
+    },
+    {
+      "bad_type": "bad_physio",
+      "component": "artifact_safe_score",
+      "backbone_a": "CBraMod_frozen",
+      "auc_a": 0.0,
+      "direction_a": "bad_high_or_inverted",
+      "backbone_b": "ST-EEGFormer-small_source_tuned",
+      "auc_b": 0.0,
+      "direction_b": "bad_high_or_inverted",
+      "abs_auc_gap": 0.0,
+      "direction_conflict": false
+    },
+    {
+      "bad_type": "bad_physio",
+      "component": "content_score",
+      "backbone_a": "CBraMod_frozen",
+      "auc_a": 0.0054166666666666695,
+      "direction_a": "bad_high_or_inverted",
+      "backbone_b": "ST-EEGFormer-small_source_tuned",
+      "auc_b": 0.5224305555555555,
+      "direction_b": "weak_or_mixed",
+      "abs_auc_gap": 0.5170138888888889,
+      "direction_conflict": false
+    },
+    {
+      "bad_type": "bad_physio",
+      "component": "physio_score",
+      "backbone_a": "CBraMod_frozen",
+      "auc_a": 0.9395833333333334,
+      "direction_a": "clean_high",
+      "backbone_b": "ST-EEGFormer-small_source_tuned",
+      "auc_b": 0.9395833333333334,
+      "direction_b": "clean_high",
+      "abs_auc_gap": 0.0,
+      "direction_conflict": false
+    },
+    {
+      "bad_type": "bad_physio",
+      "component": "sas_score",
+      "backbone_a": "CBraMod_frozen",
+      "auc_a": 0.00027777777777777864,
+      "direction_a": "bad_high_or_inverted",
+      "backbone_b": "ST-EEGFormer-small_source_tuned",
+      "auc_b": 0.1745833333333333,
+      "direction_b": "bad_high_or_inverted",
+      "abs_auc_gap": 0.17430555555555555,
+      "direction_conflict": false
+    },
+    {
+      "bad_type": "bad_physio",
+      "component": "score_artifact_gate_physio",
+      "backbone_a": "CBraMod_frozen",
+      "auc_a": 0.9395833333333334,
+      "direction_a": "clean_high",
+      "backbone_b": "ST-EEGFormer-small_source_tuned",
+      "auc_b": 0.9395833333333334,
+      "direction_b": "clean_high",
+      "abs_auc_gap": 0.0,
+      "direction_conflict": false
+    },
+    {
+      "bad_type": "bad_physio",
+      "component": "style_score",
+      "backbone_a": "CBraMod_frozen",
+      "auc_a": 0.6225,
+      "direction_a": "clean_high",
+      "backbone_b": "ST-EEGFormer-small_source_tuned",
+      "auc_b": 0.6225,
+      "direction_b": "clean_high",
+      "abs_auc_gap": 0.0,
+      "direction_conflict": false
+    }
+  ],
+  "score_distribution_by_aug_type": [
+    {
+      "backbone": "CBraMod_frozen",
+      "aug_type": "bad_artifact",
+      "component": "content_score",
+      "mean": 0.7551020423571269,
+      "std": 0.08825203387796877,
+      "min": 0.5918367505073547,
+      "max": 0.9387755393981934,
+      "n": 60
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "aug_type": "bad_artifact",
+      "component": "style_score",
+      "mean": 0.23877551207939784,
+      "std": 0.061934656504931344,
+      "min": 0.1428571492433548,
+      "max": 0.3469387888908386,
+      "n": 60
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "aug_type": "bad_artifact",
+      "component": "physio_score",
+      "mean": 0.6414966017007828,
+      "std": 0.060925198011392054,
+      "min": 0.5102040767669678,
+      "max": 0.7346938848495483,
+      "n": 60
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "aug_type": "bad_artifact",
+      "component": "artifact_safe_score",
+      "mean": 0.09183673541992902,
+      "std": 0.058617986868754454,
+      "min": 0.0,
+      "max": 0.18367347121238708,
+      "n": 60
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "aug_type": "bad_artifact",
+      "component": "sas_score",
+      "mean": 0.39030611465374626,
+      "std": 0.05254408780454925,
+      "min": 0.2846938669681549,
+      "max": 0.5122449398040771,
+      "n": 60
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "aug_type": "bad_artifact",
+      "component": "score_artifact_gate_physio",
+      "mean": 0.3166666676600774,
+      "std": 0.31947069668282824,
+      "min": 0.0,
+      "max": 0.7346938848495483,
+      "n": 60
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "aug_type": "bad_content",
+      "component": "content_score",
+      "mean": 0.1316326543999215,
+      "std": 0.11291851168756985,
+      "min": 0.0,
+      "max": 0.5306122303009033,
+      "n": 60
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "aug_type": "bad_content",
+      "component": "style_score",
+      "mean": 0.43469387938578924,
+      "std": 0.06832925844325977,
+      "min": 0.22448979318141937,
+      "max": 0.5306122303009033,
+      "n": 60
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "aug_type": "bad_content",
+      "component": "physio_score",
+      "mean": 0.21700680423527957,
+      "std": 0.14711661073856114,
+      "min": 0.0,
+      "max": 0.4897959232330322,
+      "n": 60
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "aug_type": "bad_content",
+      "component": "artifact_safe_score",
+      "mean": 0.9047619124253591,
+      "std": 0.06535570407132756,
+      "min": 0.6938775777816772,
+      "max": 1.0,
+      "n": 60
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "aug_type": "bad_content",
+      "component": "sas_score",
+      "mean": 0.556853752831618,
+      "std": 0.06355324407832749,
+      "min": 0.40918371081352234,
+      "max": 0.7224489450454712,
+      "n": 60
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "aug_type": "bad_content",
+      "component": "score_artifact_gate_physio",
+      "mean": 0.21700680423527957,
+      "std": 0.14711661073856114,
+      "min": 0.0,
+      "max": 0.4897959232330322,
+      "n": 60
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "aug_type": "bad_physio",
+      "component": "content_score",
+      "mean": 0.8527210940917332,
+      "std": 0.1292924227675818,
+      "min": 0.5714285969734192,
+      "max": 1.0,
+      "n": 60
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "aug_type": "bad_physio",
+      "component": "style_score",
+      "mean": 0.6540816356738408,
+      "std": 0.07004738477298969,
+      "min": 0.5510203838348389,
+      "max": 0.795918345451355,
+      "n": 60
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "aug_type": "bad_physio",
+      "component": "physio_score",
+      "mean": 0.21972789317369462,
+      "std": 0.13938275904917247,
+      "min": 0.0,
+      "max": 0.5306122303009033,
+      "n": 60
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "aug_type": "bad_physio",
+      "component": "artifact_safe_score",
+      "mean": 0.7074829916159312,
+      "std": 0.06297570937335116,
+      "min": 0.6122449040412903,
+      "max": 0.8571428656578064,
+      "n": 60
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "aug_type": "bad_physio",
+      "component": "sas_score",
+      "mean": 0.7728401372830073,
+      "std": 0.07561449823747322,
+      "min": 0.6030611991882324,
+      "max": 0.9214285612106323,
+      "n": 60
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "aug_type": "bad_physio",
+      "component": "score_artifact_gate_physio",
+      "mean": 0.21972789317369462,
+      "std": 0.13938275904917247,
+      "min": 0.0,
+      "max": 0.5306122303009033,
+      "n": 60
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "aug_type": "clean",
+      "component": "content_score",
+      "mean": 0.3802721104429414,
+      "std": 0.14588466686992738,
+      "min": 0.020408162847161293,
+      "max": 0.6938775777816772,
+      "n": 120
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "aug_type": "clean",
+      "component": "style_score",
+      "mean": 0.5862244922978183,
+      "std": 0.3931592861638082,
+      "min": 0.0,
+      "max": 1.0,
+      "n": 120
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "aug_type": "clean",
+      "component": "physio_score",
+      "mean": 0.7108843563124537,
+      "std": 0.24625944459901816,
+      "min": 0.08163265138864517,
+      "max": 1.0,
+      "n": 120
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "aug_type": "clean",
+      "component": "artifact_safe_score",
+      "mean": 0.39795918613672254,
+      "std": 0.11767921037120449,
+      "min": 0.20408163964748383,
+      "max": 0.5918367505073547,
+      "n": 120
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "aug_type": "clean",
+      "component": "sas_score",
+      "mean": 0.3900000017136335,
+      "std": 0.10280585577162481,
+      "min": 0.13265305757522583,
+      "max": 0.6153061389923096,
+      "n": 120
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "aug_type": "clean",
+      "component": "score_artifact_gate_physio",
+      "mean": 0.7108843563124537,
+      "std": 0.24625944459901816,
+      "min": 0.08163265138864517,
+      "max": 1.0,
+      "n": 120
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "aug_type": "bad_artifact",
+      "component": "content_score",
+      "mean": 0.8721088483929634,
+      "std": 0.13282912154189488,
+      "min": 0.18367347121238708,
+      "max": 1.0,
+      "n": 60
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "aug_type": "bad_artifact",
+      "component": "style_score",
+      "mean": 0.23877551207939784,
+      "std": 0.061934656504931344,
+      "min": 0.1428571492433548,
+      "max": 0.3469387888908386,
+      "n": 60
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "aug_type": "bad_artifact",
+      "component": "physio_score",
+      "mean": 0.6414966017007828,
+      "std": 0.060925198011392054,
+      "min": 0.5102040767669678,
+      "max": 0.7346938848495483,
+      "n": 60
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "aug_type": "bad_artifact",
+      "component": "artifact_safe_score",
+      "mean": 0.09183673541992902,
+      "std": 0.058617986868754454,
+      "min": 0.0,
+      "max": 0.18367347121238708,
+      "n": 60
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "aug_type": "bad_artifact",
+      "component": "sas_score",
+      "mean": 0.44295917662481465,
+      "std": 0.0723712593862261,
+      "min": 0.1051020398736,
+      "max": 0.5418367385864258,
+      "n": 60
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "aug_type": "bad_artifact",
+      "component": "score_artifact_gate_physio",
+      "mean": 0.3166666676600774,
+      "std": 0.31947069668282824,
+      "min": 0.0,
+      "max": 0.7346938848495483,
+      "n": 60
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "aug_type": "bad_content",
+      "component": "content_score",
+      "mean": 0.5418367374998828,
+      "std": 0.22160875377901124,
+      "min": 0.020408162847161293,
+      "max": 0.8163265585899353,
+      "n": 60
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "aug_type": "bad_content",
+      "component": "style_score",
+      "mean": 0.43469387938578924,
+      "std": 0.06832925844325977,
+      "min": 0.22448979318141937,
+      "max": 0.5306122303009033,
+      "n": 60
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "aug_type": "bad_content",
+      "component": "physio_score",
+      "mean": 0.21700680423527957,
+      "std": 0.14711661073856114,
+      "min": 0.0,
+      "max": 0.4897959232330322,
+      "n": 60
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "aug_type": "bad_content",
+      "component": "artifact_safe_score",
+      "mean": 0.9047619124253591,
+      "std": 0.06535570407132756,
+      "min": 0.6938775777816772,
+      "max": 1.0,
+      "n": 60
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "aug_type": "bad_content",
+      "component": "sas_score",
+      "mean": 0.7414455860853195,
+      "std": 0.10336220532041644,
+      "min": 0.5030612349510193,
+      "max": 0.9081632494926453,
+      "n": 60
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "aug_type": "bad_content",
+      "component": "score_artifact_gate_physio",
+      "mean": 0.21700680423527957,
+      "std": 0.14711661073856114,
+      "min": 0.0,
+      "max": 0.4897959232330322,
+      "n": 60
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "aug_type": "bad_physio",
+      "component": "content_score",
+      "mean": 0.3649659866777559,
+      "std": 0.29222636151755765,
+      "min": 0.0,
+      "max": 0.918367326259613,
+      "n": 60
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "aug_type": "bad_physio",
+      "component": "style_score",
+      "mean": 0.6540816356738408,
+      "std": 0.07004738477298969,
+      "min": 0.5510203838348389,
+      "max": 0.795918345451355,
+      "n": 60
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "aug_type": "bad_physio",
+      "component": "physio_score",
+      "mean": 0.21972789317369462,
+      "std": 0.13938275904917247,
+      "min": 0.0,
+      "max": 0.5306122303009033,
+      "n": 60
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "aug_type": "bad_physio",
+      "component": "artifact_safe_score",
+      "mean": 0.7074829916159312,
+      "std": 0.06297570937335116,
+      "min": 0.6122449040412903,
+      "max": 0.8571428656578064,
+      "n": 60
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "aug_type": "bad_physio",
+      "component": "sas_score",
+      "mean": 0.5533503447969754,
+      "std": 0.14034724731434725,
+      "min": 0.3459183871746063,
+      "max": 0.8326530456542969,
+      "n": 60
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "aug_type": "bad_physio",
+      "component": "score_artifact_gate_physio",
+      "mean": 0.21972789317369462,
+      "std": 0.13938275904917247,
+      "min": 0.0,
+      "max": 0.5306122303009033,
+      "n": 60
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "aug_type": "clean",
+      "component": "content_score",
+      "mean": 0.36054421958203114,
+      "std": 0.2051559036151435,
+      "min": 0.020408162847161293,
+      "max": 0.9795918464660645,
+      "n": 120
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "aug_type": "clean",
+      "component": "style_score",
+      "mean": 0.5862244922978183,
+      "std": 0.3931592861638082,
+      "min": 0.0,
+      "max": 1.0,
+      "n": 120
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "aug_type": "clean",
+      "component": "physio_score",
+      "mean": 0.7108843563124537,
+      "std": 0.24625944459901816,
+      "min": 0.08163265138864517,
+      "max": 1.0,
+      "n": 120
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "aug_type": "clean",
+      "component": "artifact_safe_score",
+      "mean": 0.39795918613672254,
+      "std": 0.11767921037120449,
+      "min": 0.20408163964748383,
+      "max": 0.5918367505073547,
+      "n": 120
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "aug_type": "clean",
+      "component": "sas_score",
+      "mean": 0.3811224507788817,
+      "std": 0.1199181454035413,
+      "min": 0.1418367326259613,
+      "max": 0.7438775300979614,
+      "n": 120
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "aug_type": "clean",
+      "component": "score_artifact_gate_physio",
+      "mean": 0.7108843563124537,
+      "std": 0.24625944459901816,
+      "min": 0.08163265138864517,
+      "max": 1.0,
+      "n": 120
+    }
+  ],
+  "best_variants": [
+    {
+      "backbone": "CBraMod_frozen",
+      "best_variant": "score_artifact_gate_physio",
+      "best_auc": 0.9022222222222221,
+      "current_sas_auc": 0.19689814814814816,
+      "current_sas_direction": "bad_high_or_inverted"
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "best_variant": "score_artifact_gate_physio",
+      "best_auc": 0.9022222222222221,
+      "current_sas_auc": 0.16620370370370371,
+      "current_sas_direction": "bad_high_or_inverted"
+    }
+  ],
+  "decision": "revise_scalar_score_before_training_expansion"
+}

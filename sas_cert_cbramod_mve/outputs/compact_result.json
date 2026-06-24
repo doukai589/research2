@@ -1,0 +1,59 @@
+{
+  "backbone": "CBraMod",
+  "backbone_frozen": true,
+  "dataset": "BCIC-IV-2a",
+  "decision": "SOFTWEIGHT_NEXT",
+  "interpretation_level": "DIAGNOSTIC_ONLY",
+  "layer0_smoke": {
+    "cbramod_input_shape": [
+      22,
+      4,
+      200
+    ],
+    "feature_shape": [
+      200
+    ],
+    "passed": true,
+    "raw_shape": [
+      22,
+      800
+    ]
+  },
+  "layer1": {
+    "bad_artifact_delta_acc_vs_clean": -0.0054012345679012586,
+    "bad_content_delta_acc_vs_clean": -0.06378600823045272,
+    "bad_physio_delta_acc_vs_clean": -0.0007716049382716084,
+    "bad_style_delta_acc_vs_clean": -0.009516460905349855,
+    "passed": false
+  },
+  "layer2": {
+    "bad_artifact_auc": 0.947394718792867,
+    "bad_content_auc": 0.8008573388203017,
+    "bad_physio_auc": 0.15951303155006857,
+    "bad_style_auc": 0.5789948559670782,
+    "bottom30_bad_rate": 0.5747599451303155,
+    "overall_auc": 0.6216899862825789,
+    "passed": false,
+    "top30_bad_rate": 0.3628257887517147
+  },
+  "layer3": {
+    "passed": false,
+    "sas_top50_minus_naive_acc": -0.02366255144032922,
+    "sas_top50_minus_naive_ece": -0.013917024900807153,
+    "sas_top50_minus_random50_acc": 0.00913065843621399,
+    "subject_std_change": null,
+    "worst_subject_gain": null
+  },
+  "next_action": "Refine artifact/content/physio certificate and run SoftWeight/ArtifactReject shadow groups.",
+  "project": "sas_cert_cbramod_mve",
+  "protocol": "FEWSHOT_TARGET_SUPPORT",
+  "protocol_leakage_detected": false,
+  "seeds": [
+    20,
+    21,
+    22
+  ],
+  "shot_per_class": 5,
+  "status": "completed",
+  "subjects": 9
+}

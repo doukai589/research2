@@ -1,0 +1,111 @@
+{
+  "status": "completed",
+  "protocol_label": "MIRepNet_BNCI2014001_4class_adapter",
+  "raw_root": "/ai/224duibishiyan/CBraMod-main/tmp_in/BCIC2a/MNE-bnci-data/database/data-sets/001-2014",
+  "output_dir": "/ai/224duibishiyan/615新研究/third_party/backbones/MIRepNet/data/BNCI2014001",
+  "raw_dataset_copied": false,
+  "saved_processed_arrays": [
+    "X.npy",
+    "labels.npy",
+    "subjects.npy",
+    "sessions.npy",
+    "trial_ids.npy"
+  ],
+  "x_shape": [
+    5088,
+    22,
+    1000
+  ],
+  "labels_shape": [
+    5088
+  ],
+  "subjects_zero_based": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ],
+  "sessions": [
+    "E",
+    "T"
+  ],
+  "label_counts": {
+    "0": 1272,
+    "1": 1272,
+    "2": 1272,
+    "3": 1272
+  },
+  "per_subject_counts": {
+    "0": 576,
+    "1": 576,
+    "2": 576,
+    "3": 480,
+    "4": 576,
+    "5": 576,
+    "6": 576,
+    "7": 576,
+    "8": 576
+  },
+  "per_subject_session_counts": {
+    "S0E": 288,
+    "S0T": 288,
+    "S1E": 288,
+    "S1T": 288,
+    "S2E": 288,
+    "S2T": 288,
+    "S3E": 288,
+    "S3T": 192,
+    "S4E": 288,
+    "S4T": 288,
+    "S5E": 288,
+    "S5T": 288,
+    "S6E": 288,
+    "S6T": 288,
+    "S7E": 288,
+    "S7T": 288,
+    "S8E": 288,
+    "S8T": 288
+  },
+  "trial_window": "event + 2s to event + 6s",
+  "sfreq": 250,
+  "bandpass": "8-30Hz butterworth order 5 sosfiltfilt",
+  "channels_saved": 22,
+  "saved_channel_order": [
+    "FZ",
+    "FC3",
+    "FC1",
+    "FCZ",
+    "FC2",
+    "FC4",
+    "C5",
+    "C3",
+    "C1",
+    "CZ",
+    "C2",
+    "C4",
+    "C6",
+    "CP3",
+    "CP1",
+    "CPZ",
+    "CP2",
+    "CP4",
+    "P1",
+    "PZ",
+    "P2",
+    "POZ"
+  ],
+  "mi_repnet_training_behavior": "Official train_subject applies train/val split first, then EA and 45-channel inverse-distance interpolation inside process_and_replace_loader.",
+  "dropped": [],
+  "array_stats": {
+    "mean": 0.00022463654750026762,
+    "std": 6.4418206214904785,
+    "max_abs": 87.28724670410156,
+    "nan_count": 0,
+    "inf_count": 0
+  }
+}

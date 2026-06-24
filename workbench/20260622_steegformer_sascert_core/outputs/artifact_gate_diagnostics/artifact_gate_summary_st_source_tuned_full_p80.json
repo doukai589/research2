@@ -1,0 +1,49 @@
+{
+  "status": "completed",
+  "score_tag": "st_source_tuned_full",
+  "output_tag": "st_source_tuned_full",
+  "write_tag": "st_source_tuned_full_p80",
+  "artifact_reject_percentile": 80.0,
+  "n_folds": 100,
+  "mean_reject_rate": 0.2,
+  "mean_clean_reject_rate": 0.0,
+  "mean_bad_artifact_reject_rate": 1.0,
+  "mean_bad_content_reject_rate": 0.0,
+  "mean_bad_physio_reject_rate": 0.0,
+  "mean_rejected_clean_fraction": 0.0,
+  "mean_rejected_bad_artifact_fraction": 1.0,
+  "mean_kept_bad_artifact_rate": 0.0,
+  "mean_content_rejected_minus_kept": 0.4684183703572489,
+  "mean_softar_minus_softweight_macro_f1": -0.00011267849620133052,
+  "mean_softar_minus_softweight_bacc": -0.0003314882571848571,
+  "mean_softar_minus_softweight_ece": -0.0026252288924711333,
+  "mean_softar_minus_naive_macro_f1": 0.006289231025346825,
+  "by_aug_type": {
+    "bad_artifact": {
+      "mean_reject_rate": 1.0,
+      "mean_artifact_risk": 1582.142099456787,
+      "mean_content_score": 0.874734698632732
+    },
+    "bad_content": {
+      "mean_reject_rate": 0.0,
+      "mean_artifact_risk": 0.25947508121936697,
+      "mean_content_score": 0.5112857159227133
+    },
+    "bad_physio": {
+      "mean_reject_rate": 0.0,
+      "mean_artifact_risk": 1.2281699542105198,
+      "mean_content_score": 0.4059795937556773
+    },
+    "clean": {
+      "mean_reject_rate": 0.0,
+      "mean_artifact_risk": 269.77010036468505,
+      "mean_content_score": 0.3540000017117709
+    }
+  },
+  "correlations": {
+    "clean_reject_rate_vs_softar_minus_softweight_macro_f1": null,
+    "bad_artifact_reject_rate_vs_softar_minus_softweight_macro_f1": null,
+    "rejected_clean_fraction_vs_softar_minus_softweight_macro_f1": null
+  },
+  "decision": "artifact_gate_calibration_tradeoff"
+}

@@ -1,0 +1,17 @@
+{
+  "status": "passed",
+  "target_test_used_for_artifact_threshold": false,
+  "target_test_used_for_ranknorm": false,
+  "target_test_used_for_prototype": false,
+  "target_test_used_for_style_anchor": false,
+  "target_test_used_for_best_epoch_or_seed": false,
+  "source_train_used_for_prototype": true,
+  "target_support_used_for_prototype_and_style_anchor": true,
+  "target_test_used_for_final_eval_only": true,
+  "notes": [
+    "Artifact thresholds are per-fold candidate-pool percentiles.",
+    "Rank normalization is computed only over per-fold augmented training candidates.",
+    "Style anchor is target support only.",
+    "Target test features are passed only to predict_probs after training."
+  ]
+}

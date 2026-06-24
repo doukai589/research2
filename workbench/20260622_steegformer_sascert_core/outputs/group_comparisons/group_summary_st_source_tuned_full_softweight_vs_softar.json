@@ -1,0 +1,16 @@
+{
+  "status": "completed",
+  "output_tag": "st_source_tuned_full",
+  "comparison": "SoftWeight_noReject_LS010-vs-SASCert_SoftAR_LS010",
+  "n_pairs": 100,
+  "delta_accuracy": 0.0002530395136778102,
+  "delta_balanced_accuracy": 0.0003314882571848571,
+  "delta_macro_f1": 0.00011267849620133052,
+  "delta_kappa": 0.0007167708012980523,
+  "delta_auroc": 0.00010605295274636328,
+  "delta_ece": 0.0026252288924711333,
+  "delta_nll": 0.0021857761145616886,
+  "delta_brier": 0.000552343875169754,
+  "subject_win_rate_macro_f1": 0.05,
+  "seed_win_rate_macro_f1": 0.0
+}

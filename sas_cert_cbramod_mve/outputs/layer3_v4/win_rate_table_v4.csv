@@ -1,0 +1,3 @@
+baseline_group,group,n_subjects,subject_win_rate_acc,subject_win_rate_macro_f1
+NaiveAug,ArtifactReject_raw_diagnostic,9,0.8888888888888888,1.0
+NaiveAug,SASCert_SoftAR_LS010,9,1.0,1.0

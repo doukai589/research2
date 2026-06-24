@@ -1,0 +1,16 @@
+{
+  "status": "completed",
+  "output_tag": "st_source_tuned_full",
+  "comparison": "SoftWeight_noReject_LS010-vs-NaiveAug_LS010",
+  "n_pairs": 100,
+  "delta_accuracy": 0.006152472527472526,
+  "delta_balanced_accuracy": 0.0064797091238654745,
+  "delta_macro_f1": 0.006401909521548154,
+  "delta_kappa": 0.012827174620159993,
+  "delta_auroc": 0.005244871601153602,
+  "delta_ece": 0.00029382908360143096,
+  "delta_nll": -0.0021715061136201833,
+  "delta_brier": -0.00566867308691144,
+  "subject_win_rate_macro_f1": 0.15,
+  "seed_win_rate_macro_f1": 0.0
+}

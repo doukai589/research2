@@ -1,0 +1,4 @@
+failure_mode,definition,most_relevant_components
+bad_artifact,"augmentation introduces low-frequency drift, bursts, or abnormal channel-energy/kurtosis patterns that can create non-neural shortcuts","artifact_safe_score, score_artifact_gate_physio"
+bad_content,augmentation disrupts task-discriminative MI content such as mu/beta structure or label-consistent representation,"content_score, physio_score"
+bad_physio,augmentation violates physiological/topological consistency such as channel arrangement or covariance structure,"physio_score, style_score"

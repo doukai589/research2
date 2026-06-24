@@ -1,0 +1,23 @@
+{
+  "cbramod": {
+    "can_run_full_reproduction_next": false,
+    "code_exact_ready": false,
+    "dry_run_success": false,
+    "needs_lmdb_generation": true,
+    "paper_exact_preprocessing_ready": true
+  },
+  "decision": "MIREPNET_ADAPTER_NEXT",
+  "mirepnet": {
+    "adapter_smoke_ready": true,
+    "can_run_full_reproduction_next": false,
+    "dependencies_missing": [
+      "wandb",
+      "einops"
+    ],
+    "forward_success": true,
+    "tiny_x_shape": "[8, 45, 1000]"
+  },
+  "next_action": "Package MIRepNet full adapter datasets and then run controlled reproduction.",
+  "stage": "repro_gate_repair",
+  "status": "completed"
+}

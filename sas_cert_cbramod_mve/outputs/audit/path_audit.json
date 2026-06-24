@@ -1,0 +1,14 @@
+{
+  "bcic2a_mat_count": 18,
+  "bcic2a_root": "/ai/224duibishiyan/CBraMod-main/tmp_in/BCIC2a/MNE-bnci-data/database/data-sets/001-2014",
+  "bcic2a_root_exists": true,
+  "cbramod_src": "/ai/224duibishiyan/\u65b0\u7814\u7a76/CBraMod-main",
+  "cbramod_src_exists": true,
+  "cbramod_weight_exists": true,
+  "data_copy_detected": false,
+  "old_eegnet_report": "/ai/224duibishiyan/615\u65b0\u7814\u7a76/sas_cert_mve_outputs/SAS_CERT_MVE_FULL_OUTPUT_AND_ANALYSIS.md",
+  "old_outputs_used_as_input": false,
+  "project_root": "/ai/224duibishiyan/615\u65b0\u7814\u7a76/sas_cert_cbramod_mve",
+  "workspace_exists": true,
+  "workspace_root": "/ai/224duibishiyan/615\u65b0\u7814\u7a76"
+}

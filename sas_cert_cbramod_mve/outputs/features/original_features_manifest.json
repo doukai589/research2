@@ -1,0 +1,14 @@
+{
+  "contains_augmented_raw_array": false,
+  "contains_cbramod_features": true,
+  "contains_labels": true,
+  "contains_raw_mat_data": false,
+  "contains_raw_trial_array": false,
+  "feature_shape": [
+    5088,
+    200
+  ],
+  "labels_scope": "source_train_and_target_support_only_for_training; target_test_only_for_eval",
+  "target_test_used_for_cert_threshold": false,
+  "target_test_used_for_style_anchor": false
+}

@@ -1,0 +1,15 @@
+{
+  "protocol": "paper_aligned_common_protocol",
+  "data_root": "/ai/224duibishiyan/CBraMod-main/tmp_in/MI/files",
+  "raw_data_copied": false,
+  "target_test_used_for_training": false,
+  "target_test_used_for_checkpoint_selection": false,
+  "full_finetune": true,
+  "models": [
+    "st_eegformer_small",
+    "labram_base",
+    "eegpt_large4e"
+  ],
+  "device": "cuda",
+  "local_deps": "/ai/224duibishiyan/615新研究/outputs/foundation_physio_mi_fullfinetune/local_python_deps"
+}

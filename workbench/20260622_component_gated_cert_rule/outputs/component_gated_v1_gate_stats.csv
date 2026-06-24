@@ -1,0 +1,9 @@
+backbone,aug_type,artifact_gate_reject_rate,content_warning_rate,n
+CBraMod_frozen,bad_artifact,0.5,0.5333333333333333,60
+CBraMod_frozen,bad_content,0.0,0.8666666666666667,60
+CBraMod_frozen,bad_physio,0.0,0.7666666666666667,60
+CBraMod_frozen,clean,0.0,0.21666666666666667,120
+ST-EEGFormer-small_source_tuned,bad_artifact,0.5,0.9333333333333333,60
+ST-EEGFormer-small_source_tuned,bad_content,0.0,0.35,60
+ST-EEGFormer-small_source_tuned,bad_physio,0.0,0.6166666666666667,60
+ST-EEGFormer-small_source_tuned,clean,0.0,0.35,120

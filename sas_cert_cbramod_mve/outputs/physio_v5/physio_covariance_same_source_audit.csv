@@ -1,0 +1,2 @@
+conclusion,covariance_auc_on_badphysio_covariance,covariance_detector_is_construct_specific,covariance_generalizes_to_topology,physio_ready_for_training
+cross_physio_signal_present,0.999966049382716,False,True,True

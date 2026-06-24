@@ -1,0 +1,8 @@
+aug_type,n,n_rejected,rejected_ratio,artifact_risk_mean,rejected_artifact_risk_mean
+ALL,60,6,0.1,1.9507597799102465,7.562344988187154
+channel_dropout,10,0,0.0,1.0051356881856919,nan
+frequency_mask,10,0,0.0,0.8946256279945374,nan
+gaussian_noise,10,3,0.3,3.471877098083496,4.360068162282308
+mild_frequency_mixup,10,0,0.0,0.8867225974798203,nan
+time_crop,10,3,0.3,4.3890385091304776,10.764621814092001
+time_shift,10,0,0.0,1.0571591585874558,nan

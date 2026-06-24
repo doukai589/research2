@@ -1,0 +1,16 @@
+{
+  "status": "completed",
+  "output_tag": "st_source_tuned_routing_dev",
+  "comparison": "SoftWeight_noReject_LS010-vs-SASCert_SoftAR_LS010",
+  "n_pairs": 95,
+  "delta_accuracy": 6.398976163813966e-06,
+  "delta_balanced_accuracy": 7.207608243027592e-06,
+  "delta_macro_f1": -0.0004990159033945665,
+  "delta_kappa": 4.2227270669226155e-05,
+  "delta_auroc": 0.002215741770633338,
+  "delta_ece": -0.0017028692784718975,
+  "delta_nll": 0.002826674460927236,
+  "delta_brier": 0.0008871768258119884,
+  "subject_win_rate_macro_f1": 0.0,
+  "seed_win_rate_macro_f1": 0.0
+}

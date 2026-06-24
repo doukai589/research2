@@ -1,0 +1,10 @@
+{
+  "candidate_count": 180,
+  "contains_augmented_raw_array": false,
+  "contains_cbramod_features": true,
+  "contains_labels": true,
+  "contains_raw_mat_data": false,
+  "contains_raw_trial_array": false,
+  "target_test_used_for_cert_threshold": false,
+  "target_test_used_for_style_anchor": false
+}

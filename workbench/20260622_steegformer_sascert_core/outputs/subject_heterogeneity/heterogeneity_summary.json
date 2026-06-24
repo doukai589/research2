@@ -1,0 +1,67 @@
+{
+  "status": "completed",
+  "output_tag": "st_source_tuned_routing_dev",
+  "score_tag": "st_source_tuned_routing_dev",
+  "primary_group": "SoftWeight_noReject_LS010",
+  "secondary_group": "SASCert_SoftAR_LS010",
+  "baseline": "NaiveAug_LS010",
+  "n_fold_rows": 95,
+  "n_subjects": 19,
+  "primary_subject_win_rate": 0.5263157894736842,
+  "secondary_subject_win_rate": 0.5263157894736842,
+  "primary_mean_subject_delta_macro_f1": 0.002869692272984948,
+  "secondary_mean_subject_delta_macro_f1": 0.0033687081763795145,
+  "primary_losing_subjects": [
+    72,
+    73,
+    74,
+    77,
+    78,
+    79,
+    80,
+    84,
+    86
+  ],
+  "primary_winning_subjects": [
+    71,
+    75,
+    76,
+    81,
+    82,
+    83,
+    85,
+    87,
+    88,
+    89
+  ],
+  "secondary_losing_subjects": [
+    71,
+    73,
+    74,
+    77,
+    78,
+    79,
+    80,
+    84,
+    86
+  ],
+  "secondary_winning_subjects": [
+    72,
+    75,
+    76,
+    81,
+    82,
+    83,
+    85,
+    87,
+    88,
+    89
+  ],
+  "correlations_primary_delta": {
+    "baseline_macro_f1": -0.09042427378189641,
+    "baseline_ece": -0.02532747427747459,
+    "std_content_score": 0.07128743773175296,
+    "mean_artifact_risk": -0.19906091973879267
+  },
+  "decision": "subject_reliability_failed"
+}

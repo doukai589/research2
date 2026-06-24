@@ -1,0 +1,7 @@
+{
+  "copied_data_detected": false,
+  "copy_mode": "selective_models_pretrained_weights_requirements",
+  "models_exists": true,
+  "third_party_cbramod": "/ai/224duibishiyan/615\u65b0\u7814\u7a76/sas_cert_cbramod_mve/third_party/CBraMod",
+  "weights_exists": true
+}

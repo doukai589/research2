@@ -1,0 +1,18 @@
+{
+  "bad_artifact_auc_current": 0.947394718792867,
+  "best_non_oracle_variant": "artifact_gate_content_rank",
+  "physio_direction_maybe_wrong": false,
+  "physio_fixed_badphysio_auc": 0.075730109739369,
+  "physio_fixed_used": false,
+  "physio_original_auc": 0.6345891632373114,
+  "protocol_leakage_detected": false,
+  "selection_rule": "best_non_oracle_variant_selected_by_clean_vs_bad_auc_on_train_support_candidate_pool_only",
+  "status": "completed",
+  "variant_overall_auc": {
+    "artifact_content": 0.5607356824417009,
+    "artifact_content_physio_fixed": 0.5902969821673525,
+    "artifact_content_style": 0.5750219478737997,
+    "artifact_gate_content_rank": 0.7238972908093279,
+    "current_total": 0.6216899862825789
+  }
+}

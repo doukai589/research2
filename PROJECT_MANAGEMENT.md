@@ -1891,3 +1891,133 @@ Primary report:
   - Whether `显存占位/` GPU helper scripts should be kept in the public repo or
     treated as local machine utilities.
 - No files were deleted or moved during this audit.
+
+### 2026-06-24 GitHub Initial Upload Pause Point
+
+- Target repository supplied by user:
+  - `https://github.com/doukai589/research2.git`
+- Local repository preparation completed:
+  - `origin` remote was configured to the target repository.
+  - GitHub CLI `gh` was installed locally (`2.95.0`).
+  - Branch was normalized to `main`.
+  - Curated upload set contains `245` tracked files, about `3.1M`.
+  - Excluded from Git:
+    - large/generated outputs
+    - downloaded third-party repositories
+    - raw EEG/data/cache/checkpoint/archive binaries
+    - workbench output directories
+    - personal/local notes: `参考论文集/`, `复盘助手`, `选题.txt`
+    - local GPU utility directory: `显存占位/`
+- Local commits currently present:
+  - `30f5860` `Initial curated research project upload`
+  - `b647160` `first commit`
+- Upload status:
+  - Push to GitHub was not completed because the environment is not yet
+    authenticated for the private GitHub repository.
+  - `gh auth status` reported no logged-in GitHub host.
+  - `git push -u origin main` failed on missing HTTPS credentials.
+- User asked to pause and verify personally before continuing.
+- Resume point:
+  - After the user completes GitHub authentication or confirms the remote state,
+    continue from local `main`, verify `git status -sb`, then push with
+    `git push -u origin main` if the remote is ready.
+
+### 2026-06-24 Manual GitHub Upload and Verification Instructions
+
+- User asked for manual upload commands and verification steps.
+- Current local state before user-side verification:
+  - Branch: `main`
+  - Remote: `origin -> https://github.com/doukai589/research2.git`
+  - Existing commits:
+    - `30f5860` curated project upload
+    - `b647160` small README follow-up
+  - `PROJECT_MANAGEMENT.md` has the newest GitHub pause/instruction ledger
+    changes and should be committed before the user's manual push.
+- Recommended manual flow:
+  - authenticate GitHub with `gh auth login`
+  - commit the latest `PROJECT_MANAGEMENT.md` ledger change
+  - push `main` to `origin`
+  - verify with `git status -sb`, `git ls-remote origin refs/heads/main`, and
+    the GitHub repository page.
+
+### 2026-06-24 GitHub Tracking Policy Revision: Code plus Lightweight Outputs
+
+- User clarified the intended GitHub purpose:
+  - GitHub should record what new code was written.
+  - GitHub should also record the outputs produced by each run, so future review
+    can see what happened in each task.
+  - Assistant final replies should explicitly state what was done and which new
+    files/outputs were produced.
+- Policy revision:
+  - Track new or modified code/config/documentation files.
+  - Track lightweight experiment outputs:
+    - `*.md`
+    - `*.csv`
+    - `*.json`
+    - `*.txt`
+    - `*.yaml`
+    - `*.yml`
+  - Continue excluding heavyweight or non-reviewable artifacts:
+    - raw EEG/data files
+    - cached arrays and feature tensors: `*.npy`, `*.npz`
+    - model/checkpoint files: `*.pt`, `*.pth`, `*.ckpt`
+    - archives and compressed downloads
+    - downloaded third-party repositories
+    - dependency snapshots inside output folders, such as `local_python_deps/`
+      and `python_target/`
+    - local/private notes and machine utilities
+- `.gitignore` was updated accordingly:
+  - `outputs/**` lightweight result files are now upload candidates.
+  - `workbench/*/outputs/**` lightweight result files are now upload
+    candidates.
+  - `sas_cert_mve_outputs/**` lightweight result files are now upload
+    candidates.
+  - `sas_cert_cbramod_mve/outputs/**` lightweight result files are now upload
+    candidates.
+- Current effect of the revised rule:
+  - About `1145` currently untracked lightweight output files become Git
+    candidates.
+  - Total candidate size is about `27M`.
+  - No raw data, checkpoints, downloaded third-party repositories, dependency
+    snapshots, or binary experiment caches are included.
+- Required answer/reporting habit going forward:
+  - Every final task response should include:
+    - what was done
+    - code/config/doc files changed
+    - output files created or updated
+    - whether files are ready for GitHub upload
+    - any files intentionally not uploaded and why
+
+### 2026-06-24 GitHub Upload Status Check
+
+- User asked to check whether the GitHub upload/setup is now OK.
+- Local check results:
+  - Current branch: `main`
+  - Local branch tracks `origin/main`.
+  - Latest tracked commit:
+    - `b647160` `first commit`
+  - Previous curated project upload commit:
+    - `30f5860` `Initial curated research project upload`
+- Interpretation:
+  - The first curated upload appears to be synchronized to `origin/main`.
+  - The newer GitHub tracking-policy update is not yet committed or pushed.
+- Current uncommitted changes:
+  - `.gitignore`
+    - changed to allow lightweight outputs (`md/csv/json/txt/yaml/yml`) while
+      keeping heavy/raw/cache/dependency files ignored.
+  - `PROJECT_MANAGEMENT.md`
+    - includes GitHub pause point, manual upload instructions, tracking-policy
+      revision, and this status check.
+- Current untracked Git candidates under the revised policy:
+  - about `1145` lightweight output files
+  - total size about `27M`
+  - no raw data, checkpoints, downloaded third-party repositories, dependency
+    snapshots, or binary experiment caches detected in the candidate set.
+- GitHub authentication status from this environment:
+  - `gh auth status` still reports no logged-in GitHub host.
+  - GitHub connector could not read the private repository content.
+- Verdict:
+  - Initial project upload: likely OK.
+  - Full desired state including lightweight outputs and new tracking rules:
+    not yet complete until `.gitignore`, `PROJECT_MANAGEMENT.md`, and the
+    lightweight output files are committed and pushed.

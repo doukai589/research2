@@ -1,0 +1,56 @@
+{
+  "status": "completed",
+  "dataset": "PhysioNetMI",
+  "cache_path": "/ai/224duibishiyan/615新研究/workbench/20260622_cbramod_physionetmi_sascert_matched/outputs/cbramod_original_features.npz",
+  "source_cache": "/ai/224duibishiyan/615新研究/outputs/foundation_physio_mi_fullfinetune/data/physionetmi_lr_r04_r08_r12_160hz_4s_zscore.npz",
+  "contains_raw_mat_data": false,
+  "contains_raw_edf_data": false,
+  "contains_raw_trial_array": false,
+  "contains_cbramod_features": true,
+  "contains_labels": true,
+  "features_shape": [
+    4917,
+    200
+  ],
+  "feature_mean": 0.0035414923913776875,
+  "feature_std": 0.10980840772390366,
+  "feature_nan_count": 0,
+  "feature_inf_count": 0,
+  "labels_shape": [
+    4917
+  ],
+  "subjects_shape": [
+    4917
+  ],
+  "runs_shape": [
+    4917
+  ],
+  "split_counts": {
+    "train": 3150,
+    "val": 867,
+    "test": 900
+  },
+  "resample_policy": "PhysioNetMI canonical [N,64,640] -> CBraMod [N,64,4,200]",
+  "target_test_used_for_cache_extraction_only": true,
+  "target_test_used_for_ranking_threshold_or_training": false,
+  "checkpoint_audit": {
+    "checkpoint_path": "/ai/224duibishiyan/新研究/CBraMod-main/pretrained_weights/pretrained_weights.pth",
+    "checkpoint_keys": 211,
+    "model_keys": 211,
+    "loaded_keys": 211,
+    "missing_in_checkpoint": [],
+    "missing_after_load": [],
+    "unexpected_after_load": [],
+    "shape_mismatch": [],
+    "unexpected_checkpoint_keys": [],
+    "code_path": "/ai/224duibishiyan/615新研究/third_party/CBraMod-main",
+    "n_channels": 64,
+    "target_samples": 800,
+    "patch_size": 200,
+    "patch_num": 4,
+    "proj_out_replaced_with_identity": true,
+    "frozen_backbone": true
+  },
+  "device": "cuda",
+  "batch_size": 32
+}

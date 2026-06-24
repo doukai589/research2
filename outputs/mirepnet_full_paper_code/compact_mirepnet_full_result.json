@@ -1,0 +1,55 @@
+{
+  "status": "completed",
+  "model": "MIRepNet",
+  "dataset": "BNCI2014001-4",
+  "task": "4-class full finetune",
+  "protocol_label": "executable_hybrid_gpu_batch64_subject_filtered_adapter",
+  "why_not_code_exact": [
+    "Official README only documents BNCI2014004 and says code for other datasets will be released.",
+    "Local BNCI2014001-4 run required generating X.npy/labels.npy and adding subjects.npy for subject-wise filtering.",
+    "Official batch_size default 8 was too slow in this environment; completed run used batch_size 64."
+  ],
+  "data": {
+    "generated_dir": "third_party/backbones/MIRepNet/data/BNCI2014001",
+    "x_shape": [5088, 22, 1000],
+    "labels_shape": [5088],
+    "subjects": 9,
+    "classes": 4,
+    "raw_dataset_copied": false,
+    "bandpass": "8-30Hz",
+    "window": "event+2s to event+6s",
+    "ea_and_45ch_interpolation": "Applied by official process_and_replace_loader after train/val split."
+  },
+  "code_repairs": [
+    "third_party/backbones/MIRepNet/dataset.py: added optional subjects.npy subject filtering for BNCI2014001 and BNCI2014001-4.",
+    "third_party/backbones/MIRepNet/dataset.py: removed unused circular import from utils.utils.",
+    "third_party/backbones/MIRepNet/model/mlm.py: added map_location='cpu' for portable checkpoint loading."
+  ],
+  "run": {
+    "seed": 666,
+    "epochs": 10,
+    "batch_size": 64,
+    "val_split": 0.7,
+    "device": "cuda",
+    "official_result_csv": "third_party/backbones/MIRepNet/result/acc/BNCI2014001-4_MIRepNet_2026-06-22_15-28-12_results.csv",
+    "stdout_log": "outputs/mirepnet_full_paper_code/mirepnet_bnci2014001_4class_full_gpu_batch64_stdout.log",
+    "official_log": "third_party/backbones/MIRepNet/result/log/BNCI2014001-4_MIRepNet_2026-06-22_15-28-12_log.txt"
+  },
+  "subject_accuracy_percent": {
+    "Subject_0": 71.03960396039604,
+    "Subject_1": 51.73267326732673,
+    "Subject_2": 78.46534653465346,
+    "Subject_3": 49.404761904761905,
+    "Subject_4": 39.851485148514854,
+    "Subject_5": 35.396039603960396,
+    "Subject_6": 70.79207920792079,
+    "Subject_7": 65.0990099009901,
+    "Subject_8": 63.613861386138616
+  },
+  "mean_accuracy": 0.5837720676829588,
+  "paper_accuracy_full_finetune": 0.6414,
+  "paper_std": 0.0031,
+  "delta": -0.05762793231704123,
+  "within_2std": false,
+  "interpretation": "The repaired executable MIRepNet BNCI2014001-4 run is below the paper full-finetune target by 5.76 percentage points. The result should be treated as an executable hybrid, not exact reproduction, because the official BNCI2014001 pipeline is unreleased and batch size was changed for feasible execution."
+}

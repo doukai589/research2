@@ -1,0 +1,43 @@
+{
+  "status": "completed_partial_scope",
+  "scope": "CBraMod official finetune_main.py on existing processed LMDB datasets",
+  "protocol_label": "code_exact_on_existing_paper_aligned_lmdb",
+  "not_paper_exact_reason": "The official code path and default hyperparameters were used, but the processed LMDB datasets were existing local artifacts rather than regenerated from raw data in this run.",
+  "runs": {
+    "cbramod_bcic_iv_2a_e9_seed3407": {
+      "dataset": "BCIC-IV-2a",
+      "seed": 3407,
+      "epochs": 50,
+      "best_validation_epoch": 5,
+      "test_balanced_accuracy": 0.39149,
+      "test_cohen_kappa": 0.18866,
+      "test_weighted_f1": 0.33078,
+      "paper_balanced_accuracy": 0.5138,
+      "paper_cohen_kappa": 0.3518,
+      "paper_weighted_f1": 0.4984,
+      "within_2std_all_metrics": false,
+      "log": "outputs/paper_code_runs/cbramod_bcic_iv_2a_e9_seed3407/stdout.log",
+      "checkpoint": "outputs/paper_code_runs/cbramod_bcic_iv_2a_e9_seed3407/epoch5_acc_0.39149_kappa_0.18866_f1_0.33078.pth"
+    },
+    "cbramod_physionet_mi_seed3407": {
+      "dataset": "PhysioNet-MI",
+      "seed": 3407,
+      "epochs": 50,
+      "best_validation_epoch": 22,
+      "test_balanced_accuracy": 0.62847,
+      "test_cohen_kappa": 0.50455,
+      "test_weighted_f1": 0.62847,
+      "paper_balanced_accuracy": 0.6417,
+      "paper_cohen_kappa": 0.5222,
+      "paper_weighted_f1": 0.6427,
+      "within_2std_all_metrics": true,
+      "log": "outputs/paper_code_runs/cbramod_physionet_mi_seed3407/stdout.log",
+      "checkpoint": "outputs/paper_code_runs/cbramod_physionet_mi_seed3407/epoch22_acc_0.62847_kappa_0.50455_f1_0.62847.pth"
+    }
+  },
+  "interpretation": {
+    "physionet_mi": "Close reproduction under code-first protocol.",
+    "bcic_iv_2a": "Large underperformance versus paper E.9 target, mainly from poor held-out test generalization despite validation reaching 0.54427 balanced accuracy.",
+    "mirepnet": "Not run in this pass; full paper-code run still requires validated 45-channel EA adapter data packaged as the official X.npy/labels.npy inputs."
+  }
+}

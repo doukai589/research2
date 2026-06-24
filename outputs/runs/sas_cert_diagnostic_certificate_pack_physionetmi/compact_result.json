@@ -1,0 +1,477 @@
+{
+  "status": "completed",
+  "project": "sas_cert_diagnostic_certificate_pack_physionetmi",
+  "dataset": "PhysioNetMI",
+  "task": "left_vs_right_motor_imagery",
+  "backbones": [
+    "CBraMod_frozen",
+    "ST-EEGFormer-small_source_tuned"
+  ],
+  "uses_existing_outputs_only": true,
+  "diagnostic_auc_rows": [
+    {
+      "backbone": "CBraMod_frozen",
+      "current_scalar_sas_auc": 0.19689814814814816,
+      "component_gated_v1_auc": 0.8395370370370371,
+      "artifact_gate_physio_auc": 0.9022222222222221,
+      "physio_score_auc": 0.8444444444444444,
+      "style_score_auc": 0.6408333333333334,
+      "content_score_auc": 0.3044444444444444,
+      "artifact_safe_score_auc": 0.33333333333333337
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "current_scalar_sas_auc": 0.16620370370370371,
+      "component_gated_v1_auc": 0.8395370370370371,
+      "artifact_gate_physio_auc": 0.9022222222222221,
+      "physio_score_auc": 0.8444444444444444,
+      "style_score_auc": 0.6408333333333334,
+      "content_score_auc": 0.2722222222222222,
+      "artifact_safe_score_auc": 0.33333333333333337
+    }
+  ],
+  "training_policy_rows": [
+    {
+      "backbone": "CBraMod_frozen",
+      "branch": "current_SASCert_SoftAR",
+      "scope": "targets_90_92_seeds_20_21",
+      "delta_balanced_accuracy_vs_naive": 0.01237076648841351,
+      "delta_macro_f1_vs_naive": 0.00045647031848300434,
+      "delta_ece_vs_naive": 0.02774762144385863,
+      "decision": "not_promoted_calibration_and_macro_f1_weak"
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "branch": "repaired_artifact_gate_physio",
+      "scope": "targets_90_92_seeds_20_21",
+      "delta_balanced_accuracy_vs_naive": 0.01112398494751432,
+      "delta_macro_f1_vs_naive": 0.042646274868148426,
+      "delta_ece_vs_naive": 0.02272186967890555,
+      "decision": "not_promoted_calibration_failed"
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "branch": "repaired_temperature_scaled",
+      "scope": "targets_90_92_seeds_20_21",
+      "delta_balanced_accuracy_vs_naive": 0.01112398494751432,
+      "delta_macro_f1_vs_naive": 0.042646274868148426,
+      "delta_ece_vs_naive": 0.02213146682628625,
+      "decision": "not_promoted_temperature_scaling_failed_calibration_gate"
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "branch": "SoftWeight_noReject",
+      "scope": "targets_90_109_seeds_20_24",
+      "delta_balanced_accuracy_vs_naive": 0.0064797091238654745,
+      "delta_macro_f1_vs_naive": 0.006401909521548154,
+      "delta_ece_vs_naive": 0.00029382908360143096,
+      "decision": "not_promoted_subject_seed_reliability_failed"
+    }
+  ],
+  "gates": {
+    "diagnostic_auc_pass": true,
+    "scalar_failure_pass": true,
+    "protocol_pass": true,
+    "weighting_policy_non_promotion_pass": true
+  },
+  "st_utility_alignment": {
+    "decision": "park_st_weighting_variants",
+    "strong_alignment_found": false,
+    "top_candidate_feature": "clean_artifact_risk_raw_mean",
+    "top_candidate_spearman": 0.11680246397602216
+  },
+  "bad_type_auc_rows": [
+    {
+      "backbone": "CBraMod_frozen",
+      "bad_type": "bad_artifact",
+      "component": "content_score",
+      "auc_high_score_is_clean": "0.005416666666666668",
+      "direction": "bad_high_or_inverted",
+      "n": "180"
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "bad_type": "bad_artifact",
+      "component": "style_score",
+      "auc_high_score_is_clean": "0.65",
+      "direction": "clean_high",
+      "n": "180"
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "bad_type": "bad_artifact",
+      "component": "physio_score",
+      "auc_high_score_is_clean": "0.6530555555555555",
+      "direction": "clean_high",
+      "n": "180"
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "bad_type": "bad_artifact",
+      "component": "artifact_safe_score",
+      "auc_high_score_is_clean": "1.0",
+      "direction": "clean_high",
+      "n": "180"
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "bad_type": "bad_artifact",
+      "component": "sas_score",
+      "auc_high_score_is_clean": "0.5084722222222222",
+      "direction": "weak_or_mixed",
+      "n": "180"
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "bad_type": "bad_artifact",
+      "component": "score_artifact_gate_physio",
+      "auc_high_score_is_clean": "0.8263888888888888",
+      "direction": "clean_high",
+      "n": "180"
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "bad_type": "bad_content",
+      "component": "content_score",
+      "auc_high_score_is_clean": "0.9025000000000002",
+      "direction": "clean_high",
+      "n": "180"
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "bad_type": "bad_content",
+      "component": "style_score",
+      "auc_high_score_is_clean": "0.65",
+      "direction": "clean_high",
+      "n": "180"
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "bad_type": "bad_content",
+      "component": "physio_score",
+      "auc_high_score_is_clean": "0.9406944444444445",
+      "direction": "clean_high",
+      "n": "180"
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "bad_type": "bad_content",
+      "component": "artifact_safe_score",
+      "auc_high_score_is_clean": "0.0",
+      "direction": "bad_high_or_inverted",
+      "n": "180"
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "bad_type": "bad_content",
+      "component": "sas_score",
+      "auc_high_score_is_clean": "0.08194444444444446",
+      "direction": "bad_high_or_inverted",
+      "n": "180"
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "bad_type": "bad_content",
+      "component": "score_artifact_gate_physio",
+      "auc_high_score_is_clean": "0.9406944444444445",
+      "direction": "clean_high",
+      "n": "180"
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "bad_type": "bad_physio",
+      "component": "content_score",
+      "auc_high_score_is_clean": "0.0054166666666666695",
+      "direction": "bad_high_or_inverted",
+      "n": "180"
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "bad_type": "bad_physio",
+      "component": "style_score",
+      "auc_high_score_is_clean": "0.6225",
+      "direction": "clean_high",
+      "n": "180"
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "bad_type": "bad_physio",
+      "component": "physio_score",
+      "auc_high_score_is_clean": "0.9395833333333334",
+      "direction": "clean_high",
+      "n": "180"
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "bad_type": "bad_physio",
+      "component": "artifact_safe_score",
+      "auc_high_score_is_clean": "0.0",
+      "direction": "bad_high_or_inverted",
+      "n": "180"
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "bad_type": "bad_physio",
+      "component": "sas_score",
+      "auc_high_score_is_clean": "0.00027777777777777864",
+      "direction": "bad_high_or_inverted",
+      "n": "180"
+    },
+    {
+      "backbone": "CBraMod_frozen",
+      "bad_type": "bad_physio",
+      "component": "score_artifact_gate_physio",
+      "auc_high_score_is_clean": "0.9395833333333334",
+      "direction": "clean_high",
+      "n": "180"
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "bad_type": "bad_artifact",
+      "component": "content_score",
+      "auc_high_score_is_clean": "0.031250000000000035",
+      "direction": "bad_high_or_inverted",
+      "n": "180"
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "bad_type": "bad_artifact",
+      "component": "style_score",
+      "auc_high_score_is_clean": "0.65",
+      "direction": "clean_high",
+      "n": "180"
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "bad_type": "bad_artifact",
+      "component": "physio_score",
+      "auc_high_score_is_clean": "0.6530555555555555",
+      "direction": "clean_high",
+      "n": "180"
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "bad_type": "bad_artifact",
+      "component": "artifact_safe_score",
+      "auc_high_score_is_clean": "1.0",
+      "direction": "clean_high",
+      "n": "180"
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "bad_type": "bad_artifact",
+      "component": "sas_score",
+      "auc_high_score_is_clean": "0.3057638888888889",
+      "direction": "bad_high_or_inverted",
+      "n": "180"
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "bad_type": "bad_artifact",
+      "component": "score_artifact_gate_physio",
+      "auc_high_score_is_clean": "0.8263888888888888",
+      "direction": "clean_high",
+      "n": "180"
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "bad_type": "bad_content",
+      "component": "content_score",
+      "auc_high_score_is_clean": "0.2629861111111111",
+      "direction": "bad_high_or_inverted",
+      "n": "180"
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "bad_type": "bad_content",
+      "component": "style_score",
+      "auc_high_score_is_clean": "0.65",
+      "direction": "clean_high",
+      "n": "180"
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "bad_type": "bad_content",
+      "component": "physio_score",
+      "auc_high_score_is_clean": "0.9406944444444445",
+      "direction": "clean_high",
+      "n": "180"
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "bad_type": "bad_content",
+      "component": "artifact_safe_score",
+      "auc_high_score_is_clean": "0.0",
+      "direction": "bad_high_or_inverted",
+      "n": "180"
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "bad_type": "bad_content",
+      "component": "sas_score",
+      "auc_high_score_is_clean": "0.018263888888888885",
+      "direction": "bad_high_or_inverted",
+      "n": "180"
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "bad_type": "bad_content",
+      "component": "score_artifact_gate_physio",
+      "auc_high_score_is_clean": "0.9406944444444445",
+      "direction": "clean_high",
+      "n": "180"
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "bad_type": "bad_physio",
+      "component": "content_score",
+      "auc_high_score_is_clean": "0.5224305555555555",
+      "direction": "weak_or_mixed",
+      "n": "180"
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "bad_type": "bad_physio",
+      "component": "style_score",
+      "auc_high_score_is_clean": "0.6225",
+      "direction": "clean_high",
+      "n": "180"
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "bad_type": "bad_physio",
+      "component": "physio_score",
+      "auc_high_score_is_clean": "0.9395833333333334",
+      "direction": "clean_high",
+      "n": "180"
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "bad_type": "bad_physio",
+      "component": "artifact_safe_score",
+      "auc_high_score_is_clean": "0.0",
+      "direction": "bad_high_or_inverted",
+      "n": "180"
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "bad_type": "bad_physio",
+      "component": "sas_score",
+      "auc_high_score_is_clean": "0.1745833333333333",
+      "direction": "bad_high_or_inverted",
+      "n": "180"
+    },
+    {
+      "backbone": "ST-EEGFormer-small_source_tuned",
+      "bad_type": "bad_physio",
+      "component": "score_artifact_gate_physio",
+      "auc_high_score_is_clean": "0.9395833333333334",
+      "direction": "clean_high",
+      "n": "180"
+    }
+  ],
+  "protocol_audit_rows": [
+    {
+      "source": "cross_backbone_direction_audit",
+      "raw_data_copied": false,
+      "new_training": false,
+      "new_augmentation_generation": false,
+      "target_heldout_used_for_score_or_threshold": false,
+      "evidence_path": "workbench/20260622_cross_backbone_cert_direction_audit/outputs/compact_cross_backbone_cert_direction_audit.json"
+    },
+    {
+      "source": "component_gated_rule_v1",
+      "raw_data_copied": false,
+      "new_training": false,
+      "new_augmentation_generation": false,
+      "target_heldout_used_for_score_or_threshold": false,
+      "evidence_path": "workbench/20260622_component_gated_cert_rule/outputs/compact_component_gated_cert_rule_v1.json"
+    },
+    {
+      "source": "cbramod_repaired_mini",
+      "raw_data_copied": false,
+      "new_training": true,
+      "new_augmentation_generation": true,
+      "target_heldout_used_for_score_or_threshold": false,
+      "evidence_path": "workbench/20260622_cbramod_physionetmi_sascert_matched/outputs/compact_cbramod_physionetmi_sascert_result_repaired_mini.json"
+    },
+    {
+      "source": "st_softweight_locked_confirm",
+      "raw_data_copied": false,
+      "new_training": false,
+      "new_augmentation_generation": false,
+      "target_heldout_used_for_score_or_threshold": false,
+      "evidence_path": "workbench/20260622_steegformer_sascert_core/outputs/locked_confirm/compact_softweight_locked_confirm.json"
+    },
+    {
+      "source": "st_utility_alignment_audit",
+      "raw_data_copied": false,
+      "new_training": false,
+      "new_augmentation_generation": false,
+      "target_heldout_used_for_score_or_threshold": false,
+      "evidence_path": "workbench/20260622_steegformer_sascert_core/outputs/utility_alignment_audit/compact_utility_alignment_audit.json"
+    }
+  ],
+  "failure_mode_definitions": [
+    {
+      "failure_mode": "bad_artifact",
+      "definition": "augmentation introduces low-frequency drift, bursts, or abnormal channel-energy/kurtosis patterns that can create non-neural shortcuts",
+      "most_relevant_components": "artifact_safe_score, score_artifact_gate_physio"
+    },
+    {
+      "failure_mode": "bad_content",
+      "definition": "augmentation disrupts task-discriminative MI content such as mu/beta structure or label-consistent representation",
+      "most_relevant_components": "content_score, physio_score"
+    },
+    {
+      "failure_mode": "bad_physio",
+      "definition": "augmentation violates physiological/topological consistency such as channel arrangement or covariance structure",
+      "most_relevant_components": "physio_score, style_score"
+    }
+  ],
+  "traceability_rows": [
+    {
+      "reported_item": "CBraMod current scalar SAS AUC 0.1969",
+      "source_path": "workbench/20260622_component_gated_cert_rule/outputs/compact_component_gated_cert_rule_v1.json",
+      "json_field_or_table": "component_auc: backbone=CBraMod_frozen, component=sas_score"
+    },
+    {
+      "reported_item": "ST current scalar SAS AUC 0.1662",
+      "source_path": "workbench/20260622_component_gated_cert_rule/outputs/compact_component_gated_cert_rule_v1.json",
+      "json_field_or_table": "component_auc: backbone=ST-EEGFormer-small_source_tuned, component=sas_score"
+    },
+    {
+      "reported_item": "component-gated v1 AUC 0.8395 on both backbones",
+      "source_path": "workbench/20260622_component_gated_cert_rule/outputs/compact_component_gated_cert_rule_v1.json",
+      "json_field_or_table": "component_auc: component=component_gated_v1"
+    },
+    {
+      "reported_item": "artifact-gate physio AUC 0.9022 on both backbones",
+      "source_path": "workbench/20260622_component_gated_cert_rule/outputs/compact_component_gated_cert_rule_v1.json",
+      "json_field_or_table": "component_auc: component=score_artifact_gate_physio"
+    },
+    {
+      "reported_item": "CBraMod repaired Macro-F1 +4.26pp and ECE +2.27pp",
+      "source_path": "workbench/20260622_cbramod_physionetmi_sascert_matched/outputs/compact_cbramod_physionetmi_sascert_result_repaired_mini.json",
+      "json_field_or_table": "primary_vs_naive"
+    },
+    {
+      "reported_item": "ST SoftWeight Macro-F1 +0.64pp and reliability failure",
+      "source_path": "workbench/20260622_steegformer_sascert_core/outputs/locked_confirm/compact_softweight_locked_confirm.json",
+      "json_field_or_table": "comparisons.softweight_vs_naive"
+    },
+    {
+      "reported_item": "ST utility alignment max candidate-only Spearman 0.1168",
+      "source_path": "workbench/20260622_steegformer_sascert_core/outputs/utility_alignment_audit/compact_utility_alignment_audit.json",
+      "json_field_or_table": "top_correlations[0]"
+    }
+  ],
+  "interpretation": {
+    "supported_claim": "SAS-Cert is currently supported as a diagnostic reliability certificate for EEG augmentation candidates.",
+    "unsupported_claim": "Current SAS-Cert weighting/rejection policies are not supported as reliable deployable training methods.",
+    "reason": "Both backbones show meaningful diagnostic score structure, but CBraMod fails calibration after repair and ST fails subject/seed reliability plus utility alignment."
+  },
+  "decision": "write_diagnostic_certificate_paper_path",
+  "protocol_leakage_detected": false,
+  "next_action": "prepare_diagnostic_certificate_paper_outline"
+}

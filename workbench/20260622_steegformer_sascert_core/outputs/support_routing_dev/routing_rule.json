@@ -1,0 +1,60 @@
+{
+  "status": "completed",
+  "output_tag": "st_source_tuned_routing_dev",
+  "score_tag": "st_source_tuned_routing_dev",
+  "n_rows": 95,
+  "n_subjects": 19,
+  "constant_strategies": {
+    "NaiveAug_LS010": {
+      "macro_f1": 0.6620622327802094,
+      "balanced_accuracy": 0.6665093981307646,
+      "ece": 0.235025075022897,
+      "nll": 0.811865509293711,
+      "brier": 0.4867930402881221,
+      "selection_NaiveAug_LS010": 1.0,
+      "selection_SoftWeight_noReject_LS010": 0.0,
+      "selection_SASCert_SoftAR_LS010": 0.0
+    },
+    "SoftWeight_noReject_LS010": {
+      "macro_f1": 0.6649319250531943,
+      "balanced_accuracy": 0.6700309863196152,
+      "ece": 0.23161419591213717,
+      "nll": 0.8090580859763316,
+      "brier": 0.48221297648392225,
+      "selection_NaiveAug_LS010": 0.0,
+      "selection_SoftWeight_noReject_LS010": 1.0,
+      "selection_SASCert_SoftAR_LS010": 0.0
+    },
+    "SASCert_SoftAR_LS010": {
+      "macro_f1": 0.6654309409565888,
+      "balanced_accuracy": 0.6700237787113721,
+      "ece": 0.23331706519060907,
+      "nll": 0.8062314115154042,
+      "brier": 0.4813257996581103,
+      "selection_NaiveAug_LS010": 0.0,
+      "selection_SoftWeight_noReject_LS010": 0.0,
+      "selection_SASCert_SoftAR_LS010": 1.0
+    }
+  },
+  "best_constant_strategy": "SASCert_SoftAR_LS010",
+  "loso_cv_routing": {
+    "macro_f1": 0.6593601106529761,
+    "balanced_accuracy": 0.664130725054886,
+    "ece": 0.23268528339596217,
+    "nll": 0.8132403963831302,
+    "brier": 0.4851816280499885
+  },
+  "full_dev_best_rule": {
+    "rule": "threshold:mean_artifact_risk<=475.104?SASCert_SoftAR_LS010:NaiveAug_LS010",
+    "macro_f1": 0.6675216798315278,
+    "balanced_accuracy": 0.6716602550932453,
+    "ece": 0.23353669179475625,
+    "nll": 0.8082597930737787,
+    "brier": 0.4821466912956614,
+    "selection_NaiveAug_LS010": 0.25263157894736843,
+    "selection_SoftWeight_noReject_LS010": 0.0,
+    "selection_SASCert_SoftAR_LS010": 0.7473684210526316
+  },
+  "decision": "do_not_freeze_routing_rule",
+  "interpretation": "LOSO support routing does not beat the best constant dev strategy under the current support-only features. Keep this as diagnostic evidence; do not apply a routed method to final target subjects yet."
+}

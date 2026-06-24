@@ -1,0 +1,5 @@
+gate,passed
+diagnostic_auc_pass,True
+scalar_failure_pass,True
+protocol_pass,True
+weighting_policy_non_promotion_pass,True

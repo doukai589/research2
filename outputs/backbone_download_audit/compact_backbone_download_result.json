@@ -1,0 +1,36 @@
+{
+  "stage": "download_general_fm_backbones",
+  "status": "ready",
+  "models": {
+    "STEEGFormer": {
+      "code_status": "ready",
+      "small_weight": true,
+      "base_weight": true,
+      "large_weight": true,
+      "largeV2_weight": false,
+      "local_path": "/ai/224duibishiyan/615新研究/third_party/backbones/STEEGFormer",
+      "recommended_first_model": "ST-EEGFormer-small_or_base",
+      "status": "ready"
+    },
+    "LaBraM": {
+      "code_status": "ready",
+      "labram_base_weight": true,
+      "vqnsp_weight": true,
+      "local_path": "/ai/224duibishiyan/615新研究/third_party/backbones/LaBraM",
+      "status": "ready"
+    },
+    "EEGPT": {
+      "code_status": "ready",
+      "eeg_large_weight": true,
+      "manual_download_required": false,
+      "checkpoint_path": "/ai/224duibishiyan/615新研究/third_party/backbones/EEGPT/checkpoint/eegpt_mcae_58chs_4s_large4E.ckpt",
+      "local_path": "/ai/224duibishiyan/615新研究/third_party/backbones/EEGPT",
+      "status": "ready_from_user_supplied_zip"
+    }
+  },
+  "warnings": [
+    "EEGPT official Figshare link was protected by WAF challenge in this environment; checkpoint was later supplied by the user via /ai/224duibishiyan/615新研究/25866970.zip.",
+    "ST-EEGFormer-largeV2 was intentionally not downloaded for first smoke because it uses the eeg_foundation_2025 path."
+  ],
+  "next_action": "Use ST-EEGFormer-small as the strongest current PhysioNetMI candidate; keep LaBraM as secondary and improve EEGPT adapter/runtime before relying on it."
+}

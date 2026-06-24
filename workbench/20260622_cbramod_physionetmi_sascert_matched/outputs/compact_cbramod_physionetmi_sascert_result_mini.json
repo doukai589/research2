@@ -1,0 +1,104 @@
+{
+  "stage": "cbramod_physionetmi_sascert_matched_mini",
+  "status": "completed_mini",
+  "protocol": {
+    "dataset": "PhysioNetMI",
+    "task": "left_vs_right_motor_imagery",
+    "runs": [
+      4,
+      8,
+      12
+    ],
+    "targets": [
+      90,
+      91,
+      92
+    ],
+    "seeds": [
+      20,
+      21
+    ],
+    "shot_per_class": 5,
+    "n_aug": 5,
+    "source_epochs": 30,
+    "finetune_epochs": 80,
+    "label_smoothing": 0.1,
+    "artifact_reject_percentile": 90.0
+  },
+  "groups": {
+    "NaiveAug_LS010": {
+      "accuracy": 0.5370820668693009,
+      "balanced_accuracy": 0.5349475143592791,
+      "macro_f1": 0.4982986240311926,
+      "kappa": 0.07250681947674666,
+      "auroc": 0.5152525252525253,
+      "ece": 0.08428846678291772,
+      "nll": 0.6930602790648893,
+      "brier": 0.4998801201581955
+    },
+    "ArtifactReject_LS010": {
+      "accuracy": 0.5334346504559271,
+      "balanced_accuracy": 0.5302396514161221,
+      "macro_f1": 0.500148403347774,
+      "kappa": 0.061938519530357006,
+      "auroc": 0.5110140621905328,
+      "ece": 0.0922664097014894,
+      "nll": 0.6930659255544948,
+      "brier": 0.49988606572151184
+    },
+    "SoftWeight_noReject_LS010": {
+      "accuracy": 0.540628166160081,
+      "balanced_accuracy": 0.5360101010101009,
+      "macro_f1": 0.49247345817395827,
+      "kappa": 0.074749246933718,
+      "auroc": 0.5108338284808873,
+      "ece": 0.08655587995487142,
+      "nll": 0.6936845553590133,
+      "brier": 0.5004987865686417
+    },
+    "SASCert_SoftAR_LS010": {
+      "accuracy": 0.553596757852077,
+      "balanced_accuracy": 0.5473182808476926,
+      "macro_f1": 0.49875509434967563,
+      "kappa": 0.0969041113874079,
+      "auroc": 0.5074390968508615,
+      "ece": 0.11203608822677635,
+      "nll": 0.693240935943425,
+      "brier": 0.5000512003898621
+    }
+  },
+  "sascert_vs_naive": {
+    "delta_balanced_accuracy": 0.01237076648841351,
+    "delta_macro_f1": 0.00045647031848300434,
+    "delta_ece": 0.02774762144385863,
+    "delta_nll": 0.0001806568785356344,
+    "delta_brier": 0.00017108023166656494,
+    "subject_win_rate_macro_f1": 0.3333333333333333,
+    "seed_win_rate_macro_f1": 0.5
+  },
+  "n_rows": 24,
+  "backbone_audit": {
+    "checkpoint_path": "/ai/224duibishiyan/新研究/CBraMod-main/pretrained_weights/pretrained_weights.pth",
+    "checkpoint_keys": 211,
+    "model_keys": 211,
+    "loaded_keys": 211,
+    "missing_in_checkpoint": [],
+    "missing_after_load": [],
+    "unexpected_after_load": [],
+    "shape_mismatch": [],
+    "unexpected_checkpoint_keys": [],
+    "code_path": "/ai/224duibishiyan/615新研究/third_party/CBraMod-main",
+    "n_channels": 64,
+    "target_samples": 800,
+    "patch_size": 200,
+    "patch_num": 4,
+    "proj_out_replaced_with_identity": true,
+    "frozen_backbone": true
+  },
+  "leakage_audit": {
+    "raw_data_copied": false,
+    "raw_augmented_arrays_saved": false,
+    "target_test_used_for_ranking_threshold_or_training": false,
+    "cbramod_backbone_frozen": true
+  }
+}

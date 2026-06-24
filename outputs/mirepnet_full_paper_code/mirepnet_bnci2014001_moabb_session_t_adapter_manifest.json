@@ -1,0 +1,149 @@
+{
+  "status": "completed",
+  "protocol_label": "MIRepNet_BNCI2014001_4class_MOABB_session_T_only",
+  "author_issue_alignment": {
+    "BNCI2014001_4class_trials": 2592,
+    "session_selection": "MOABB first session / 0train only",
+    "train_test_behavior": "MIRepNet code performs subject-wise 30% train / 70% test split later, then EA and 45-channel interpolation separately."
+  },
+  "output_dir": "/ai/224duibishiyan/615新研究/third_party/backbones/MIRepNet/data/BNCI2014001",
+  "previous_adapter_backup_dir": "/ai/224duibishiyan/615新研究/outputs/mirepnet_full_paper_code/adapter_backups/BNCI2014001_before_moabb_session_t_20260622_160040",
+  "raw_dataset_copied": false,
+  "saved_processed_arrays": [
+    "X.npy",
+    "labels.npy",
+    "subjects.npy",
+    "sessions.npy",
+    "trial_ids.npy"
+  ],
+  "x_shape": [
+    2592,
+    22,
+    1000
+  ],
+  "labels_shape": [
+    2592
+  ],
+  "source_moabb_shapes_before_session_filter": {
+    "1": [
+      576,
+      22,
+      1001
+    ],
+    "2": [
+      576,
+      22,
+      1001
+    ],
+    "3": [
+      576,
+      22,
+      1001
+    ],
+    "4": [
+      576,
+      22,
+      1001
+    ],
+    "5": [
+      576,
+      22,
+      1001
+    ],
+    "6": [
+      576,
+      22,
+      1001
+    ],
+    "7": [
+      576,
+      22,
+      1001
+    ],
+    "8": [
+      576,
+      22,
+      1001
+    ],
+    "9": [
+      576,
+      22,
+      1001
+    ]
+  },
+  "time_crop": "MOABB returned 1001 samples for [2s, 6s]; saved first 1000 samples for MIRepNet's 4s@250Hz input.",
+  "subjects_zero_based": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ],
+  "sessions": [
+    "0train"
+  ],
+  "label_map": {
+    "left_hand": 0,
+    "right_hand": 1,
+    "feet": 2,
+    "tongue": 3
+  },
+  "label_counts": {
+    "0": 648,
+    "1": 648,
+    "2": 648,
+    "3": 648
+  },
+  "per_subject_counts": {
+    "0": 288,
+    "1": 288,
+    "2": 288,
+    "3": 288,
+    "4": 288,
+    "5": 288,
+    "6": 288,
+    "7": 288,
+    "8": 288
+  },
+  "session_counts": {
+    "0train": 2592
+  },
+  "sfreq": 250,
+  "bandpass": "MOABB MotorImagery(fmin=8, fmax=30)",
+  "channels_saved": 22,
+  "saved_channel_order": [
+    "FZ",
+    "FC3",
+    "FC1",
+    "FCZ",
+    "FC2",
+    "FC4",
+    "C5",
+    "C3",
+    "C1",
+    "CZ",
+    "C2",
+    "C4",
+    "C6",
+    "CP3",
+    "CP1",
+    "CPZ",
+    "CP2",
+    "CP4",
+    "P1",
+    "PZ",
+    "P2",
+    "POZ"
+  ],
+  "array_stats": {
+    "mean": 0.0005533720250241458,
+    "std": 6.215379238128662,
+    "max_abs": 73.34323120117188,
+    "nan_count": 0,
+    "inf_count": 0
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "checkpoint_path": "/ai/224duibishiyan/新研究/CBraMod-main/pretrained_weights/pretrained_weights.pth",
+  "checkpoint_keys": 211,
+  "model_keys": 211,
+  "loaded_keys": 211,
+  "missing_in_checkpoint": [],
+  "missing_after_load": [],
+  "unexpected_after_load": [],
+  "shape_mismatch": [],
+  "unexpected_checkpoint_keys": [],
+  "code_path": "/ai/224duibishiyan/615新研究/third_party/CBraMod-main",
+  "n_channels": 64,
+  "target_samples": 800,
+  "patch_size": 200,
+  "patch_num": 4,
+  "proj_out_replaced_with_identity": true,
+  "frozen_backbone": true
+}

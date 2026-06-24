@@ -1,0 +1,7 @@
+component,backbone_a,auc_a,direction_a,backbone_b,auc_b,direction_b,abs_auc_gap,direction_conflict
+artifact_safe_score,CBraMod_frozen,0.33333333333333337,bad_high_or_inverted,ST-EEGFormer-small_source_tuned,0.33333333333333337,bad_high_or_inverted,0.0,False
+content_score,CBraMod_frozen,0.3044444444444444,bad_high_or_inverted,ST-EEGFormer-small_source_tuned,0.2722222222222222,bad_high_or_inverted,0.03222222222222221,False
+physio_score,CBraMod_frozen,0.8444444444444444,clean_high,ST-EEGFormer-small_source_tuned,0.8444444444444444,clean_high,0.0,False
+sas_score,CBraMod_frozen,0.19689814814814816,bad_high_or_inverted,ST-EEGFormer-small_source_tuned,0.16620370370370371,bad_high_or_inverted,0.03069444444444444,False
+score_artifact_gate_physio,CBraMod_frozen,0.9022222222222221,clean_high,ST-EEGFormer-small_source_tuned,0.9022222222222221,clean_high,0.0,False
+style_score,CBraMod_frozen,0.6408333333333334,clean_high,ST-EEGFormer-small_source_tuned,0.6408333333333334,clean_high,0.0,False

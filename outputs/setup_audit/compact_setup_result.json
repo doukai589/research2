@@ -1,0 +1,73 @@
+{
+  "backbones": {
+    "CBraMod": {
+      "git_commit": "",
+      "has_weights": true,
+      "local_path": "/ai/224duibishiyan/615\u65b0\u7814\u7a76/sas_cert_cbramod_mve/third_party/CBraMod",
+      "status": "ready"
+    },
+    "EEG-DINO": {
+      "git_commit": "",
+      "has_weights": false,
+      "local_path": "/ai/224duibishiyan/615\u65b0\u7814\u7a76/third_party/backbones/EEG-DINO",
+      "status": "unresolved"
+    },
+    "EEGPT": {
+      "git_commit": "a0e0a8fad729e2ecf4eedb3a81548a6e6d48a705",
+      "has_weights": false,
+      "local_path": "/ai/224duibishiyan/615\u65b0\u7814\u7a76/third_party/backbones/EEGPT",
+      "status": "code_only"
+    },
+    "LaBraM": {
+      "git_commit": "c431221e6cfd23dbfa9950e0180682fb322b0548",
+      "has_weights": true,
+      "local_path": "/ai/224duibishiyan/615\u65b0\u7814\u7a76/third_party/backbones/LaBraM",
+      "status": "ready"
+    },
+    "MFrFM": {
+      "git_commit": "aab96df836e88f19527cf311f2c54cc20fec59cd",
+      "has_weights": false,
+      "local_path": "/ai/224duibishiyan/615\u65b0\u7814\u7a76/third_party/backbones/MFrFM",
+      "status": "code_only"
+    },
+    "MIRepNet": {
+      "git_commit": "2bf16bcea493911948bfc9230775f56d47beeade",
+      "has_weights": true,
+      "local_path": "/ai/224duibishiyan/615\u65b0\u7814\u7a76/third_party/backbones/MIRepNet",
+      "status": "ready"
+    }
+  },
+  "datasets": {
+    "non_mi_candidates": [
+      "CHB-MIT",
+      "DEAP",
+      "P300 / ERP",
+      "SEED / SEED-IV",
+      "Sleep / ISRUC"
+    ],
+    "primary_mi_dataset": "BCIC-IV-2a / BNCI2014-001",
+    "primary_mi_path": "/ai/224duibishiyan/CBraMod-main/tmp_in/BCIC2a/MNE-bnci-data",
+    "secondary_mi_dataset": "PhysioNetMI / EEGMMI",
+    "secondary_mi_path": "/ai/224duibishiyan/CBraMod-main/tmp_in/MI/files",
+    "third_mi_dataset": "",
+    "third_mi_path": ""
+  },
+  "project_root": "/ai/224duibishiyan/615\u65b0\u7814\u7a76",
+  "protocol_safety": {
+    "old_outputs_modified": false,
+    "raw_dataset_copied": false,
+    "training_run_started": false
+  },
+  "recommended_next_experiment": {
+    "backbone": "MIRepNet",
+    "blocked_by": [],
+    "dataset": "BCIC-IV-2a / BNCI2014-001",
+    "reason": "Use MIRepNet first if official weight is ready; otherwise continue with CBraMod on the complete BCIC-IV-2a inventory."
+  },
+  "stage": "step0_backbone_dataset_inventory",
+  "status": "completed",
+  "warnings": [
+    "EEG-DINO: unresolved"
+  ],
+  "workspace_root": "/ai/224duibishiyan/615\u65b0\u7814\u7a76"
+}

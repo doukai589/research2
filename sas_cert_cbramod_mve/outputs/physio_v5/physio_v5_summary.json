@@ -1,0 +1,15 @@
+{
+  "conclusion": "cross_physio_signal_present",
+  "covariance_detector_is_construct_specific": false,
+  "covariance_generalizes_to_topology": true,
+  "physio_covariance_auc": 0.999966049382716,
+  "physio_detector_counts_auc_ge_070": {
+    "bandpower_score": 0,
+    "channel_order_score": 0,
+    "covariance_score": 3,
+    "topology_score": 3
+  },
+  "physio_ready_for_training": true,
+  "protocol_leakage_detected": false,
+  "status": "completed"
+}

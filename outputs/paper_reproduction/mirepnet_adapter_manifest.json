@@ -1,0 +1,204 @@
+{
+  "EA_behavior": "PAPER_PROTOCOL_EA requested; official behavior for train/test separation must be verified before generating exact arrays",
+  "adapter_ready": false,
+  "bcic_raw_path": "/ai/224duibishiyan/CBraMod-main/tmp_in/BCIC2a/MNE-bnci-data/database/data-sets/001-2014",
+  "channel_template": [
+    "F7",
+    "F5",
+    "F3",
+    "F1",
+    "FZ",
+    "F2",
+    "F4",
+    "F6",
+    "F8",
+    "FT7",
+    "FC5",
+    "FC3",
+    "FC1",
+    "FCZ",
+    "FC2",
+    "FC4",
+    "FC6",
+    "FT8",
+    "T7",
+    "C5",
+    "C3",
+    "C1",
+    "CZ",
+    "C2",
+    "C4",
+    "C6",
+    "T8",
+    "TP7",
+    "CP5",
+    "CP3",
+    "CP1",
+    "CPZ",
+    "CP2",
+    "CP4",
+    "CP6",
+    "TP8",
+    "P7",
+    "P5",
+    "P3",
+    "P1",
+    "PZ",
+    "P2",
+    "P4",
+    "P6",
+    "P8"
+  ],
+  "channel_template_mapping": "requires inverse-distance interpolation from 22 BNCI channels to 45-channel MIRepNet template",
+  "class_count": {
+    "BNCI2014001_2class_left_right": 2,
+    "BNCI2014001_4class_full": 4
+  },
+  "compatibility_with_official_code": "not_ready; official code expects ./data/<dataset>/X.npy and labels.npy plus dependencies",
+  "directly_observed_template_channels": [
+    "FZ",
+    "FC3",
+    "FC1",
+    "FCZ",
+    "FC2",
+    "FC4",
+    "C5",
+    "C3",
+    "C1",
+    "CZ",
+    "C2",
+    "C4",
+    "C6",
+    "CP3",
+    "CP1",
+    "CPZ",
+    "CP2",
+    "CP4",
+    "P1",
+    "PZ",
+    "P2"
+  ],
+  "expected_files_not_generated": [
+    "X.npy",
+    "labels.npy",
+    "metadata.json",
+    "subject_split.json",
+    "protocol_manifest.json"
+  ],
+  "generated_files": [],
+  "input_raw_shape": {
+    "files": 18,
+    "labels": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "left_right_trials": 2544,
+    "raw_shape_examples": [
+      [
+        96735,
+        25
+      ],
+      [
+        96735,
+        25
+      ],
+      [
+        96735,
+        25
+      ],
+      [
+        96735,
+        25
+      ],
+      [
+        96735,
+        25
+      ]
+    ],
+    "status": "audited",
+    "valid_trials": 5088
+  },
+  "interpolated_template_channels_required": [
+    "F7",
+    "F5",
+    "F3",
+    "F1",
+    "F2",
+    "F4",
+    "F6",
+    "F8",
+    "FT7",
+    "FC5",
+    "FC6",
+    "FT8",
+    "T7",
+    "T8",
+    "TP7",
+    "CP5",
+    "CP6",
+    "TP8",
+    "P7",
+    "P5",
+    "P3",
+    "P4",
+    "P6",
+    "P8"
+  ],
+  "local_backbone_path": "/ai/224duibishiyan/615新研究/third_party/backbones/MIRepNet",
+  "missing_dependencies": [
+    "wandb",
+    "einops"
+  ],
+  "official_code_status": "README command only documents BNCI2014004; BNCI2014001 paper targets require unreleased/adapter pipeline.",
+  "preprocessing_required": [
+    "8-30Hz bandpass",
+    "resample to 250Hz",
+    "4s window = 1000 points",
+    "Euclidean Alignment"
+  ],
+  "processed_shape_expected": {
+    "BNCI2014001_2class_left_right": "[samples,45,1000]",
+    "BNCI2014001_4class_full": "[samples,45,1000]"
+  },
+  "protocol_classification": {
+    "code_exact": "blocked_for_BNCI2014001_and_BNCI2014001-4",
+    "executable_hybrid": "not_created_to_avoid_mislabeling",
+    "paper_exact": "blocked_until_adapter_validated"
+  },
+  "reason": "not_generated_until_validated_inverse_distance_interpolation_and_EA_are_implemented",
+  "sample_count_expected_from_raw": {
+    "all_4class_trials": 5088,
+    "left_right_subset_estimate": 2544
+  },
+  "selected_tasks": [
+    "BNCI2014001_2class_left_right",
+    "BNCI2014001_4class_full"
+  ],
+  "source_channels": [
+    "FZ",
+    "FC3",
+    "FC1",
+    "FCZ",
+    "FC2",
+    "FC4",
+    "C5",
+    "C3",
+    "C1",
+    "CZ",
+    "C2",
+    "C4",
+    "C6",
+    "CP3",
+    "CP1",
+    "CPZ",
+    "CP2",
+    "CP4",
+    "P1",
+    "PZ",
+    "P2",
+    "POZ"
+  ],
+  "subject_count": 9
+}

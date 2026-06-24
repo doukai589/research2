@@ -1,0 +1,40 @@
+{
+  "status": "completed",
+  "review_target": "SoftWeight_noReject_LS010",
+  "output_tag": "st_source_tuned_full",
+  "decision": "revise_training",
+  "promotion_decision": "do_not_promote_softweight_no_reject",
+  "first_broken_link": "clean-vs-bad certificate quality does not reliably translate into subject/seed-stable training utility",
+  "facts": {
+    "delta_balanced_accuracy_vs_naive": 0.0064797091238654745,
+    "delta_macro_f1_vs_naive": 0.006401909521548154,
+    "delta_ece_vs_naive": 0.00029382908360143096,
+    "delta_nll_vs_naive": -0.0021715061136201833,
+    "delta_brier_vs_naive": -0.00566867308691144,
+    "positive_subject_mean_delta_macro_f1_rate": 0.6,
+    "majority_seed_subject_win_rate_macro_f1": 0.15,
+    "seed_win_rate_macro_f1": 0.0
+  },
+  "supported_links": [
+    "mean classification improves",
+    "calibration does not materially degrade",
+    "source-tuned ST feature substrate is useful"
+  ],
+  "rejected_links": [
+    "subject/seed reliability is sufficient for promotion",
+    "score-only diagnostic strength is sufficient proof of training utility"
+  ],
+  "top_explanations": [
+    "clean-vs-bad separability is not the same as subject-specific utility",
+    "artifact rejection may remove candidates useful as regularization",
+    "head-only few-shot training is sensitive to duplicated support-derived candidates"
+  ],
+  "next_experiment": "support_candidate_utility_alignment_audit",
+  "next_experiment_constraints": {
+    "no_new_training": true,
+    "no_new_dataset": true,
+    "no_new_backbone": true,
+    "one_diagnostic_only": true
+  },
+  "protocol_leakage_detected": false
+}

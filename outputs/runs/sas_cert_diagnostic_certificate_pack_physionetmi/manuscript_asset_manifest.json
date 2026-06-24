@@ -1,0 +1,29 @@
+{
+  "submission_clean_draft": "docs/SAS_CERT_DIAGNOSTIC_CERTIFICATE_SUBMISSION_DRAFT.md",
+  "latex_submission_draft": "docs/SAS_CERT_DIAGNOSTIC_CERTIFICATE_SUBMISSION_DRAFT_LATEX.md",
+  "bibliography_trace": "docs/SAS_CERT_BIBLIOGRAPHY_TRACE.md",
+  "references_bib": "docs/SAS_CERT_REFERENCES.bib",
+  "bibliography_resolution_report": "docs/SAS_CERT_BIBLIOGRAPHY_RESOLUTION_REPORT.md",
+  "figure_table_polish_report": "docs/SAS_CERT_FIGURE_TABLE_POLISH_REPORT.md",
+  "tables": [
+    "outputs/runs/sas_cert_diagnostic_certificate_pack_physionetmi/manuscript_tables/table1_protocol_and_claim_boundary.md",
+    "outputs/runs/sas_cert_diagnostic_certificate_pack_physionetmi/manuscript_tables/table2_diagnostic_auc_summary.md",
+    "outputs/runs/sas_cert_diagnostic_certificate_pack_physionetmi/manuscript_tables/table3_bad_type_component_auc.md",
+    "outputs/runs/sas_cert_diagnostic_certificate_pack_physionetmi/manuscript_tables/table4_training_policy_non_promotion.md",
+    "outputs/runs/sas_cert_diagnostic_certificate_pack_physionetmi/manuscript_tables/table5_claim_support.md",
+    "outputs/runs/sas_cert_diagnostic_certificate_pack_physionetmi/manuscript_tables/appendix_protocol_leakage_audit.md"
+  ],
+  "figures": [
+    "outputs/runs/sas_cert_diagnostic_certificate_pack_physionetmi/manuscript_figures/figure2_diagnostic_auc.svg",
+    "outputs/runs/sas_cert_diagnostic_certificate_pack_physionetmi/manuscript_figures/figure3_component_specificity_heatmap.svg",
+    "outputs/runs/sas_cert_diagnostic_certificate_pack_physionetmi/manuscript_figures/figure4_training_policy_non_promotion.svg",
+    "outputs/runs/sas_cert_diagnostic_certificate_pack_physionetmi/manuscript_figures/figure5_causal_chain.svg",
+    "outputs/runs/sas_cert_diagnostic_certificate_pack_physionetmi/manuscript_figures/figure1_certificate_overview.svg"
+  ],
+  "constraints": {
+    "new_experiments": false,
+    "new_training": false,
+    "new_claims": false,
+    "source": "existing_csv_json_and_polished_draft_only"
+  }
+}

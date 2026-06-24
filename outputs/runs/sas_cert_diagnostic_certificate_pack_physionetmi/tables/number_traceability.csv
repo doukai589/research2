@@ -1,0 +1,8 @@
+reported_item,source_path,json_field_or_table
+CBraMod current scalar SAS AUC 0.1969,workbench/20260622_component_gated_cert_rule/outputs/compact_component_gated_cert_rule_v1.json,"component_auc: backbone=CBraMod_frozen, component=sas_score"
+ST current scalar SAS AUC 0.1662,workbench/20260622_component_gated_cert_rule/outputs/compact_component_gated_cert_rule_v1.json,"component_auc: backbone=ST-EEGFormer-small_source_tuned, component=sas_score"
+component-gated v1 AUC 0.8395 on both backbones,workbench/20260622_component_gated_cert_rule/outputs/compact_component_gated_cert_rule_v1.json,component_auc: component=component_gated_v1
+artifact-gate physio AUC 0.9022 on both backbones,workbench/20260622_component_gated_cert_rule/outputs/compact_component_gated_cert_rule_v1.json,component_auc: component=score_artifact_gate_physio
+CBraMod repaired Macro-F1 +4.26pp and ECE +2.27pp,workbench/20260622_cbramod_physionetmi_sascert_matched/outputs/compact_cbramod_physionetmi_sascert_result_repaired_mini.json,primary_vs_naive
+ST SoftWeight Macro-F1 +0.64pp and reliability failure,workbench/20260622_steegformer_sascert_core/outputs/locked_confirm/compact_softweight_locked_confirm.json,comparisons.softweight_vs_naive
+ST utility alignment max candidate-only Spearman 0.1168,workbench/20260622_steegformer_sascert_core/outputs/utility_alignment_audit/compact_utility_alignment_audit.json,top_correlations[0]

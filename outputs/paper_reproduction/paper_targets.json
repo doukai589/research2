@@ -1,0 +1,318 @@
+{
+  "conflicts": [
+    {
+      "chosen_protocol": "paper_exact blocked until exact LMDB is generated; code_exact kept separate",
+      "code_behavior": "Official finetune_main.py consumes processed LMDB via datasets/physio_dataset.py; default CLI points to MentalArithmetic path.",
+      "conflict_type": "preprocessing_and_entrypoint",
+      "dataset": "PhysioNet-MI",
+      "expected_impact": "Large; split/preprocessing mismatch can dominate metrics.",
+      "model": "CBraMod",
+      "paper_claim": "Paper protocol uses raw PhysioNet-MI 64 channels, 200Hz, 4s, subject 1-70/71-89/90-109 split.",
+      "reason": "LMDB contents are opaque unless regenerated/audited."
+    },
+    {
+      "chosen_protocol": "paper_exact blocked until exact LMDB is generated; hybrid forward smoke not scored",
+      "code_behavior": "Official dataset class consumes LMDB; repository default CLI is not BCIC-IV-2a.",
+      "conflict_type": "split_and_preprocessing",
+      "dataset": "BCIC-IV-2a",
+      "expected_impact": "Large; exact paper comparison invalid without exact preprocessing.",
+      "model": "CBraMod",
+      "paper_claim": "Paper E.9 uses [2,6]s, 0.3-40Hz, 200Hz, subjects 1-5 train, 6-7 val, 8-9 test.",
+      "reason": "Existing SAS-Cert loader uses different bandpass in prior MVE and frozen pooling."
+    },
+    {
+      "chosen_protocol": "not_run_missing_key_ingredients_implementation",
+      "code_behavior": "No matching key-ingredients implementation found in the clean official entrypoint.",
+      "conflict_type": "missing_method_components",
+      "dataset": "BCIC-IV-2a LOSO",
+      "expected_impact": "Large; paper target is much higher and depends on ingredients.",
+      "model": "CBraMod",
+      "paper_claim": "LOSO result requires EA, session statistics, Mixup, and subject-wise regularization.",
+      "reason": "Running plain LOSO would not reproduce the paper table."
+    },
+    {
+      "chosen_protocol": "paper_exact blocked; code_exact unavailable",
+      "code_behavior": "README command only shows BNCI2014004; README states code for other datasets will be released.",
+      "conflict_type": "dataset_code_unreleased",
+      "dataset": "BNCI2014001",
+      "expected_impact": "Blocking; any local adapter is hybrid/paper reconstruction, not code exact.",
+      "model": "MIRepNet",
+      "paper_claim": "Paper reports BNCI2014001 2-class with 8-30Hz, 250Hz, 45-channel template, EA, 30% target fine-tune.",
+      "reason": "Cannot call official default for BNCI2014001 without inventing missing data pipeline."
+    },
+    {
+      "chosen_protocol": "adapter audit before reproduction",
+      "code_behavior": "dataset.py has a BNCI2014001-4 branch but expects ./data/BNCI2014001/X.npy and labels.npy; local files absent.",
+      "conflict_type": "missing_processed_data_and_adapter",
+      "dataset": "BNCI2014001-4",
+      "expected_impact": "Blocking until adapter is validated.",
+      "model": "MIRepNet",
+      "paper_claim": "Paper reports BNCI2014001 full 4-class with 45-channel template and EA.",
+      "reason": "Direct 22-channel BCIC input would violate paper and code expectations."
+    },
+    {
+      "chosen_protocol": "record missing dependency; no global install",
+      "code_behavior": "Local environment lacks wandb/einops; model PatchEmbedding defaults to num_channels=45.",
+      "conflict_type": "dependency_and_input_shape",
+      "dataset": "BNCI2014001/BNCI2014001-4",
+      "expected_impact": "Blocking for code execution; high risk if bypassed.",
+      "model": "MIRepNet",
+      "paper_claim": "Paper preprocessing includes 45-channel template and EA.",
+      "reason": "Attachment forbids global pollution; adapter must preserve 45 channels."
+    }
+  ],
+  "protocols": [
+    {
+      "dataset": "PhysioNet-MI",
+      "entrypoint": "/ai/224duibishiyan/615新研究/third_party/CBraMod-main/finetune_main.py",
+      "executable_now": true,
+      "model": "CBraMod",
+      "notes": "Official entry defaults are code behavior; requires LMDB datasets_dir with train/val/test keys.",
+      "protocol_name": "code_exact",
+      "protocol_type": "code_exact",
+      "status": "available_but_requires_processed_lmdb"
+    },
+    {
+      "dataset": "PhysioNet-MI",
+      "entrypoint": "paper raw EDF preprocessing + CBraMod full finetune",
+      "executable_now": false,
+      "model": "CBraMod",
+      "notes": "Raw EDF split 1-70/71-89/90-109 must be converted to exact LMDB before exact run.",
+      "protocol_name": "paper_exact",
+      "protocol_type": "paper_exact",
+      "status": "needs_paper_preprocessing_lmdb"
+    },
+    {
+      "dataset": "PhysioNet-MI",
+      "entrypoint": "Step1 mapped/cropped forward smoke",
+      "executable_now": true,
+      "model": "CBraMod",
+      "notes": "Can forward with 22-channel mapping, but this is not paper exact because paper uses 64 channels.",
+      "protocol_name": "executable_hybrid",
+      "protocol_type": "executable_hybrid",
+      "status": "forward_only_not_reproduction"
+    },
+    {
+      "dataset": "BCIC-IV-2a",
+      "entrypoint": "/ai/224duibishiyan/615新研究/third_party/CBraMod-main/finetune_main.py",
+      "executable_now": true,
+      "model": "CBraMod",
+      "notes": "Official code uses LMDB dataset class; default CLI is not BCIC.",
+      "protocol_name": "code_exact",
+      "protocol_type": "code_exact",
+      "status": "available_but_requires_processed_lmdb"
+    },
+    {
+      "dataset": "BCIC-IV-2a",
+      "entrypoint": "paper raw MAT preprocessing + CBraMod full finetune",
+      "executable_now": false,
+      "model": "CBraMod",
+      "notes": "Need exact [2,6]s, 0.3-40Hz, 200Hz, 1-5/6-7/8-9 split before exact run.",
+      "protocol_name": "paper_exact",
+      "protocol_type": "paper_exact",
+      "status": "needs_paper_preprocessing_lmdb"
+    },
+    {
+      "dataset": "BCIC-IV-2a",
+      "entrypoint": "Step1 raw MAT loader + CBraMod forward smoke",
+      "executable_now": true,
+      "model": "CBraMod",
+      "notes": "Forward works, but not full fine-tuning reproduction.",
+      "protocol_name": "executable_hybrid",
+      "protocol_type": "executable_hybrid",
+      "status": "forward_only_not_reproduction"
+    },
+    {
+      "dataset": "BNCI2014001",
+      "entrypoint": "/ai/224duibishiyan/615新研究/third_party/backbones/MIRepNet/finetune.py",
+      "executable_now": false,
+      "model": "MIRepNet",
+      "notes": "README command supports BNCI2014004; README says code for other datasets will be released.",
+      "protocol_name": "code_exact",
+      "protocol_type": "code_exact",
+      "status": "code_not_released_for_dataset"
+    },
+    {
+      "dataset": "BNCI2014001",
+      "entrypoint": "paper 45-channel template + EA + 30% target fine-tune",
+      "executable_now": false,
+      "model": "MIRepNet",
+      "notes": "Requires adapter to X.npy/labels.npy and local dependencies wandb/einops.",
+      "protocol_name": "paper_exact",
+      "protocol_type": "paper_exact",
+      "status": "needs_adapter_and_dependencies"
+    },
+    {
+      "dataset": "BNCI2014001",
+      "entrypoint": "local adapter audit only",
+      "executable_now": false,
+      "model": "MIRepNet",
+      "notes": "Hybrid cannot be scored until adapter is validated.",
+      "protocol_name": "executable_hybrid",
+      "protocol_type": "executable_hybrid",
+      "status": "not_ready"
+    },
+    {
+      "dataset": "BNCI2014001-4",
+      "entrypoint": "/ai/224duibishiyan/615新研究/third_party/backbones/MIRepNet/finetune.py",
+      "executable_now": false,
+      "model": "MIRepNet",
+      "notes": "Repository dataset.py has BNCI2014001-4 branch but README says other dataset code to be released; dependency/preprocessed files missing.",
+      "protocol_name": "code_exact",
+      "protocol_type": "code_exact",
+      "status": "code_not_released_for_dataset"
+    },
+    {
+      "dataset": "BNCI2014001-4",
+      "entrypoint": "paper 45-channel template + EA + 30% target fine-tune",
+      "executable_now": false,
+      "model": "MIRepNet",
+      "notes": "Requires validated inverse-distance channel interpolation and EA behavior.",
+      "protocol_name": "paper_exact",
+      "protocol_type": "paper_exact",
+      "status": "needs_adapter_and_dependencies"
+    },
+    {
+      "dataset": "BNCI2014001-4",
+      "entrypoint": "local adapter audit only",
+      "executable_now": false,
+      "model": "MIRepNet",
+      "notes": "Hybrid cannot be scored until adapter is validated.",
+      "protocol_name": "executable_hybrid",
+      "protocol_type": "executable_hybrid",
+      "status": "not_ready"
+    }
+  ],
+  "targets": [
+    {
+      "dataset": "PhysioNet-MI",
+      "metric": "balanced_accuracy",
+      "model": "CBraMod",
+      "notes": "subjects 1-70 train, 71-89 val, 90-109 test; 4s; 200Hz",
+      "paper_mean": 0.6417,
+      "paper_protocol": "paper_exact",
+      "paper_std": 0.0091,
+      "task": "4-class"
+    },
+    {
+      "dataset": "PhysioNet-MI",
+      "metric": "cohen_kappa",
+      "model": "CBraMod",
+      "notes": "subjects 1-70 train, 71-89 val, 90-109 test; 4s; 200Hz",
+      "paper_mean": 0.5222,
+      "paper_protocol": "paper_exact",
+      "paper_std": 0.0169,
+      "task": "4-class"
+    },
+    {
+      "dataset": "PhysioNet-MI",
+      "metric": "weighted_f1",
+      "model": "CBraMod",
+      "notes": "subjects 1-70 train, 71-89 val, 90-109 test; 4s; 200Hz",
+      "paper_mean": 0.6427,
+      "paper_protocol": "paper_exact",
+      "paper_std": 0.01,
+      "task": "4-class"
+    },
+    {
+      "dataset": "BCIC-IV-2a",
+      "metric": "balanced_accuracy",
+      "model": "CBraMod",
+      "notes": "[2,6]s; 0.3-40Hz; 200Hz; subjects 1-5 train, 6-7 val, 8-9 test",
+      "paper_mean": 0.5138,
+      "paper_protocol": "paper_exact",
+      "paper_std": 0.0066,
+      "task": "E.9 4-class"
+    },
+    {
+      "dataset": "BCIC-IV-2a",
+      "metric": "cohen_kappa",
+      "model": "CBraMod",
+      "notes": "[2,6]s; 0.3-40Hz; 200Hz; subjects 1-5 train, 6-7 val, 8-9 test",
+      "paper_mean": 0.3518,
+      "paper_protocol": "paper_exact",
+      "paper_std": 0.0094,
+      "task": "E.9 4-class"
+    },
+    {
+      "dataset": "BCIC-IV-2a",
+      "metric": "weighted_f1",
+      "model": "CBraMod",
+      "notes": "[2,6]s; 0.3-40Hz; 200Hz; subjects 1-5 train, 6-7 val, 8-9 test",
+      "paper_mean": 0.4984,
+      "paper_protocol": "paper_exact",
+      "paper_std": 0.0085,
+      "task": "E.9 4-class"
+    },
+    {
+      "dataset": "BCIC-IV-2a LOSO key ingredients",
+      "metric": "balanced_accuracy",
+      "model": "CBraMod",
+      "notes": "LOSO with EA, session statistics, Mixup, subject-wise regularization",
+      "paper_mean": 0.7405,
+      "paper_protocol": "paper_exact",
+      "paper_std": 0.0635,
+      "task": "LOSO key ingredients"
+    },
+    {
+      "dataset": "BCIC-IV-2a LOSO key ingredients",
+      "metric": "auc_pr",
+      "model": "CBraMod",
+      "notes": "LOSO with EA, session statistics, Mixup, subject-wise regularization",
+      "paper_mean": 0.5997,
+      "paper_protocol": "paper_exact",
+      "paper_std": 0.0833,
+      "task": "LOSO key ingredients"
+    },
+    {
+      "dataset": "BCIC-IV-2a LOSO key ingredients",
+      "metric": "auroc",
+      "model": "CBraMod",
+      "notes": "LOSO with EA, session statistics, Mixup, subject-wise regularization",
+      "paper_mean": 0.7195,
+      "paper_protocol": "paper_exact",
+      "paper_std": 0.0682,
+      "task": "LOSO key ingredients"
+    },
+    {
+      "dataset": "BNCI2014001",
+      "metric": "accuracy_full_finetune",
+      "model": "MIRepNet",
+      "notes": "30% target-session trials; 8-30Hz; 250Hz; 45-channel template; EA",
+      "paper_mean": 0.8177,
+      "paper_protocol": "paper_exact",
+      "paper_std": 0.0027,
+      "task": "likely 2-class left/right"
+    },
+    {
+      "dataset": "BNCI2014001",
+      "metric": "accuracy_linear_probe",
+      "model": "MIRepNet",
+      "notes": "30% target-session trials; 8-30Hz; 250Hz; 45-channel template; EA",
+      "paper_mean": 0.7536,
+      "paper_protocol": "paper_exact",
+      "paper_std": 0.0226,
+      "task": "likely 2-class left/right"
+    },
+    {
+      "dataset": "BNCI2014001-4",
+      "metric": "accuracy_full_finetune",
+      "model": "MIRepNet",
+      "notes": "30% target-session trials; 8-30Hz; 250Hz; 45-channel template; EA",
+      "paper_mean": 0.6414,
+      "paper_protocol": "paper_exact",
+      "paper_std": 0.0031,
+      "task": "4-class full"
+    },
+    {
+      "dataset": "BNCI2014001-4",
+      "metric": "accuracy_linear_probe",
+      "model": "MIRepNet",
+      "notes": "30% target-session trials; 8-30Hz; 250Hz; 45-channel template; EA",
+      "paper_mean": 0.5194,
+      "paper_protocol": "paper_exact",
+      "paper_std": 0.0184,
+      "task": "4-class full"
+    }
+  ]
+}

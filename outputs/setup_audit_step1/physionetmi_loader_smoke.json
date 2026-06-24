@@ -1,0 +1,155 @@
+{
+  "channel_names": [
+    "Fc5.",
+    "Fc3.",
+    "Fc1.",
+    "Fcz.",
+    "Fc2.",
+    "Fc4.",
+    "Fc6.",
+    "C5..",
+    "C3..",
+    "C1..",
+    "Cz..",
+    "C2..",
+    "C4..",
+    "C6..",
+    "Cp5.",
+    "Cp3.",
+    "Cp1.",
+    "Cpz.",
+    "Cp2.",
+    "Cp4.",
+    "Cp6.",
+    "Fp1.",
+    "Fpz.",
+    "Fp2.",
+    "Af7.",
+    "Af3.",
+    "Afz.",
+    "Af4.",
+    "Af8.",
+    "F7..",
+    "F5..",
+    "F3..",
+    "F1..",
+    "Fz..",
+    "F2..",
+    "F4..",
+    "F6..",
+    "F8..",
+    "Ft7.",
+    "Ft8.",
+    "T7..",
+    "T8..",
+    "T9..",
+    "T10.",
+    "Tp7.",
+    "Tp8.",
+    "P7..",
+    "P5..",
+    "P3..",
+    "P1..",
+    "Pz..",
+    "P2..",
+    "P4..",
+    "P6..",
+    "P8..",
+    "Po7.",
+    "Po3.",
+    "Poz.",
+    "Po4.",
+    "Po8.",
+    "O1..",
+    "Oz..",
+    "O2..",
+    "Iz.."
+  ],
+  "dataset": "PhysioNetMI / EEGMMI",
+  "errors": [],
+  "event_code_to_label": {
+    "T0": "rest",
+    "T1_on_runs_4_8_12": "left_fist_imagery",
+    "T1_on_runs_6_10_14": "both_fists_imagery",
+    "T2_on_runs_4_8_12": "right_fist_imagery",
+    "T2_on_runs_6_10_14": "both_feet_imagery"
+  },
+  "mi_runs_detected": [
+    4,
+    6,
+    8,
+    10,
+    12,
+    14
+  ],
+  "path": "/ai/224duibishiyan/CBraMod-main/tmp_in/MI/files",
+  "ready": true,
+  "recommended_task": "2-class left vs right from MI runs 4/8/12 first; then 2-class hands vs feet from runs 6/10/14; 4-class requires combining run semantics carefully.",
+  "recommended_window": "4.0s trial window, resample/crop to 200Hz x 4s = 800 samples for CBraMod compatibility",
+  "runs_per_subject": [
+    14
+  ],
+  "sample_smoke": [
+    {
+      "annotations": {
+        "T0": 15,
+        "T1": 8,
+        "T2": 7
+      },
+      "file": "/ai/224duibishiyan/CBraMod-main/tmp_in/MI/files/S001/S001R04.edf",
+      "n_channels": 64,
+      "sfreq": 160.0
+    },
+    {
+      "annotations": {
+        "T0": 15,
+        "T1": 7,
+        "T2": 8
+      },
+      "file": "/ai/224duibishiyan/CBraMod-main/tmp_in/MI/files/S001/S001R06.edf",
+      "n_channels": 64,
+      "sfreq": 160.0
+    },
+    {
+      "annotations": {
+        "T0": 15,
+        "T1": 7,
+        "T2": 8
+      },
+      "file": "/ai/224duibishiyan/CBraMod-main/tmp_in/MI/files/S002/S002R04.edf",
+      "n_channels": 64,
+      "sfreq": 160.0
+    },
+    {
+      "annotations": {
+        "T0": 15,
+        "T1": 8,
+        "T2": 7
+      },
+      "file": "/ai/224duibishiyan/CBraMod-main/tmp_in/MI/files/S002/S002R06.edf",
+      "n_channels": 64,
+      "sfreq": 160.0
+    }
+  ],
+  "sampled_runs": [
+    "S001R04",
+    "S001R06",
+    "S002R04",
+    "S002R06"
+  ],
+  "sampled_subjects": [
+    "S001",
+    "S002"
+  ],
+  "sfreq": 160.0,
+  "status": "ready",
+  "subjects": 109,
+  "task_type_by_run": {
+    "1": "eyes_open",
+    "2": "eyes_closed",
+    "3,7,11": "motor_execution_left_right_fist",
+    "4,8,12": "motor_imagery_left_right_fist",
+    "5,9,13": "motor_execution_both_fists_both_feet",
+    "6,10,14": "motor_imagery_both_fists_both_feet"
+  }
+}

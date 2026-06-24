@@ -1,0 +1,15 @@
+{
+  "global_install_performed": false,
+  "install_suggestion": "Use a project-local environment or pip --target outputs/repro_gate_repair/local_python_deps for einops; wandb can be stubbed for smoke but should be installed in a clean env for code_exact.",
+  "missing_dependencies": [
+    "wandb",
+    "einops"
+  ],
+  "present_dependencies": [
+    "torch",
+    "numpy",
+    "sklearn",
+    "pandas",
+    "scipy"
+  ]
+}

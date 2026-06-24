@@ -1,0 +1,16 @@
+{
+  "status": "completed",
+  "output_tag": "st_source_tuned_routing_dev",
+  "comparison": "SASCert_SoftAR_LS010-vs-NaiveAug_LS010",
+  "n_pairs": 95,
+  "delta_accuracy": 0.0036730123180291137,
+  "delta_balanced_accuracy": 0.0035143805806075266,
+  "delta_macro_f1": 0.0033687081763795145,
+  "delta_kappa": 0.0070309323869911676,
+  "delta_auroc": 0.0044503758386408914,
+  "delta_ece": -0.0017080098322879208,
+  "delta_nll": -0.0056340977783067995,
+  "delta_brier": -0.005467240630011809,
+  "subject_win_rate_macro_f1": 0.2631578947368421,
+  "seed_win_rate_macro_f1": 0.0
+}

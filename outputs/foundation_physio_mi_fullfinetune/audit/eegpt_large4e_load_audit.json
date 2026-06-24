@@ -1,0 +1,17 @@
+{
+  "checkpoint_keys": 206,
+  "model_keys": 213,
+  "loaded_keys": 206,
+  "skipped_missing_name": 0,
+  "skipped_shape": [],
+  "missing_after_load": [
+    "chan_conv.0.weight",
+    "chan_conv.0.bias",
+    "predictor.cls_token",
+    "fc_norm.weight",
+    "fc_norm.bias",
+    "head.weight",
+    "head.bias"
+  ],
+  "unexpected_after_load": []
+}

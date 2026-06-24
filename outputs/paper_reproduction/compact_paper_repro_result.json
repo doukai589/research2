@@ -1,0 +1,92 @@
+{
+  "cbramod": {
+    "bcic_iv_2a_e9": {
+      "local_metrics": {},
+      "matched_or_close": null,
+      "paper_metrics": {
+        "balanced_accuracy": {
+          "mean": 0.5138,
+          "std": 0.0066
+        },
+        "cohen_kappa": {
+          "mean": 0.3518,
+          "std": 0.0094
+        },
+        "weighted_f1": {
+          "mean": 0.4984,
+          "std": 0.0085
+        }
+      },
+      "ran": false,
+      "status": "failed"
+    },
+    "bcic_iv_2a_loso_key_ingredients": {
+      "ran": false,
+      "reason": "failed"
+    },
+    "physionet_mi": {
+      "local_metrics": {},
+      "matched_or_close": null,
+      "paper_metrics": {
+        "balanced_accuracy": {
+          "mean": 0.6417,
+          "std": 0.0091
+        },
+        "cohen_kappa": {
+          "mean": 0.5222,
+          "std": 0.0169
+        },
+        "weighted_f1": {
+          "mean": 0.6427,
+          "std": 0.01
+        }
+      },
+      "ran": false,
+      "status": "failed"
+    }
+  },
+  "mirepnet": {
+    "adapter_ready": false,
+    "bnci2014001": {
+      "local_metrics": {},
+      "matched_or_close": null,
+      "paper_metrics": {
+        "accuracy_full_finetune": {
+          "mean": 0.8177,
+          "std": 0.0027
+        },
+        "accuracy_linear_probe": {
+          "mean": 0.7536,
+          "std": 0.0226
+        }
+      },
+      "ran": false,
+      "status": "failed"
+    },
+    "bnci2014001_4": {
+      "local_metrics": {},
+      "matched_or_close": null,
+      "paper_metrics": {
+        "accuracy_full_finetune": {
+          "mean": 0.6414,
+          "std": 0.0031
+        },
+        "accuracy_linear_probe": {
+          "mean": 0.5194,
+          "std": 0.0184
+        }
+      },
+      "ran": false,
+      "status": "failed"
+    }
+  },
+  "next_action": "Build exact preprocessing/LMDB for CBraMod paper runs and validate MIRepNet 45-channel interpolation+EA adapter before claiming paper reproduction.",
+  "overall_decision": "ADAPTER_NEEDED",
+  "safe_for_sas_cert_next_stage": false,
+  "stage": "paper_reproduction_gate",
+  "status": "partial",
+  "warnings": [
+    "CBraMod paper_exact did not run; only gate/failure audit is available.",
+    "MIRepNet adapter not ready; MIRepNet paper_exact did not run."
+  ]
+}

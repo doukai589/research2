@@ -1,0 +1,6 @@
+item,code_exact,paper_exact,gap,prefer_code_if_gap_small,notes
+data_container,LMDB train/val/test keys,raw MAT/EDF preprocessing specification,container_only_if_regenerated,True,"Generate LMDB from paper preprocessing, then official code can be primary."
+BCIC split,whatever LMDB keys contain,subjects 1-5/6-7/8-9,must_audit,False,Split mismatch changes metric.
+BCIC filter,whatever preprocessing produced,0.3-40Hz,must_generate,False,Prior SAS loader used different filter; do not reuse.
+PhysioNet channels,64-channel model_for_physio,64-channel raw PhysioNetMI,small_if_full_64ch_lmdb,True,Do not use 22-channel hybrid mapping for paper reproduction.
+hyperparameters,"50 epochs, bs64, AdamW, lr1e-4, wd5e-2, label_smoothing0.1",same listed hyperparameters,small,True,Official code should be primary after LMDB is exact.

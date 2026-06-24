@@ -1,0 +1,100 @@
+{
+  "artifact_reject_percentile": 10.0,
+  "backbone_frozen": true,
+  "label_smoothing": 0.1,
+  "main_method": "SASCert_SoftAR_LS010",
+  "paired_comparison": [
+    {
+      "baseline_group": "NaiveAug",
+      "delta_acc": 0.01504629629629628,
+      "delta_brier": -0.0007319026823617847,
+      "delta_ece": 0.004430180397114639,
+      "delta_kappa": 0.02006172839506172,
+      "delta_macro_f1": 0.03235301279054953,
+      "delta_nll": -0.0014313909742569297,
+      "delta_subject_wise_std": 0.002697776221642585,
+      "delta_worst_subject_acc": 0.009027777777777829,
+      "final_group_decision": "ARTIFACT_ONLY_BRANCH_DIAGNOSTIC",
+      "group": "ArtifactReject_raw_diagnostic",
+      "passed_acc": true,
+      "passed_brier": true,
+      "passed_ece": true,
+      "passed_macro_f1": true,
+      "passed_nll": true,
+      "subject_win_rate_acc": 0.8888888888888888,
+      "subject_win_rate_macro_f1": 1.0
+    },
+    {
+      "baseline_group": "NaiveAug",
+      "delta_acc": 0.013657407407407396,
+      "delta_brier": -0.00038867577089130023,
+      "delta_ece": 0.004534982561053322,
+      "delta_kappa": 0.01820987654320988,
+      "delta_macro_f1": 0.023688857809868236,
+      "delta_nll": -0.0009087483088177084,
+      "delta_subject_wise_std": 0.002171519514135911,
+      "delta_worst_subject_acc": 0.008333333333333331,
+      "final_group_decision": "GO_STABLE_CALIBRATED_SOFTWEIGHT",
+      "group": "SASCert_SoftAR_LS010",
+      "passed_acc": true,
+      "passed_brier": true,
+      "passed_ece": true,
+      "passed_macro_f1": true,
+      "passed_nll": true,
+      "subject_win_rate_acc": 1.0,
+      "subject_win_rate_macro_f1": 1.0
+    }
+  ],
+  "protocol_leakage_detected": false,
+  "score_variant": "artifact_gate_content_rank",
+  "seeds": [
+    20,
+    21,
+    22,
+    23,
+    24
+  ],
+  "status": "completed",
+  "summary": [
+    {
+      "acc": 0.326929012345679,
+      "brier": 0.7401938860549919,
+      "ece": 0.06968670005415693,
+      "group": "ArtifactReject_raw_diagnostic",
+      "kappa": 0.10257201646090534,
+      "macro_f1": 0.2687184141885544,
+      "mean_confidence": 0.28364362517992653,
+      "n": 45,
+      "nll": 1.3673293087217542,
+      "subject_wise_std": 0.05667163817321487,
+      "worst_subject_acc": 0.2555555555555556
+    },
+    {
+      "acc": 0.3118827160493827,
+      "brier": 0.7409257887373537,
+      "ece": 0.0652565196570423,
+      "group": "NaiveAug",
+      "kappa": 0.08251028806584362,
+      "macro_f1": 0.23636540139800488,
+      "mean_confidence": 0.2900963054762946,
+      "n": 45,
+      "nll": 1.368760699696011,
+      "subject_wise_std": 0.053973861951572284,
+      "worst_subject_acc": 0.24652777777777776
+    },
+    {
+      "acc": 0.3255401234567901,
+      "brier": 0.7405371129664624,
+      "ece": 0.06979150221809562,
+      "group": "SASCert_SoftAR_LS010",
+      "kappa": 0.1007201646090535,
+      "macro_f1": 0.2600542592078731,
+      "mean_confidence": 0.28505911893314784,
+      "n": 45,
+      "nll": 1.3678519513871934,
+      "subject_wise_std": 0.056145381465708195,
+      "worst_subject_acc": 0.2548611111111111
+    }
+  ],
+  "w_min": 0.2
+}

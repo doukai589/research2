@@ -1,0 +1,22 @@
+{
+  "created": true,
+  "labels": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "path": "/ai/224duibishiyan/615新研究/outputs/repro_gate_repair/cbramod_tiny_lmdb_bcic",
+  "raw_dataset_copied": false,
+  "sample_shape": [
+    22,
+    4,
+    200
+  ],
+  "splits": {
+    "test": 8,
+    "train": 32,
+    "val": 8
+  },
+  "status": "tiny_lmdb_ready"
+}

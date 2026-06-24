@@ -1,0 +1,35 @@
+{
+  "checkpoint_path": "/ai/224duibishiyan/615新研究/third_party/backbones/STEEGFormer/pretrained_weights/ST-EEGFormer-small/checkpoint-300.pth",
+  "checkpoint_keys": 160,
+  "model_keys": 106,
+  "loaded_keys": 101,
+  "skipped_missing_name": 59,
+  "skipped_shape": [],
+  "missing_after_load": [
+    "pos_embed",
+    "fc_norm.weight",
+    "fc_norm.bias",
+    "head.weight",
+    "head.bias"
+  ],
+  "unexpected_after_load": [],
+  "optional_source_tuned_state_dict": {
+    "state_dict_path": "outputs/foundation_physio_mi_fullfinetune/checkpoints/st_eegformer_small_seed3407_best.pt",
+    "checkpoint_keys": 106,
+    "target_model_keys": 106,
+    "loaded_keys": 106,
+    "skipped_missing_name": 0,
+    "skipped_shape": [],
+    "missing_after_load": [],
+    "unexpected_after_load": []
+  },
+  "feature_tag": "st_source_tuned_seed3407",
+  "experiment": "v1_1",
+  "groups": [
+    "NaiveAug_LS010",
+    "ArtifactReject_LS010",
+    "SoftWeight_noReject_LS010",
+    "SAS-Cert-SoftAR-LS-v1.1"
+  ],
+  "artifact_reject_percentile": 90.0
+}

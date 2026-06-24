@@ -1,0 +1,96 @@
+{
+  "stage": "cbramod_physionetmi_sascert_matched_mini",
+  "status": "completed_mini",
+  "protocol": {
+    "dataset": "PhysioNetMI",
+    "task": "left_vs_right_motor_imagery",
+    "runs": [
+      4,
+      8,
+      12
+    ],
+    "targets": [
+      90,
+      91,
+      92
+    ],
+    "seeds": [
+      20,
+      21
+    ],
+    "shot_per_class": 5,
+    "n_aug": 5,
+    "source_epochs": 30,
+    "finetune_epochs": 80,
+    "label_smoothing": 0.1,
+    "artifact_reject_percentile": 90.0,
+    "experiment": "repaired",
+    "primary_group": "RepairedSoftWeight_artifact_gate_physio_LS010"
+  },
+  "groups": {
+    "NaiveAug_LS010": {
+      "accuracy": 0.5370820668693009,
+      "balanced_accuracy": 0.5349475143592791,
+      "macro_f1": 0.4982986240311926,
+      "kappa": 0.07250681947674666,
+      "auroc": 0.5152525252525253,
+      "ece": 0.08428846678291772,
+      "nll": 0.6930602807267171,
+      "brier": 0.4998801251252492
+    },
+    "NoAug_LS010": {
+      "accuracy": 0.5251266464032421,
+      "balanced_accuracy": 0.5230956625074272,
+      "macro_f1": 0.49543860516622873,
+      "kappa": 0.04755839922258057,
+      "auroc": 0.5147692612398495,
+      "ece": 0.05953978728408629,
+      "nll": 0.69266108540871,
+      "brier": 0.49948735535144806
+    },
+    "RepairedSoftWeight_artifact_gate_physio_LS010": {
+      "accuracy": 0.5500506585612969,
+      "balanced_accuracy": 0.5460714993067934,
+      "macro_f1": 0.540944898899341,
+      "kappa": 0.09289860694414569,
+      "auroc": 0.5124678154089918,
+      "ece": 0.10701033646182327,
+      "nll": 0.691584284810952,
+      "brier": 0.49841371675332385
+    }
+  },
+  "primary_vs_naive": {
+    "delta_balanced_accuracy": 0.01112398494751432,
+    "delta_macro_f1": 0.042646274868148426,
+    "delta_ece": 0.02272186967890555,
+    "delta_nll": -0.0014759959157650826,
+    "delta_brier": -0.001466408371925354,
+    "subject_win_rate_macro_f1": 0.6666666666666666,
+    "seed_win_rate_macro_f1": 1.0
+  },
+  "n_rows": 18,
+  "backbone_audit": {
+    "checkpoint_path": "/ai/224duibishiyan/新研究/CBraMod-main/pretrained_weights/pretrained_weights.pth",
+    "checkpoint_keys": 211,
+    "model_keys": 211,
+    "loaded_keys": 211,
+    "missing_in_checkpoint": [],
+    "missing_after_load": [],
+    "unexpected_after_load": [],
+    "shape_mismatch": [],
+    "unexpected_checkpoint_keys": [],
+    "code_path": "/ai/224duibishiyan/615新研究/third_party/CBraMod-main",
+    "n_channels": 64,
+    "target_samples": 800,
+    "patch_size": 200,
+    "patch_num": 4,
+    "proj_out_replaced_with_identity": true,
+    "frozen_backbone": true
+  },
+  "leakage_audit": {
+    "raw_data_copied": false,
+    "raw_augmented_arrays_saved": false,
+    "target_test_used_for_ranking_threshold_or_training": false,
+    "cbramod_backbone_frozen": true
+  }
+}

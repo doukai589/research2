@@ -1,0 +1,3 @@
+target_subject,seed,comparison,delta_balanced_accuracy,delta_macro_f1,delta_ece,delta_nll,delta_brier,win_macro_f1
+90,20,RepairedSoftWeight_artifact_gate_physio_LS010-vs-NoAug_LS010,0.02614379084967322,0.01107763204537393,-0.028212904930114746,2.9410199967161432e-05,2.9325485229492188e-05,1
+90,20,RepairedSoftWeight_artifact_gate_physio_LS010-vs-NaiveAug_LS010,-0.0016339869281045694,-0.013095238095238104,6.99758529663086e-05,-6.472708332583288e-05,-6.473064422607422e-05,0

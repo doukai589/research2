@@ -1,0 +1,111 @@
+{
+  "stage": "steegformer_sascert_core_workbench",
+  "status": "completed_smoke",
+  "experiment": "component_gated",
+  "primary_group": "ComponentGatedV1_LS010",
+  "groups": {
+    "NaiveAug_LS010": {
+      "accuracy": 0.8571428571428571,
+      "balanced_accuracy": 0.8611111111111112,
+      "macro_f1": 0.8552522746071133,
+      "kappa": 0.7163695299837926,
+      "auroc": 0.9967320261437909,
+      "ece": 0.08248553957257952,
+      "nll": 0.3458316710457467,
+      "brier": 0.21888208389282227
+    },
+    "SoftWeight_noReject_LS010": {
+      "accuracy": 0.8285714285714286,
+      "balanced_accuracy": 0.8333333333333333,
+      "macro_f1": 0.825,
+      "kappa": 0.6601941747572816,
+      "auroc": 0.9967320261437909,
+      "ece": 0.11322657380785262,
+      "nll": 0.4168484733958784,
+      "brier": 0.25269341468811035
+    },
+    "SASCert_SoftAR_LS010": {
+      "accuracy": 0.8571428571428571,
+      "balanced_accuracy": 0.8611111111111112,
+      "macro_f1": 0.8552522746071133,
+      "kappa": 0.7163695299837926,
+      "auroc": 0.9967320261437909,
+      "ece": 0.14884489945002963,
+      "nll": 0.3893399086500709,
+      "brier": 0.23924137651920319
+    },
+    "ArtifactGatePhysio_LS010": {
+      "accuracy": 0.8571428571428571,
+      "balanced_accuracy": 0.8611111111111112,
+      "macro_f1": 0.8552522746071133,
+      "kappa": 0.7163695299837926,
+      "auroc": 0.9967320261437909,
+      "ece": 0.15059838976178852,
+      "nll": 0.3983980494464145,
+      "brier": 0.2472515106201172
+    },
+    "ComponentGatedV1_LS010": {
+      "accuracy": 0.8571428571428571,
+      "balanced_accuracy": 0.8611111111111112,
+      "macro_f1": 0.8552522746071133,
+      "kappa": 0.7163695299837926,
+      "auroc": 0.9967320261437909,
+      "ece": 0.1498883877481733,
+      "nll": 0.3944745632702177,
+      "brier": 0.24543896317481995
+    }
+  },
+  "primary_vs_naive": {
+    "primary_group": "ComponentGatedV1_LS010",
+    "baseline_group": "NaiveAug_LS010",
+    "delta_balanced_accuracy": 0.0,
+    "delta_macro_f1": 0.0,
+    "delta_ece": 0.06740284817559379,
+    "delta_nll": 0.04864289222447099,
+    "delta_brier": 0.02655687928199768,
+    "subject_win_rate_macro_f1": 0.0,
+    "seed_win_rate_macro_f1": 0.0
+  },
+  "sascert_vs_naive": null,
+  "paired_comparisons": {
+    "ComponentGatedV1_LS010-vs-NaiveAug_LS010": {
+      "delta_balanced_accuracy": 0.0,
+      "delta_macro_f1": 0.0,
+      "delta_ece": 0.06740284817559379,
+      "delta_nll": 0.04864289222447099,
+      "delta_brier": 0.02655687928199768,
+      "win_macro_f1": 0.0
+    },
+    "ComponentGatedV1_LS010-vs-SoftWeight_noReject_LS010": {
+      "delta_balanced_accuracy": 0.0277777777777779,
+      "delta_macro_f1": 0.030252274607113327,
+      "delta_ece": 0.0366618139403207,
+      "delta_nll": -0.0223739101256607,
+      "delta_brier": -0.007254451513290405,
+      "win_macro_f1": 1.0
+    },
+    "ComponentGatedV1_LS010-vs-SASCert_SoftAR_LS010": {
+      "delta_balanced_accuracy": 0.0,
+      "delta_macro_f1": 0.0,
+      "delta_ece": 0.0010434882981436855,
+      "delta_nll": 0.0051346546201467835,
+      "delta_brier": 0.00619758665561676,
+      "win_macro_f1": 0.0
+    },
+    "ComponentGatedV1_LS010-vs-ArtifactGatePhysio_LS010": {
+      "delta_balanced_accuracy": 0.0,
+      "delta_macro_f1": 0.0,
+      "delta_ece": -0.0007100020136152074,
+      "delta_nll": -0.003923486176196811,
+      "delta_brier": -0.0018125474452972412,
+      "win_macro_f1": 0.0
+    }
+  },
+  "component_ablation": {
+    "beats_artifact_reject_macro_f1": null,
+    "beats_softweight_no_reject_macro_f1": true,
+    "mean_delta_macro_f1_vs_artifact_reject": null,
+    "mean_delta_macro_f1_vs_softweight_no_reject": 0.030252274607113327
+  },
+  "n_rows": 5
+}

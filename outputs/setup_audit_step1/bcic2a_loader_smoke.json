@@ -1,0 +1,103 @@
+{
+  "channel_count": 22,
+  "channel_names": [
+    "FZ",
+    "FC3",
+    "FC1",
+    "FCZ",
+    "FC2",
+    "FC4",
+    "C5",
+    "C3",
+    "C1",
+    "CZ",
+    "C2",
+    "C4",
+    "C6",
+    "CP3",
+    "CP1",
+    "CPZ",
+    "CP2",
+    "CP4",
+    "P1",
+    "PZ",
+    "P2",
+    "POZ"
+  ],
+  "dataset": "BCIC-IV-2a / BNCI2014-001",
+  "eog_channels_detected": true,
+  "eog_channels_excluded": true,
+  "errors": [],
+  "files": [
+    "A01E.mat",
+    "A01T.mat",
+    "A02E.mat",
+    "A02T.mat",
+    "A03E.mat",
+    "A03T.mat",
+    "A04E.mat",
+    "A04T.mat",
+    "A05E.mat",
+    "A05T.mat",
+    "A06E.mat",
+    "A06T.mat",
+    "A07E.mat",
+    "A07T.mat",
+    "A08E.mat",
+    "A08T.mat",
+    "A09E.mat",
+    "A09T.mat"
+  ],
+  "label_counts": {
+    "0": 1272,
+    "1": 1272,
+    "2": 1272,
+    "3": 1272
+  },
+  "labels": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "path": "/ai/224duibishiyan/CBraMod-main/tmp_in/BCIC2a/MNE-bnci-data/database/data-sets/001-2014",
+  "ready": true,
+  "sample_trial_stats": {
+    "inf_count": 0,
+    "max": 24.264141082763672,
+    "mean": 0.05568582937121391,
+    "min": -20.893754959106445,
+    "nan_count": 0,
+    "std": 5.8115339279174805
+  },
+  "sessions": [
+    "E",
+    "T"
+  ],
+  "sfreq_output": 200,
+  "sfreq_raw": 250,
+  "status": "ready",
+  "subject_session_complete": true,
+  "subjects": [
+    "A01",
+    "A02",
+    "A03",
+    "A04",
+    "A05",
+    "A06",
+    "A07",
+    "A08",
+    "A09"
+  ],
+  "target_shape": [
+    22,
+    800
+  ],
+  "trial_shape": [
+    22,
+    800
+  ],
+  "trial_shape_counts": {
+    "(22, 800)": 5088
+  }
+}

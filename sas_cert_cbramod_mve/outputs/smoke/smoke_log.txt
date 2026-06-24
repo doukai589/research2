@@ -1,0 +1,83 @@
+{
+  "cbramod_input_shape_tail": [
+    22,
+    4,
+    200
+  ],
+  "cbramod_output_shape": [
+    8,
+    22,
+    4,
+    200
+  ],
+  "checkpoint_audit": {
+    "adapter_missing_accepted": true,
+    "checkpoint_path": "/ai/224duibishiyan/615\u65b0\u7814\u7a76/sas_cert_cbramod_mve/third_party/CBraMod/pretrained_weights/pretrained_weights.pth",
+    "checkpoint_total_keys": 211,
+    "core_missing_keys": [],
+    "matched_keys": 211,
+    "missing_keys": 240,
+    "missing_keys_preview": [
+      "encoder.layers.0.adapter.temperature",
+      "encoder.layers.0.adapter.alpha",
+      "encoder.layers.0.adapter.linear_adapter.down_proj.weight",
+      "encoder.layers.0.adapter.linear_adapter.down_proj.bias",
+      "encoder.layers.0.adapter.linear_adapter.up_proj.weight",
+      "encoder.layers.0.adapter.linear_adapter.up_proj.bias",
+      "encoder.layers.0.adapter.freq_adapter.spec_norm.weight",
+      "encoder.layers.0.adapter.freq_adapter.spec_norm.bias",
+      "encoder.layers.0.adapter.freq_adapter.mlp.0.weight",
+      "encoder.layers.0.adapter.freq_adapter.mlp.0.bias",
+      "encoder.layers.0.adapter.freq_adapter.mlp.3.weight",
+      "encoder.layers.0.adapter.freq_adapter.mlp.3.bias",
+      "encoder.layers.0.adapter.temporal_adapter.conv.weight",
+      "encoder.layers.0.adapter.temporal_adapter.conv.bias",
+      "encoder.layers.0.adapter.gate_linear.weight",
+      "encoder.layers.0.adapter.gate_linear.bias",
+      "encoder.layers.0.adapter.gate_freq.weight",
+      "encoder.layers.0.adapter.gate_freq.bias",
+      "encoder.layers.0.adapter.gate_time.weight",
+      "encoder.layers.0.adapter.gate_time.bias",
+      "encoder.layers.1.adapter.temperature",
+      "encoder.layers.1.adapter.alpha",
+      "encoder.layers.1.adapter.linear_adapter.down_proj.weight",
+      "encoder.layers.1.adapter.linear_adapter.down_proj.bias",
+      "encoder.layers.1.adapter.linear_adapter.up_proj.weight",
+      "encoder.layers.1.adapter.linear_adapter.up_proj.bias",
+      "encoder.layers.1.adapter.freq_adapter.spec_norm.weight",
+      "encoder.layers.1.adapter.freq_adapter.spec_norm.bias",
+      "encoder.layers.1.adapter.freq_adapter.mlp.0.weight",
+      "encoder.layers.1.adapter.freq_adapter.mlp.0.bias"
+    ],
+    "model_total_keys": 451,
+    "shape_mismatch": [],
+    "unexpected_keys": 0
+  },
+  "feature_inf_count": 0,
+  "feature_nan_count": 0,
+  "loaded_subjects": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "loaded_trials": 5088,
+  "passed": true,
+  "pooled_feature_shape": [
+    8,
+    200
+  ],
+  "raw_shape_tail": [
+    22,
+    800
+  ],
+  "sessions": [
+    "E",
+    "T"
+  ]
+}

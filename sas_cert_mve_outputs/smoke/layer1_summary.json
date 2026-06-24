@@ -1,0 +1,28 @@
+{
+  "bad_high_acc_mean": NaN,
+  "bad_high_minus_clean_acc": null,
+  "bad_intensity_vs_accuracy_drop_spearman": NaN,
+  "clean_aug_acc_mean": 0.4583333333333333,
+  "grouped_mean": [
+    {
+      "acc": 0.4583333333333333,
+      "condition": "CleanAug",
+      "ece": 0.14058114795221224,
+      "intensity": 0.5,
+      "kappa": 0.27777777777777773,
+      "macro_f1": 0.4247603852685115,
+      "n": 1,
+      "nll": 1.2634623050689697
+    },
+    {
+      "acc": 0.4444444444444444,
+      "condition": "NoAug",
+      "ece": 0.12781985673225588,
+      "intensity": 0.0,
+      "kappa": 0.25925925925925924,
+      "macro_f1": 0.4053896314391067,
+      "n": 1,
+      "nll": 1.2701706886291504
+    }
+  ]
+}

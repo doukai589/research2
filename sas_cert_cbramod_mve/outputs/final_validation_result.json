@@ -1,0 +1,91 @@
+{
+  "analysis": {
+    "main_conclusion": "CBraMod hard Top50 is not confirmatory: Layer 2 overall AUC is below 0.70 and Layer 3 SASCertTop50 underperforms NaiveAug on accuracy.",
+    "next_action": "Make SoftWeightArtifactReject the next preregistered main group; refine physio scoring before expanding model/data scope.",
+    "positive_signal": "Certificate components strongly detect BadArtifact and BadContent, and shadow SoftWeightArtifactReject improves over NaiveAug while keeping ECE delta within the <=0.01 gate.",
+    "risk": "BadPhysio remains inverted/weak, overall AUC is diluted, and ArtifactReject alone worsens ECE despite best accuracy/F1 gain."
+  },
+  "backbone": "CBraMod",
+  "backbone_frozen": true,
+  "data_copy_detected": false,
+  "dataset": "BCIC-IV-2a",
+  "final_decision": "PROMOTE_SOFTWEIGHT_ARTIFACTREJECT_TO_MAIN_CONFIRMATORY_MVE",
+  "key_outputs": {
+    "final_report": "/ai/224duibishiyan/615新研究/sas_cert_cbramod_mve/outputs/FINAL_VALIDATION_REPORT.md",
+    "final_result": "/ai/224duibishiyan/615新研究/sas_cert_cbramod_mve/outputs/final_validation_result.json",
+    "main_compact_result": "/ai/224duibishiyan/615新研究/sas_cert_cbramod_mve/outputs/compact_result.json",
+    "main_report": "/ai/224duibishiyan/615新研究/sas_cert_cbramod_mve/outputs/SAS_CERT_CBRAMOD_MVE_REPORT.md",
+    "shadow_report": "/ai/224duibishiyan/615新研究/sas_cert_cbramod_mve/outputs/softweight_artifactreject/SOFTWEIGHT_ARTIFACTREJECT_REPORT.md",
+    "shadow_summary": "/ai/224duibishiyan/615新研究/sas_cert_cbramod_mve/outputs/softweight_artifactreject/shadow_summary.json"
+  },
+  "main_mve": {
+    "decision": "SOFTWEIGHT_NEXT",
+    "hard_top50_minus_naive_acc": -0.02366255144032922,
+    "hard_top50_minus_naive_ece": -0.013917024900807153,
+    "hard_top50_minus_random50_acc": 0.00913065843621399,
+    "interpretation_level": "DIAGNOSTIC_ONLY",
+    "layer0_passed": true,
+    "layer1_passed": false,
+    "layer2_bad_artifact_auc": 0.947394718792867,
+    "layer2_bad_content_auc": 0.8008573388203017,
+    "layer2_bad_physio_auc": 0.15951303155006857,
+    "layer2_bad_style_auc": 0.5789948559670782,
+    "layer2_overall_auc": 0.6216899862825789,
+    "layer2_passed": false,
+    "layer3_passed": false,
+    "status": "completed"
+  },
+  "mat_files_inside_project": 0,
+  "project": "sas_cert_cbramod_mve",
+  "protocol": "FEWSHOT_TARGET_SUPPORT",
+  "protocol_audit": {
+    "backbone_frozen": true,
+    "data_copy_detected": false,
+    "head_only_training": true,
+    "old_outputs_used_as_input": false,
+    "protocol_leakage_detected": false,
+    "target_test_used_for_cert_threshold": false,
+    "target_test_used_for_rank_normalization": false,
+    "target_test_used_for_style_anchor": false
+  },
+  "run_commands": {
+    "main_mve": "python scripts/run_full_mve.py --project_root /ai/224duibishiyan/615新研究/sas_cert_cbramod_mve --workspace_root /ai/224duibishiyan/615新研究 --cbramod_src ../新研究/CBraMod-main --bcic2a_root ../CBraMod-main/tmp_in/BCIC2a/MNE-bnci-data/database/data-sets/001-2014 --old_eegnet_report /ai/224duibishiyan/615新研究/sas_cert_mve_outputs/SAS_CERT_MVE_FULL_OUTPUT_AND_ANALYSIS.md --mode full --continue_on_nogo true --device auto",
+    "shadow_validation": "python scripts/07_run_softweight_artifactreject.py --project_root /ai/224duibishiyan/615新研究/sas_cert_cbramod_mve --workspace_root /ai/224duibishiyan/615新研究 --bcic2a_root ../CBraMod-main/tmp_in/BCIC2a/MNE-bnci-data/database/data-sets/001-2014 --device auto"
+  },
+  "seeds": [
+    20,
+    21,
+    22
+  ],
+  "shadow_validation": {
+    "artifact_reject": {
+      "acc_vs_naive": 0.016846707818930048,
+      "acc_vs_top50": 0.01916152263374485,
+      "ece_vs_naive": 0.017037372025297072,
+      "macro_f1_vs_naive": 0.03318337618842063,
+      "passes_shadow_gate": false
+    },
+    "best_group_by_acc_vs_naive": "ArtifactReject",
+    "best_passing_shadow_group": "SoftWeightArtifactReject",
+    "recommended_next": "PROMOTE_SOFTWEIGHT_SHADOW_TO_MAIN",
+    "sas_cert_softweight": {
+      "acc_vs_naive": 0.007844650205761326,
+      "acc_vs_top50": 0.010159465020576127,
+      "ece_vs_naive": 0.007409120141432731,
+      "macro_f1_vs_naive": 0.0012821990623061153,
+      "passes_shadow_gate": true
+    },
+    "softweight_artifactreject": {
+      "acc_vs_naive": 0.011574074074074079,
+      "acc_vs_top50": 0.01388888888888888,
+      "ece_vs_naive": 0.008254898930497375,
+      "macro_f1_vs_naive": 0.014293837205182446,
+      "passes_shadow_gate": true
+    },
+    "source": "cached_original_and_augmented_cbramod_features_from_main_mve",
+    "status": "completed"
+  },
+  "shot_per_class": 5,
+  "status": "completed",
+  "subjects": 9
+}

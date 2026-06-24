@@ -1,0 +1,52 @@
+{
+  "direction_wrong_components": [
+    "physio_channel_order"
+  ],
+  "physio_best_component": "physio_covariance",
+  "physio_best_component_auc": 0.999920987654321,
+  "physio_not_ready_for_training": false,
+  "physio_ready_for_training": true,
+  "protocol_leakage_detected": false,
+  "status": "completed",
+  "subscore_auc": [
+    {
+      "bad_type": "BadPhysio_bandpower",
+      "direction_maybe_wrong": false,
+      "inverted_auc": 0.3620768518518519,
+      "n": 3600,
+      "original_auc": 0.6379231481481481,
+      "subscore": "physio_bandpower",
+      "usable_physio_component": false
+    },
+    {
+      "bad_type": "BadPhysio_covariance",
+      "direction_maybe_wrong": false,
+      "inverted_auc": 7.901234567897486e-05,
+      "n": 3600,
+      "original_auc": 0.999920987654321,
+      "subscore": "physio_covariance",
+      "usable_physio_component": true
+    },
+    {
+      "bad_type": "BadPhysio_topology",
+      "direction_maybe_wrong": false,
+      "inverted_auc": 0.3068811728395062,
+      "n": 3600,
+      "original_auc": 0.6931188271604938,
+      "subscore": "physio_topology",
+      "usable_physio_component": false
+    },
+    {
+      "bad_type": "BadPhysio_channel_order",
+      "direction_maybe_wrong": true,
+      "inverted_auc": 0.8850716049382716,
+      "n": 3600,
+      "original_auc": 0.11492839506172839,
+      "subscore": "physio_channel_order",
+      "usable_physio_component": false
+    }
+  ],
+  "usable_components": [
+    "physio_covariance"
+  ]
+}

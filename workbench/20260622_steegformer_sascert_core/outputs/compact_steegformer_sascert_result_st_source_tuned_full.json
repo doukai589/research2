@@ -1,0 +1,62 @@
+{
+  "stage": "steegformer_sascert_core_workbench",
+  "status": "completed",
+  "groups": {
+    "NaiveAug_LS010": {
+      "accuracy": 0.708814662730886,
+      "balanced_accuracy": 0.708793339473564,
+      "macro_f1": 0.7045379911100288,
+      "kappa": 0.41759295691796394,
+      "auroc": 0.7823705502058109,
+      "ece": 0.2079087014568807,
+      "nll": 0.685334156404121,
+      "brier": 0.41592236867174504
+    },
+    "ArtifactReject_LS010": {
+      "accuracy": 0.7105013297872341,
+      "balanced_accuracy": 0.7107257149670078,
+      "macro_f1": 0.7064107860337908,
+      "kappa": 0.421220002298896,
+      "auroc": 0.7819780546748027,
+      "ece": 0.21115916588248307,
+      "nll": 0.6853661278757319,
+      "brier": 0.41649284575134515
+    },
+    "SoftWeight_noReject_LS010": {
+      "accuracy": 0.7149671352583585,
+      "balanced_accuracy": 0.7152730485974295,
+      "macro_f1": 0.7109399006315767,
+      "kappa": 0.4304201315381239,
+      "auroc": 0.7876154218069642,
+      "ece": 0.20820253054048213,
+      "nll": 0.6831626502905006,
+      "brier": 0.4102536955848336
+    },
+    "SASCert_SoftAR_LS010": {
+      "accuracy": 0.7147140957446808,
+      "balanced_accuracy": 0.7149415603402445,
+      "macro_f1": 0.7108272221353755,
+      "kappa": 0.429703360736826,
+      "auroc": 0.7875093688542181,
+      "ece": 0.20557730164801102,
+      "nll": 0.680976874175939,
+      "brier": 0.4097013517096639
+    }
+  },
+  "sascert_vs_naive": {
+    "delta_balanced_accuracy": 0.006148220866680432,
+    "delta_macro_f1": 0.006289231025346731,
+    "delta_ece": -0.0023313998088696775,
+    "delta_nll": -0.004357282228181991,
+    "delta_brier": -0.006221016962081161,
+    "subject_win_rate_macro_f1": 0.25,
+    "seed_win_rate_macro_f1": 0.0
+  },
+  "component_ablation": {
+    "beats_artifact_reject_macro_f1": true,
+    "beats_softweight_no_reject_macro_f1": false,
+    "mean_delta_macro_f1_vs_artifact_reject": 0.004416436101584816,
+    "mean_delta_macro_f1_vs_softweight_no_reject": -0.00011267849620133052
+  },
+  "n_rows": 400
+}

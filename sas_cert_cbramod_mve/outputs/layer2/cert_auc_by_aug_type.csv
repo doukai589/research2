@@ -1,0 +1,6 @@
+comparison,n,total_auc
+clean_vs_bad_artifact,3240,0.947394718792867
+clean_vs_bad_content,3240,0.8008573388203017
+clean_vs_bad_physio,3240,0.15951303155006857
+clean_vs_bad_style,3240,0.5789948559670782
+clean_vs_all_bad,4860,0.6216899862825789

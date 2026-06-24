@@ -1,0 +1,15 @@
+{
+  "status": "passed",
+  "target_test_used_for_artifact_threshold": false,
+  "target_test_used_for_ranknorm": false,
+  "target_test_used_for_prototype": false,
+  "target_test_used_for_style_anchor": false,
+  "target_test_used_for_best_epoch_or_seed": false,
+  "target_test_used_for_final_eval_only": true,
+  "notes": [
+    "v1.2 extreme artifact threshold uses per-fold candidate robust z only.",
+    "v1.2 rank normalization uses per-fold augmented training candidates only.",
+    "Prototype uses source train plus target support.",
+    "Style anchor uses target support only."
+  ]
+}

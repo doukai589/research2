@@ -1,0 +1,10 @@
+{
+  "backbone_frozen": true,
+  "data_copy_detected": false,
+  "head_only_training": true,
+  "old_outputs_used_as_input": false,
+  "protocol_leakage_detected": false,
+  "target_test_used_for_cert_threshold": false,
+  "target_test_used_for_rank_normalization": false,
+  "target_test_used_for_style_anchor": false
+}

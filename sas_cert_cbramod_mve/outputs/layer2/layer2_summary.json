@@ -1,0 +1,10 @@
+{
+  "bad_artifact_auc": 0.947394718792867,
+  "bad_content_auc": 0.8008573388203017,
+  "bad_physio_auc": 0.15951303155006857,
+  "bad_style_auc": 0.5789948559670782,
+  "bottom30_bad_rate": 0.5747599451303155,
+  "overall_auc": 0.6216899862825789,
+  "passed": false,
+  "top30_bad_rate": 0.3628257887517147
+}
