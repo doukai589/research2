@@ -36,3 +36,4 @@ The current main line is:
 3. LaBraM as secondary reliability/calibration baseline.
 4. EEGPT and MIRepNet are paused outside the main line.
 
+# research2
