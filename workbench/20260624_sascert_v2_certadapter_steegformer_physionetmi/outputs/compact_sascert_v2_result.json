@@ -1,0 +1,235 @@
+{
+  "task": "SASCERT_V2_STRUCTURED_CERT_ADAPTER_ON_STEEGFORMER_PHYSIONETMI",
+  "status": "completed",
+  "training_card": {
+    "backbone": "ST-EEGFormer-small source-tuned checkpoint",
+    "frozen_modules": [
+      "ST-EEGFormer-small backbone"
+    ],
+    "trainable_modules": [
+      "Task-Prior Head",
+      "classifier head",
+      "CertAdapter for v2-full"
+    ],
+    "data_streams": {
+      "source_train": "task-prior head, prototypes, source-initialized head",
+      "validation": "not used for best epoch in this fixed-epoch workbench run",
+      "target_support": "prototype construction, certificate construction, training",
+      "target_test": "final evaluation only"
+    },
+    "losses": {
+      "real": "CE with label_smoothing=0.10",
+      "aug": "normalized gamma-weighted CE",
+      "consistency": "lambda_cons=0.2 gamma-weighted KL",
+      "prototype": "lambda_proto=0.2 multi-prototype margin"
+    },
+    "checkpoint_selection": "fixed source-tuned checkpoint and fixed epoch count; no target-test model selection",
+    "target_test_use": "final metrics only"
+  },
+  "leakage_audit": {
+    "status": "passed",
+    "target_test_used_for_prototype": false,
+    "target_test_used_for_ranknorm": false,
+    "target_test_used_for_threshold": false,
+    "target_test_used_for_certificate": false,
+    "target_test_used_for_best_epoch_or_seed": false,
+    "target_test_used_for_final_eval_only": true,
+    "notes": [
+      "Task-prior head and prototype bank use source train plus target support clean samples only.",
+      "Augmentation certificates are computed only for candidates generated from target support samples.",
+      "Target test is only passed through the frozen embedding and final classifier for evaluation."
+    ]
+  },
+  "certificate_summary": {
+    "gamma": [
+      {
+        "pool": "regular",
+        "aug_type": "ALL",
+        "n": 6000,
+        "gamma_mean": 0.6528052739767979,
+        "gamma_std": 0.3076037050576863,
+        "gamma_p10": 0.05394231155514717,
+        "gamma_p50": 0.8292162120342255,
+        "gamma_p90": 0.861110943555832,
+        "artifact_score_mean": 1.581825144531826,
+        "E_physio_mean": 0.4999999995343387,
+        "E_style_mean": 0.4999999995343387
+      },
+      {
+        "pool": "riskmixed",
+        "aug_type": "ALL",
+        "n": 10000,
+        "gamma_mean": 0.6532956597868353,
+        "gamma_std": 0.30706944732140207,
+        "gamma_p10": 0.053662870079278946,
+        "gamma_p50": 0.8289620876312256,
+        "gamma_p90": 0.861056387424469,
+        "artifact_score_mean": 3.9535120114721356,
+        "E_physio_mean": 0.5000000001024455,
+        "E_style_mean": 0.5000000001024455
+      }
+    ],
+    "prototype_agreement": [
+      {
+        "pool": "regular",
+        "aug_type": "ALL",
+        "n": 6000,
+        "prior_agreement_rate": 0.7825,
+        "prototype_agreement_rate": 0.7785,
+        "both_agreement_rate": 0.7381666666666666,
+        "proto_margin_mean": 0.03095110168059667,
+        "prior_margin_mean": 2.555417570869128
+      },
+      {
+        "pool": "riskmixed",
+        "aug_type": "ALL",
+        "n": 10000,
+        "prior_agreement_rate": 0.7864,
+        "prototype_agreement_rate": 0.7767,
+        "both_agreement_rate": 0.7401,
+        "proto_margin_mean": 0.030524500328302385,
+        "prior_margin_mean": 2.559306250834465
+      }
+    ]
+  },
+  "regular_pool": {
+    "groups": {
+      "NaiveAug_LS010": {
+        "balanced_accuracy": 0.7567000024356447,
+        "macro_f1": 0.7523544247967905,
+        "auroc": 0.8212034693155821,
+        "ece": 0.18565865956913175,
+        "nll": 0.6221221053010547,
+        "brier": 0.35944342727772893,
+        "mean_v2_gamma": 0.6528052803874016,
+        "v2_prior_agreement_rate": 0.7824999997019768,
+        "v2_proto_agreement_rate": 0.7785000005364417
+      },
+      "SAS-Cert-CU-LS-v1.3": {
+        "balanced_accuracy": 0.7587782284322144,
+        "macro_f1": 0.7542889264320487,
+        "auroc": 0.8235249199229712,
+        "ece": 0.18610228832041714,
+        "nll": 0.6206318096418283,
+        "brier": 0.3586803687736392,
+        "mean_v2_gamma": 0.6528052803874016,
+        "v2_prior_agreement_rate": 0.7824999997019768,
+        "v2_proto_agreement_rate": 0.7785000005364417
+      },
+      "SAS-Cert-v2-no-adapter": {
+        "balanced_accuracy": 0.7587344019198895,
+        "macro_f1": 0.754181198610097,
+        "auroc": 0.8328652327576701,
+        "ece": 0.18246581063266024,
+        "nll": 0.602333662257921,
+        "brier": 0.35523285422474143,
+        "mean_v2_gamma": 0.6528052803874016,
+        "v2_prior_agreement_rate": 0.7824999997019768,
+        "v2_proto_agreement_rate": 0.7785000005364417
+      },
+      "SAS-Cert-v2-full": {
+        "balanced_accuracy": 0.7570914026247229,
+        "macro_f1": 0.7507164947184097,
+        "auroc": 0.8343080086688718,
+        "ece": 0.18418882076792212,
+        "nll": 0.6137865248624689,
+        "brier": 0.35926552139222623,
+        "mean_v2_gamma": 0.6528052803874016,
+        "v2_prior_agreement_rate": 0.7824999997019768,
+        "v2_proto_agreement_rate": 0.7785000005364417
+      }
+    },
+    "v2_full_vs_naive": {
+      "delta_balanced_accuracy": 0.00039140018907812824,
+      "delta_macro_f1": -0.001637930078380756,
+      "delta_ece": -0.0014698388012096275,
+      "delta_nll": -0.008335580438585843,
+      "delta_brier": -0.00017790588550270492
+    },
+    "v2_full_vs_cu_v1_3": {
+      "delta_balanced_accuracy": -0.0016868258074915765,
+      "delta_macro_f1": -0.0035724317136389683,
+      "delta_ece": -0.001913467552495024,
+      "delta_nll": -0.006845284779359417,
+      "delta_brier": 0.0005851526185870481
+    },
+    "v2_no_adapter_vs_cu_v1_3": {
+      "delta_balanced_accuracy": -4.382651232492929e-05,
+      "delta_macro_f1": -0.0001077278219516753,
+      "delta_ece": -0.003636477687756906,
+      "delta_nll": -0.018298147383907337,
+      "delta_brier": -0.0034475145488977454
+    },
+    "v2_full_vs_no_adapter": {
+      "delta_balanced_accuracy": -0.0016429992951666472,
+      "delta_macro_f1": -0.003464703891687293,
+      "delta_ece": 0.001723010135261882,
+      "delta_nll": 0.01145286260454792,
+      "delta_brier": 0.004032667167484794
+    },
+    "v2_full_vs_naive_win_rates": {
+      "subject_win_rate_macro_f1": 0.2,
+      "seed_win_rate_macro_f1": 0.2
+    },
+    "v2_full_vs_cu_v1_3_win_rates": {
+      "subject_win_rate_macro_f1": 0.2,
+      "seed_win_rate_macro_f1": 0.0
+    }
+  },
+  "riskmixed_pool": {
+    "groups": {
+      "RiskMixed_NaiveAug_LS010": {
+        "balanced_accuracy": 0.7530474503008171,
+        "macro_f1": 0.7485384183602207,
+        "auroc": 0.821045266895557,
+        "ece": 0.18456321635048575,
+        "nll": 0.6276850043054398,
+        "brier": 0.3634826979320496,
+        "mean_v2_gamma": 0.653295656144619,
+        "v2_prior_agreement_rate": 0.7863999989628792,
+        "v2_proto_agreement_rate": 0.776700000166893
+      },
+      "RiskMixed_CU-v1.3": {
+        "balanced_accuracy": 0.7531235401466438,
+        "macro_f1": 0.7485040713586233,
+        "auroc": 0.8233477516893152,
+        "ece": 0.18499443195041493,
+        "nll": 0.6238268619605359,
+        "brier": 0.36114991148933767,
+        "mean_v2_gamma": 0.653295656144619,
+        "v2_prior_agreement_rate": 0.7863999989628792,
+        "v2_proto_agreement_rate": 0.776700000166893
+      },
+      "RiskMixed_SAS-Cert-v2-full": {
+        "balanced_accuracy": 0.7523210160668364,
+        "macro_f1": 0.7468871268961597,
+        "auroc": 0.8359322373165703,
+        "ece": 0.18682677628775207,
+        "nll": 0.6158455413627578,
+        "brier": 0.36061762826517224,
+        "mean_v2_gamma": 0.653295656144619,
+        "v2_prior_agreement_rate": 0.7863999989628792,
+        "v2_proto_agreement_rate": 0.776700000166893
+      }
+    },
+    "v2_full_vs_riskmixed_naive": {
+      "delta_balanced_accuracy": -0.0007264342339806662,
+      "delta_macro_f1": -0.0016512914640610665,
+      "delta_ece": 0.0022635599372663184,
+      "delta_nll": -0.01183946294268201,
+      "delta_brier": -0.0028650696668773845
+    },
+    "v2_full_vs_riskmixed_cu_v1_3": {
+      "delta_balanced_accuracy": -0.0008025240798074096,
+      "delta_macro_f1": -0.001616944462463632,
+      "delta_ece": 0.001832344337337144,
+      "delta_nll": -0.007981320597778119,
+      "delta_brier": -0.0005322832241654307
+    },
+    "win_rates": {
+      "subject_win_rate_macro_f1": 0.25,
+      "seed_win_rate_macro_f1": 0.0
+    }
+  },
+  "decision": "continue_repair_v2_or_diagnostic_only"
+}

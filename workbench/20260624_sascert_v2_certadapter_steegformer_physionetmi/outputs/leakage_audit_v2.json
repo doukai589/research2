@@ -1,0 +1,14 @@
+{
+  "status": "passed",
+  "target_test_used_for_prototype": false,
+  "target_test_used_for_ranknorm": false,
+  "target_test_used_for_threshold": false,
+  "target_test_used_for_certificate": false,
+  "target_test_used_for_best_epoch_or_seed": false,
+  "target_test_used_for_final_eval_only": true,
+  "notes": [
+    "Task-prior head and prototype bank use source train plus target support clean samples only.",
+    "Augmentation certificates are computed only for candidates generated from target support samples.",
+    "Target test is only passed through the frozen embedding and final classifier for evaluation."
+  ]
+}

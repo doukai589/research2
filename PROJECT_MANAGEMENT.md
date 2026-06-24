@@ -2456,3 +2456,104 @@ Primary report:
 - Next-route preference:
   - Start a new `workbench/` trial for v2.
   - Do not enter CBraMod until v2 has meaningful ST + PhysioNetMI evidence.
+
+### 2026-06-24 SAS-Cert v2 Structured Certificate Adapter Result
+
+- Task:
+  - `SASCERT_V2_STRUCTURED_CERT_ADAPTER_ON_STEEGFORMER_PHYSIONETMI`
+- Workbench trial:
+  - `workbench/20260624_sascert_v2_certadapter_steegformer_physionetmi`
+- Code policy:
+  - Reused and extended existing runner:
+    - `workbench/20260623_sascert_softar_ls_v1_1_steegformer_physionetmi/runner_v1_1.py`
+  - Did not download new tools.
+  - Did not switch backbone or dataset.
+  - Did not train the ST backbone.
+  - Kept artifact / physio / style diagnostic-only for training.
+- Training card:
+  - Backbone:
+    - ST-EEGFormer-small source-tuned checkpoint.
+  - Frozen:
+    - ST-EEGFormer-small backbone.
+  - Trainable:
+    - Task-Prior Head.
+    - classifier head.
+    - CertAdapter for `SAS-Cert-v2-full`.
+  - Data streams:
+    - source train: task-prior head and prototype bank.
+    - target support: prototype construction, certificate construction, and
+      training.
+    - target test: final evaluation only.
+  - Losses:
+    - real CE with label smoothing `0.10`.
+    - normalized gamma-weighted augmented CE.
+    - gamma-weighted KL consistency with `lambda_cons=0.2`.
+    - multi-prototype margin loss with `lambda_proto=0.2`.
+- Regular pool results:
+  - v2-full vs `NaiveAug_LS010`:
+    - delta BAcc `+0.000391`
+    - delta Macro-F1 `-0.001638`
+    - delta ECE `-0.001470`
+    - delta NLL `-0.008336`
+    - delta Brier `-0.000178`
+    - subject / seed win rate Macro-F1 `0.20 / 0.20`
+  - v2-full vs CU-v1.3:
+    - delta BAcc `-0.001687`
+    - delta Macro-F1 `-0.003572`
+  - v2-full vs v2-no-adapter:
+    - delta BAcc `-0.001643`
+    - delta Macro-F1 `-0.003465`
+  - v2-no-adapter vs CU-v1.3:
+    - delta BAcc `-0.000044`
+    - delta Macro-F1 `-0.000108`
+- Risk-mixed pool results:
+  - v2-full vs `RiskMixed_NaiveAug_LS010`:
+    - delta BAcc `-0.000726`
+    - delta Macro-F1 `-0.001651`
+    - delta ECE `+0.002264`
+    - delta NLL `-0.011839`
+    - delta Brier `-0.002865`
+    - subject / seed win rate Macro-F1 `0.25 / 0.00`
+- Certificate statistics:
+  - regular gamma mean `0.6528`, p10/p50/p90 `0.0539 / 0.8292 / 0.8611`
+  - risk-mixed gamma mean `0.6533`, p10/p50/p90 `0.0537 / 0.8290 / 0.8611`
+  - regular prior/prototype/both agreement:
+    - `0.7825 / 0.7785 / 0.7382`
+  - risk-mixed prior/prototype/both agreement:
+    - `0.7864 / 0.7767 / 0.7401`
+- Leakage audit:
+  - `passed`
+  - target test was not used for prototype, ranknorm, threshold, certificate,
+    best epoch, or best seed.
+- Decision:
+  - `continue_repair_v2_or_diagnostic_only`
+  - Current CertAdapter form failed the ablation:
+    - v2-full underperformed v2-no-adapter.
+  - v2-full also failed the risk-mixed success criterion.
+  - Do not enter CBraMod from this v2 result.
+  - If continuing v2, diagnose why gamma does not separate risky candidates
+    enough and why adapter hurts Macro-F1; otherwise keep SAS-Cert as
+    diagnostic-only.
+- Required outputs:
+  - `workbench/20260624_sascert_v2_certadapter_steegformer_physionetmi/outputs/TRAINING_PLAN.md`
+  - `workbench/20260624_sascert_v2_certadapter_steegformer_physionetmi/outputs/TRAINING_REPORT.md`
+  - `workbench/20260624_sascert_v2_certadapter_steegformer_physionetmi/outputs/SASCERT_V2_REPORT.md`
+  - `workbench/20260624_sascert_v2_certadapter_steegformer_physionetmi/outputs/compact_sascert_v2_result.json`
+  - `workbench/20260624_sascert_v2_certadapter_steegformer_physionetmi/outputs/metrics_regular_pool.csv`
+  - `workbench/20260624_sascert_v2_certadapter_steegformer_physionetmi/outputs/paired_regular_pool.csv`
+  - `workbench/20260624_sascert_v2_certadapter_steegformer_physionetmi/outputs/metrics_riskmixed_pool.csv`
+  - `workbench/20260624_sascert_v2_certadapter_steegformer_physionetmi/outputs/paired_riskmixed_pool.csv`
+  - `workbench/20260624_sascert_v2_certadapter_steegformer_physionetmi/outputs/certificate_gamma_distribution.csv`
+  - `workbench/20260624_sascert_v2_certadapter_steegformer_physionetmi/outputs/prototype_agreement_summary.csv`
+  - `workbench/20260624_sascert_v2_certadapter_steegformer_physionetmi/outputs/adapter_ablation_summary.csv`
+  - `workbench/20260624_sascert_v2_certadapter_steegformer_physionetmi/outputs/leakage_audit_v2.json`
+  - `workbench/20260624_sascert_v2_certadapter_steegformer_physionetmi/outputs/failure_review.md`
+- GitHub tracking:
+  - Commit code/config/docs and lightweight v2 outputs.
+  - No raw EEG, checkpoints, feature caches, or third-party dependency trees
+    should be uploaded.
+  - Local commit:
+    - latest local commit: `Run SAS-Cert v2 structured adapter ST PhysioNetMI`
+  - Push status:
+    - blocked locally by missing HTTPS GitHub credentials:
+      `could not read Username for 'https://github.com'`

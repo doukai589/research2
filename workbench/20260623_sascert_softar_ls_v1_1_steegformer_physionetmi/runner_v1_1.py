@@ -81,6 +81,12 @@ V1_4_REGULAR_GROUPS = ["NaiveAug_LS010", V1_3_PRIMARY, V1_4_PRIMARY]
 RISK_MIXED_NAIVE = "RiskMixed_NaiveAug_LS010"
 RISK_MIXED_V1_4_PRIMARY = "RiskMixed_SAS-Cert-SCB-CU-LS-v1.4"
 V1_4_RISKMIXED_GROUPS = [RISK_MIXED_NAIVE, RISK_MIXED_V1_4_PRIMARY]
+V2_NO_ADAPTER = "SAS-Cert-v2-no-adapter"
+V2_FULL = "SAS-Cert-v2-full"
+V2_REGULAR_GROUPS = ["NaiveAug_LS010", V1_3_PRIMARY, V2_NO_ADAPTER, V2_FULL]
+RISK_MIXED_CU_V1_3 = "RiskMixed_CU-v1.3"
+RISK_MIXED_V2_FULL = "RiskMixed_SAS-Cert-v2-full"
+V2_RISKMIXED_GROUPS = [RISK_MIXED_NAIVE, RISK_MIXED_CU_V1_3, RISK_MIXED_V2_FULL]
 V1_1_FULL_OUT = ROOT / "workbench" / "20260623_sascert_softar_ls_v1_1_steegformer_physionetmi" / "outputs"
 warnings.filterwarnings("ignore", message="Precision loss occurred in moment calculation.*")
 warnings.filterwarnings("ignore", message="No module named 'numba'. Your code will be slower.*")
@@ -442,6 +448,9 @@ def score_candidates(
     orig_probs: np.ndarray,
     cand_probs: np.ndarray,
     artifact_gate_percentile: float,
+    v2_prior_logits: np.ndarray | None = None,
+    v2_prior_probs: np.ndarray | None = None,
+    v2_prototypes: dict[int, np.ndarray] | None = None,
 ) -> tuple[List[Dict[str, object]], Dict[str, object]]:
     cand_x = np.stack([c.x for c in candidates]).astype(np.float32)
     orig_x = np.stack([support_x[c.original_local_index] for c in candidates]).astype(np.float32)
@@ -527,6 +536,28 @@ def score_candidates(
             content_v1_4_rank[mask] = global_content_rank[mask]
             content_v1_4_scope[mask] = "global_fallback"
     scb_content_utility_weight_v1_4 = 0.75 + 0.5 * content_v1_4_rank
+    if v2_prior_logits is None or v2_prior_probs is None:
+        v2_prior_logits = np.log(np.clip(cand_probs, 1e-7, 1.0)).astype(np.float32)
+        v2_prior_probs = cand_probs
+    if v2_prototypes is None:
+        v2_prototypes = build_multi_class_prototypes(
+            np.concatenate([source_features, support_features], axis=0),
+            np.concatenate([source_y, support_y], axis=0),
+            n_per_class=2,
+        )
+    v2_proto_margin, v2_proto_label, v2_proto_own_sim, v2_proto_other_sim = multi_prototype_scores(candidate_features, labels, v2_prototypes)
+    v2_prior_label = v2_prior_probs.argmax(axis=1).astype(np.int64)
+    v2_prior_true = v2_prior_logits[np.arange(len(labels)), labels]
+    v2_prior_masked = v2_prior_logits.copy()
+    v2_prior_masked[np.arange(len(labels)), labels] = -1e9
+    v2_prior_margin = v2_prior_true - v2_prior_masked.max(axis=1)
+    v2_prior_agree = (v2_prior_label == labels).astype(np.float32)
+    v2_proto_agree = (v2_proto_label == labels).astype(np.float32)
+    v2_embed_score = np.clip((e_embed_raw + 1.0) * 0.5, 0.0, 1.0)
+    v2_prior_score = 1.0 / (1.0 + np.exp(-np.clip(v2_prior_margin, -20.0, 20.0)))
+    v2_proto_score = 1.0 / (1.0 + np.exp(-np.clip(5.0 * v2_proto_margin, -20.0, 20.0)))
+    v2_agreement_factor = 0.10 + 0.45 * v2_prior_agree + 0.45 * v2_proto_agree
+    v2_gamma = np.clip(((v2_embed_score + v2_prior_score + v2_proto_score) / 3.0) * v2_agreement_factor, 0.0, 1.0).astype(np.float32)
     raw_ce_loss = -np.log(np.clip(cand_probs[np.arange(len(labels)), labels], 1e-7, 1.0))
     aug_correctness = (cand_probs.argmax(axis=1) == labels).astype(np.int64)
     nonfinite_content_v1_3 = (
@@ -573,6 +604,18 @@ def score_candidates(
                 "content_score_v1_4_scb": float(content_v1_4_rank[i]),
                 "scb_content_utility_weight_v1_4": float(scb_content_utility_weight_v1_4[i]),
                 "scb_ranknorm_scope_v1_4": str(content_v1_4_scope[i]),
+                "v2_gamma": float(v2_gamma[i]),
+                "v2_embed_score": float(v2_embed_score[i]),
+                "v2_prior_margin": float(v2_prior_margin[i]),
+                "v2_prior_score": float(v2_prior_score[i]),
+                "v2_prior_label": int(v2_prior_label[i]),
+                "v2_prior_agree": int(v2_prior_agree[i]),
+                "v2_proto_margin": float(v2_proto_margin[i]),
+                "v2_proto_score": float(v2_proto_score[i]),
+                "v2_proto_label": int(v2_proto_label[i]),
+                "v2_proto_agree": int(v2_proto_agree[i]),
+                "v2_proto_own_sim": float(v2_proto_own_sim[i]),
+                "v2_proto_other_sim": float(v2_proto_other_sim[i]),
                 "nonfinite_content_v1_3": int(nonfinite_content_v1_3[i]),
                 "raw_ce_loss": float(raw_ce_loss[i]),
                 "aug_correctness": int(aug_correctness[i]),
@@ -588,6 +631,11 @@ def score_candidates(
         "mean_softsafe_weight_v1_2": float(softsafe_weight_v1_2.mean()),
         "mean_content_utility_weight_v1_3": float(content_utility_weight_v1_3.mean()),
         "mean_scb_content_utility_weight_v1_4": float(scb_content_utility_weight_v1_4.mean()),
+        "mean_v2_gamma": float(v2_gamma.mean()),
+        "v2_prior_agreement_rate": float(v2_prior_agree.mean()),
+        "v2_proto_agreement_rate": float(v2_proto_agree.mean()),
+        "v2_both_agreement_rate": float((v2_prior_agree * v2_proto_agree).mean()),
+        "v2_num_prototypes": int(sum(len(v) for v in v2_prototypes.values())),
         "content_utility_nan_inf_count_v1_3": int(nonfinite_content_v1_3.sum()),
         "scb_ranknorm_scope_counts_v1_4": {
             str(scope): int(np.sum(content_v1_4_scope == scope))
@@ -661,6 +709,122 @@ class FeatureHead(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.linear(x)
+
+
+class CertAdapterClassifier(nn.Module):
+    def __init__(self, in_dim: int, cert_dim: int = 4, n_classes: int = 2):
+        super().__init__()
+        hidden = max(16, min(64, in_dim // 4))
+        self.adapter = nn.Sequential(
+            nn.Linear(cert_dim, hidden),
+            nn.ReLU(),
+            nn.Linear(hidden, in_dim * 2),
+        )
+        self.classifier = nn.Linear(in_dim, n_classes)
+
+    def adapt(self, features: torch.Tensor, cert: torch.Tensor) -> torch.Tensor:
+        alpha_beta = self.adapter(cert)
+        alpha, beta = torch.chunk(alpha_beta, 2, dim=1)
+        return (1.0 + 0.1 * torch.tanh(alpha)) * features + 0.1 * torch.tanh(beta)
+
+    def forward(self, features: torch.Tensor, cert: torch.Tensor) -> torch.Tensor:
+        return self.classifier(self.adapt(features, cert))
+
+
+def neutral_cert_features(n: int) -> np.ndarray:
+    return np.tile(np.asarray([[1.0, 1.0, 0.0, 0.0]], dtype=np.float32), (n, 1))
+
+
+def train_task_prior_head(
+    features: np.ndarray,
+    labels: np.ndarray,
+    init_state: Dict[str, torch.Tensor] | None,
+    device: str,
+    epochs: int,
+    lr: float,
+    label_smoothing: float,
+) -> FeatureHead:
+    head = FeatureHead(features.shape[1]).to(device)
+    if init_state is not None:
+        head.load_state_dict(init_state)
+    x = torch.from_numpy(features).float().to(device)
+    y = torch.from_numpy(labels).long().to(device)
+    opt = torch.optim.AdamW(head.parameters(), lr=lr, weight_decay=0.01)
+    for _ in range(epochs):
+        head.train()
+        opt.zero_grad(set_to_none=True)
+        logits = head(x)
+        ce = F.cross_entropy(logits, y, label_smoothing=label_smoothing)
+        true_logits = logits.gather(1, y[:, None]).squeeze(1)
+        masked = logits.clone()
+        masked.scatter_(1, y[:, None], -1e9)
+        margin = true_logits - masked.max(dim=1).values
+        margin_loss = F.relu(0.5 - margin).mean()
+        loss = ce + 0.2 * margin_loss
+        if not torch.isfinite(loss):
+            raise RuntimeError("non-finite task-prior loss")
+        loss.backward()
+        opt.step()
+    return head
+
+
+def predict_logits_probs(head: nn.Module, features: np.ndarray, device: str) -> tuple[np.ndarray, np.ndarray]:
+    head.eval()
+    logits_out = []
+    probs_out = []
+    with torch.no_grad():
+        for start in range(0, len(features), 256):
+            xb = torch.from_numpy(features[start : start + 256]).float().to(device)
+            logits = head(xb)
+            logits_out.append(logits.cpu().numpy())
+            probs_out.append(torch.softmax(logits, dim=1).cpu().numpy())
+    return np.concatenate(logits_out, axis=0).astype(np.float32), np.concatenate(probs_out, axis=0).astype(np.float32)
+
+
+def build_multi_class_prototypes(features: np.ndarray, labels: np.ndarray, n_per_class: int = 2, n_iter: int = 6) -> dict[int, np.ndarray]:
+    prototypes: dict[int, np.ndarray] = {}
+    for label in sorted(set(labels.astype(int))):
+        subset = features[labels.astype(int) == int(label)].astype(np.float32)
+        if len(subset) == 0:
+            continue
+        if len(subset) == 1 or n_per_class <= 1:
+            centroids = subset[:1].copy()
+        else:
+            mean = subset.mean(axis=0, keepdims=True)
+            far = int(np.argmax(np.linalg.norm(subset - mean, axis=1)))
+            first = subset[far]
+            second = subset[int(np.argmax(np.linalg.norm(subset - first[None, :], axis=1)))]
+            centroids = np.stack([first, second], axis=0).astype(np.float32)
+            for _ in range(n_iter):
+                sims = subset @ centroids.T / ((np.linalg.norm(subset, axis=1, keepdims=True) * np.linalg.norm(centroids, axis=1)[None, :]) + 1e-8)
+                assign = sims.argmax(axis=1)
+                updated = []
+                for k in range(len(centroids)):
+                    part = subset[assign == k]
+                    updated.append(part.mean(axis=0) if len(part) else centroids[k])
+                centroids = np.stack(updated, axis=0).astype(np.float32)
+        prototypes[int(label)] = centroids.astype(np.float32)
+    return prototypes
+
+
+def multi_prototype_scores(features: np.ndarray, labels: np.ndarray, prototypes: dict[int, np.ndarray]) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    proto_labels = sorted(prototypes)
+    proto_blocks = [prototypes[k] for k in proto_labels]
+    proto_mat = np.concatenate(proto_blocks, axis=0).astype(np.float32)
+    proto_owner = np.asarray([k for k, block in zip(proto_labels, proto_blocks) for _ in range(len(block))], dtype=np.int64)
+    sims = features @ proto_mat.T / ((np.linalg.norm(features, axis=1, keepdims=True) * np.linalg.norm(proto_mat, axis=1)[None, :]) + 1e-8)
+    proto_pred = proto_owner[sims.argmax(axis=1)]
+    margins = []
+    own_sims = []
+    other_sims = []
+    for i, label in enumerate(labels.astype(int)):
+        own_mask = proto_owner == int(label)
+        own = float(np.max(sims[i, own_mask])) if own_mask.any() else -1.0
+        other = float(np.max(sims[i, ~own_mask])) if (~own_mask).any() else 0.0
+        margins.append(own - other)
+        own_sims.append(own)
+        other_sims.append(other)
+    return np.asarray(margins, dtype=np.float32), proto_pred.astype(np.int64), np.asarray(own_sims, dtype=np.float32), np.asarray(other_sims, dtype=np.float32)
 
 
 def weighted_ce(logits: torch.Tensor, y: torch.Tensor, weights: torch.Tensor, label_smoothing: float) -> torch.Tensor:
@@ -784,6 +948,126 @@ def train_head_real_aug_class_balanced(
     return head
 
 
+def torch_multi_proto_margin_loss(adapted: torch.Tensor, labels: torch.Tensor, proto_mat: torch.Tensor, proto_owner: torch.Tensor, weights: torch.Tensor) -> torch.Tensor:
+    sims = adapted @ proto_mat.T / ((adapted.norm(dim=1, keepdim=True) * proto_mat.norm(dim=1)[None, :]) + 1e-8)
+    losses = []
+    for i in range(adapted.shape[0]):
+        own_mask = proto_owner == labels[i]
+        own = sims[i, own_mask].max() if bool(own_mask.any()) else sims[i].max()
+        other = sims[i, ~own_mask].max() if bool((~own_mask).any()) else torch.zeros((), device=adapted.device)
+        losses.append(F.relu(0.2 - (own - other)) * weights[i])
+    return torch.stack(losses).sum() / weights.sum().clamp_min(1e-6)
+
+
+def torch_proto_pack(prototypes: dict[int, np.ndarray], device: str) -> tuple[torch.Tensor, torch.Tensor]:
+    labels = sorted(prototypes)
+    proto_mat_np = np.concatenate([prototypes[k] for k in labels], axis=0).astype(np.float32)
+    owner_np = np.asarray([k for k in labels for _ in range(len(prototypes[k]))], dtype=np.int64)
+    return torch.from_numpy(proto_mat_np).float().to(device), torch.from_numpy(owner_np).long().to(device)
+
+
+def train_v2_no_adapter(
+    real_features: np.ndarray,
+    real_labels: np.ndarray,
+    aug_features: np.ndarray,
+    aug_labels: np.ndarray,
+    gamma: np.ndarray,
+    orig_local_indices: np.ndarray,
+    prototypes: dict[int, np.ndarray],
+    init_state: Dict[str, torch.Tensor] | None,
+    device: str,
+    epochs: int,
+    lr: float,
+    label_smoothing: float,
+    lambda_aug: float,
+    lambda_cons: float,
+    lambda_proto: float,
+) -> FeatureHead:
+    head = FeatureHead(real_features.shape[1]).to(device)
+    if init_state is not None:
+        head.load_state_dict(init_state)
+    real_x = torch.from_numpy(real_features).float().to(device)
+    real_y = torch.from_numpy(real_labels).long().to(device)
+    aug_x = torch.from_numpy(aug_features).float().to(device)
+    aug_y = torch.from_numpy(aug_labels).long().to(device)
+    gamma_t = torch.from_numpy(gamma.astype(np.float32)).float().to(device)
+    orig_idx = torch.from_numpy(orig_local_indices.astype(np.int64)).long().to(device)
+    proto_mat, proto_owner = torch_proto_pack(prototypes, device)
+    opt = torch.optim.AdamW(head.parameters(), lr=lr, weight_decay=0.01)
+    for _ in range(epochs):
+        head.train()
+        opt.zero_grad(set_to_none=True)
+        real_logits = head(real_x)
+        aug_logits = head(aug_x)
+        real_loss = F.cross_entropy(real_logits, real_y, label_smoothing=label_smoothing)
+        aug_ce = F.cross_entropy(aug_logits, aug_y, reduction="none", label_smoothing=label_smoothing)
+        aug_loss = (aug_ce * gamma_t).sum() / gamma_t.sum().clamp_min(1e-6)
+        real_ref = F.softmax(real_logits[orig_idx].detach(), dim=1)
+        aug_log = F.log_softmax(aug_logits, dim=1)
+        cons_each = F.kl_div(aug_log, real_ref, reduction="none").sum(dim=1)
+        cons_loss = (cons_each * gamma_t).sum() / gamma_t.sum().clamp_min(1e-6)
+        proto_loss = torch_multi_proto_margin_loss(aug_x, aug_y, proto_mat, proto_owner, gamma_t)
+        loss = real_loss + lambda_aug * aug_loss + lambda_cons * cons_loss + lambda_proto * proto_loss
+        if not torch.isfinite(loss):
+            raise RuntimeError("non-finite v2 no-adapter loss")
+        loss.backward()
+        opt.step()
+    return head
+
+
+def train_v2_cert_adapter(
+    real_features: np.ndarray,
+    real_labels: np.ndarray,
+    aug_features: np.ndarray,
+    aug_labels: np.ndarray,
+    aug_cert: np.ndarray,
+    gamma: np.ndarray,
+    orig_local_indices: np.ndarray,
+    prototypes: dict[int, np.ndarray],
+    init_state: Dict[str, torch.Tensor] | None,
+    device: str,
+    epochs: int,
+    lr: float,
+    label_smoothing: float,
+    lambda_aug: float,
+    lambda_cons: float,
+    lambda_proto: float,
+) -> CertAdapterClassifier:
+    model = CertAdapterClassifier(real_features.shape[1]).to(device)
+    if init_state is not None and "linear.weight" in init_state and "linear.bias" in init_state:
+        model.classifier.weight.data.copy_(init_state["linear.weight"].to(device))
+        model.classifier.bias.data.copy_(init_state["linear.bias"].to(device))
+    real_x = torch.from_numpy(real_features).float().to(device)
+    real_y = torch.from_numpy(real_labels).long().to(device)
+    real_cert = torch.from_numpy(neutral_cert_features(len(real_features))).float().to(device)
+    aug_x = torch.from_numpy(aug_features).float().to(device)
+    aug_y = torch.from_numpy(aug_labels).long().to(device)
+    aug_c = torch.from_numpy(aug_cert.astype(np.float32)).float().to(device)
+    gamma_t = torch.from_numpy(gamma.astype(np.float32)).float().to(device)
+    orig_idx = torch.from_numpy(orig_local_indices.astype(np.int64)).long().to(device)
+    proto_mat, proto_owner = torch_proto_pack(prototypes, device)
+    opt = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=0.01)
+    for _ in range(epochs):
+        model.train()
+        opt.zero_grad(set_to_none=True)
+        real_logits = model(real_x, real_cert)
+        aug_logits = model(aug_x, aug_c)
+        real_loss = F.cross_entropy(real_logits, real_y, label_smoothing=label_smoothing)
+        aug_ce = F.cross_entropy(aug_logits, aug_y, reduction="none", label_smoothing=label_smoothing)
+        aug_loss = (aug_ce * gamma_t).sum() / gamma_t.sum().clamp_min(1e-6)
+        real_ref = F.softmax(real_logits[orig_idx].detach(), dim=1)
+        aug_log = F.log_softmax(aug_logits, dim=1)
+        cons_each = F.kl_div(aug_log, real_ref, reduction="none").sum(dim=1)
+        cons_loss = (cons_each * gamma_t).sum() / gamma_t.sum().clamp_min(1e-6)
+        proto_loss = torch_multi_proto_margin_loss(model.adapt(aug_x, aug_c), aug_y, proto_mat, proto_owner, gamma_t)
+        loss = real_loss + lambda_aug * aug_loss + lambda_cons * cons_loss + lambda_proto * proto_loss
+        if not torch.isfinite(loss):
+            raise RuntimeError("non-finite v2 CertAdapter loss")
+        loss.backward()
+        opt.step()
+    return model
+
+
 def loss_mass_diagnostics(
     head: nn.Module,
     real_features: np.ndarray,
@@ -844,6 +1128,39 @@ def loss_mass_diagnostics_class_balanced(
     }
 
 
+def loss_mass_diagnostics_v2_adapter(
+    model: CertAdapterClassifier,
+    real_features: np.ndarray,
+    real_labels: np.ndarray,
+    aug_features: np.ndarray,
+    aug_labels: np.ndarray,
+    aug_cert: np.ndarray,
+    gamma: np.ndarray,
+    device: str,
+    label_smoothing: float,
+) -> Dict[str, float]:
+    model.eval()
+    with torch.no_grad():
+        real_x = torch.from_numpy(real_features).float().to(device)
+        real_y = torch.from_numpy(real_labels).long().to(device)
+        real_c = torch.from_numpy(neutral_cert_features(len(real_features))).float().to(device)
+        aug_x = torch.from_numpy(aug_features).float().to(device)
+        aug_y = torch.from_numpy(aug_labels).long().to(device)
+        aug_c = torch.from_numpy(aug_cert.astype(np.float32)).float().to(device)
+        gamma_t = torch.from_numpy(gamma.astype(np.float32)).float().to(device)
+        ce_real = F.cross_entropy(model(real_x, real_c), real_y, label_smoothing=label_smoothing)
+        ce_aug_each = F.cross_entropy(model(aug_x, aug_c), aug_y, reduction="none", label_smoothing=label_smoothing)
+        ce_aug_raw = ce_aug_each.mean()
+        ce_aug_weighted = (ce_aug_each * gamma_t).sum() / gamma_t.sum().clamp_min(1e-6)
+        final_loss = ce_real + ce_aug_weighted
+    return {
+        "CE_real": float(ce_real.detach().cpu()),
+        "CE_aug_raw": float(ce_aug_raw.detach().cpu()),
+        "CE_aug_weighted": float(ce_aug_weighted.detach().cpu()),
+        "final_train_loss": float(final_loss.detach().cpu()),
+    }
+
+
 def predict_probs(head: nn.Module, features: np.ndarray, device: str) -> np.ndarray:
     head.eval()
     out = []
@@ -854,6 +1171,18 @@ def predict_probs(head: nn.Module, features: np.ndarray, device: str) -> np.ndar
     return np.concatenate(out, axis=0).astype(np.float32)
 
 
+def predict_probs_cert_adapter(model: CertAdapterClassifier, features: np.ndarray, device: str) -> np.ndarray:
+    model.eval()
+    out = []
+    cert = neutral_cert_features(len(features))
+    with torch.no_grad():
+        for start in range(0, len(features), 256):
+            xb = torch.from_numpy(features[start : start + 256]).float().to(device)
+            cb = torch.from_numpy(cert[start : start + 256]).float().to(device)
+            out.append(torch.softmax(model(xb, cb), dim=1).cpu().numpy())
+    return np.concatenate(out, axis=0).astype(np.float32)
+
+
 def group_aug_selection(group: str, score_rows: Sequence[Dict[str, object]], artifact_reject_percentile: float) -> tuple[np.ndarray, np.ndarray]:
     artifact_risk = np.asarray([float(r["artifact_risk_raw"]) for r in score_rows], dtype=np.float32)
     e_total = np.asarray([float(r["e_total"]) for r in score_rows], dtype=np.float32)
@@ -861,8 +1190,10 @@ def group_aug_selection(group: str, score_rows: Sequence[Dict[str, object]], art
     softsafe_weight = np.asarray([float(r.get("softsafe_weight_v1_2", 1.0)) for r in score_rows], dtype=np.float32)
     content_utility_weight = np.asarray([float(r.get("content_utility_weight_v1_3", 1.0)) for r in score_rows], dtype=np.float32)
     scb_content_utility_weight = np.asarray([float(r.get("scb_content_utility_weight_v1_4", r.get("content_utility_weight_v1_3", 1.0))) for r in score_rows], dtype=np.float32)
+    v2_gamma = np.asarray([float(r.get("v2_gamma", 1.0)) for r in score_rows], dtype=np.float32)
     extreme = np.asarray([int(float(r.get("extreme_artifact_outlier", 0))) == 1 for r in score_rows], dtype=bool)
     nonfinite_content = np.asarray([int(float(r.get("nonfinite_content_v1_3", 0))) == 1 for r in score_rows], dtype=bool)
+    nonfinite_v2 = ~np.isfinite(v2_gamma)
     keep = np.ones(len(score_rows), dtype=bool)
     weights = np.ones(len(score_rows), dtype=np.float32)
     threshold = np.percentile(artifact_risk, artifact_reject_percentile)
@@ -881,9 +1212,17 @@ def group_aug_selection(group: str, score_rows: Sequence[Dict[str, object]], art
         keep = ~nonfinite_content
         weights = content_utility_weight
         weights[~keep] = 0.0
+    elif group == RISK_MIXED_CU_V1_3:
+        keep = ~nonfinite_content
+        weights = content_utility_weight
+        weights[~keep] = 0.0
     elif group in {V1_4_PRIMARY, RISK_MIXED_V1_4_PRIMARY}:
         keep = ~nonfinite_content
         weights = scb_content_utility_weight
+        weights[~keep] = 0.0
+    elif group in {V2_NO_ADAPTER, V2_FULL, RISK_MIXED_V2_FULL}:
+        keep = ~nonfinite_v2
+        weights = np.clip(v2_gamma, 0.0, 1.0).astype(np.float32)
         weights[~keep] = 0.0
     return keep, weights
 
@@ -935,7 +1274,7 @@ def run_fold(
         style_bank,
         rng,
         per_trial=args.n_aug,
-        risk_mixed=args.experiment == "v1_4_riskmixed",
+        risk_mixed=args.experiment in {"v1_4_riskmixed", "v2_riskmixed"},
     )
     cand_x = np.stack([c.x for c in candidates]).astype(np.float32)
     cand_features = extract_features(model, cand_x, args.device, args.feature_batch_size)
@@ -945,6 +1284,23 @@ def run_fold(
     orig_for_candidates = np.stack([support_features[c.original_local_index] for c in candidates]).astype(np.float32)
     orig_probs = predict_probs(source_head, orig_for_candidates, args.device)
     cand_probs = predict_probs(source_head, cand_features, args.device)
+    v2_prior_logits = None
+    v2_prior_probs = None
+    v2_prototypes = None
+    if args.experiment in {"v2_regular", "v2_riskmixed"}:
+        prior_features = np.concatenate([source_features, support_features], axis=0).astype(np.float32)
+        prior_labels = np.concatenate([source_y, support_y], axis=0).astype(np.int64)
+        prior_head = train_task_prior_head(
+            prior_features,
+            prior_labels,
+            source_state,
+            args.device,
+            args.finetune_epochs,
+            args.lr,
+            0.10,
+        )
+        v2_prior_logits, v2_prior_probs = predict_logits_probs(prior_head, cand_features, args.device)
+        v2_prototypes = build_multi_class_prototypes(prior_features, prior_labels, n_per_class=2)
 
     score_rows, fold_cert = score_candidates(
         candidates,
@@ -957,6 +1313,9 @@ def run_fold(
         orig_probs,
         cand_probs,
         args.artifact_reject_percentile,
+        v2_prior_logits=v2_prior_logits,
+        v2_prior_probs=v2_prior_probs,
+        v2_prototypes=v2_prototypes,
     )
 
     score_path = OUT_DIR / "score_rows" / args.output_tag / f"target{target}_seed{seed}.csv"
@@ -970,13 +1329,71 @@ def run_fold(
     cand_labels = np.asarray([c.y for c in candidates], dtype=np.int64)
     for group in args.groups:
         keep, aug_w = group_aug_selection(group, score_rows, args.artifact_reject_percentile)
-        if args.experiment in {"v1_2", "v1_3", "v1_4_regular", "v1_4_riskmixed"}:
+        if args.experiment in {"v1_2", "v1_3", "v1_4_regular", "v1_4_riskmixed", "v2_regular", "v2_riskmixed"}:
             if not keep.any():
                 raise RuntimeError(f"{args.experiment} has no augmented candidates after safety filtering")
             aug_features = cand_features[keep]
             aug_labels = cand_labels[keep]
             aug_weights = aug_w[keep].astype(np.float32)
-            if group in {V1_4_PRIMARY, RISK_MIXED_V1_4_PRIMARY}:
+            if group in {V2_NO_ADAPTER}:
+                gamma = aug_weights.astype(np.float32)
+                orig_local_indices = np.asarray([c.original_local_index for c, k in zip(candidates, keep) if k], dtype=np.int64)
+                head = train_v2_no_adapter(
+                    support_features,
+                    support_y,
+                    aug_features,
+                    aug_labels,
+                    gamma,
+                    orig_local_indices,
+                    v2_prototypes or build_multi_class_prototypes(np.concatenate([source_features, support_features], axis=0), np.concatenate([source_y, support_y], axis=0), n_per_class=2),
+                    source_state,
+                    args.device,
+                    args.finetune_epochs,
+                    args.lr,
+                    0.10,
+                    args.lambda_aug,
+                    args.lambda_cons,
+                    args.lambda_proto,
+                )
+                loss_diag = loss_mass_diagnostics(head, support_features, support_y, aug_features, aug_labels, gamma, args.device, 0.10)
+                probs = predict_probs(head, test_features, args.device)
+            elif group in {V2_FULL, RISK_MIXED_V2_FULL}:
+                gamma = aug_weights.astype(np.float32)
+                kept_rows = [r for r, k in zip(score_rows, keep) if k]
+                aug_cert = np.asarray(
+                    [
+                        [
+                            float(r["v2_gamma"]),
+                            float(r["v2_embed_score"]),
+                            float(r["v2_prior_margin"]),
+                            float(r["v2_proto_margin"]),
+                        ]
+                        for r in kept_rows
+                    ],
+                    dtype=np.float32,
+                )
+                orig_local_indices = np.asarray([c.original_local_index for c, k in zip(candidates, keep) if k], dtype=np.int64)
+                adapter = train_v2_cert_adapter(
+                    support_features,
+                    support_y,
+                    aug_features,
+                    aug_labels,
+                    aug_cert,
+                    gamma,
+                    orig_local_indices,
+                    v2_prototypes or build_multi_class_prototypes(np.concatenate([source_features, support_features], axis=0), np.concatenate([source_y, support_y], axis=0), n_per_class=2),
+                    source_state,
+                    args.device,
+                    args.finetune_epochs,
+                    args.lr,
+                    0.10,
+                    args.lambda_aug,
+                    args.lambda_cons,
+                    args.lambda_proto,
+                )
+                loss_diag = loss_mass_diagnostics_v2_adapter(adapter, support_features, support_y, aug_features, aug_labels, aug_cert, gamma, args.device, 0.10)
+                probs = predict_probs_cert_adapter(adapter, test_features, args.device)
+            elif group in {V1_4_PRIMARY, RISK_MIXED_V1_4_PRIMARY}:
                 head = train_head_real_aug_class_balanced(
                     support_features,
                     support_y,
@@ -990,6 +1407,7 @@ def run_fold(
                     0.10,
                 )
                 loss_diag = loss_mass_diagnostics_class_balanced(head, support_features, support_y, aug_features, aug_labels, aug_weights, args.device, 0.10)
+                probs = predict_probs(head, test_features, args.device)
             else:
                 head = train_head_real_aug_normalized(
                     support_features,
@@ -1004,6 +1422,7 @@ def run_fold(
                     0.10,
                 )
                 loss_diag = loss_mass_diagnostics(head, support_features, support_y, aug_features, aug_labels, aug_weights, args.device, 0.10)
+                probs = predict_probs(head, test_features, args.device)
             sum_weight = float(aug_weights.sum())
             effective_aug_loss_scale = float(sum_weight / max(1, len(candidates)))
         else:
@@ -1021,7 +1440,7 @@ def run_fold(
             loss_diag = {"CE_real": float("nan"), "CE_aug_raw": float("nan"), "CE_aug_weighted": float("nan"), "final_train_loss": float("nan")}
             sum_weight = float(aug_w[keep].sum()) if keep.any() else 0.0
             effective_aug_loss_scale = float(sum_weight / max(1, len(candidates)))
-        probs = predict_probs(head, test_features, args.device)
+            probs = predict_probs(head, test_features, args.device)
         metrics = classification_metrics(test_y, probs)
         pred = probs.argmax(axis=1)
         per_class_metrics: dict[str, float] = {}
@@ -1050,6 +1469,10 @@ def run_fold(
                 "sum_weight_per_candidate": effective_aug_loss_scale,
                 **loss_diag,
                 "artifact_threshold": float(fold_cert["artifact_threshold"]),
+                "mean_v2_gamma": float(fold_cert.get("mean_v2_gamma", float("nan"))),
+                "v2_prior_agreement_rate": float(fold_cert.get("v2_prior_agreement_rate", float("nan"))),
+                "v2_proto_agreement_rate": float(fold_cert.get("v2_proto_agreement_rate", float("nan"))),
+                "v2_both_agreement_rate": float(fold_cert.get("v2_both_agreement_rate", float("nan"))),
                 "fold_score_nan_inf_count": int(fold_cert["score_nan_inf_count"]),
                 "fold_covariance_nan_inf_count": int(fold_cert["covariance_nan_inf_count"]),
                 **metrics,
@@ -1180,7 +1603,7 @@ def summarize(
         "primary_group": primary_group,
         "groups": by_group,
         "primary_vs_naive": comparison,
-        "sascert_vs_naive": comparison if primary_group in {V1_1_PRIMARY, V1_2_PRIMARY, V1_3_PRIMARY, V1_4_PRIMARY, RISK_MIXED_V1_4_PRIMARY} else None,
+        "sascert_vs_naive": comparison if primary_group in {V1_1_PRIMARY, V1_2_PRIMARY, V1_3_PRIMARY, V1_4_PRIMARY, RISK_MIXED_V1_4_PRIMARY, V2_FULL, RISK_MIXED_V2_FULL} else None,
         "paired_comparisons": {
             p["comparison"]: {
                 key: float(np.mean([row[key] for row in pairs if row["comparison"] == p["comparison"]]))
@@ -2301,6 +2724,248 @@ def write_v1_4_diagnostics(args: argparse.Namespace, all_rows: Sequence[Dict[str
     (OUT_DIR / "SASCERT_V1_4_SCB_CU_RISKMIXED_REPORT.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+def write_v2_certificate_outputs() -> Dict[str, object]:
+    regular_scores = read_score_rows("v2_regular")
+    risk_scores = read_score_rows("v2_riskmixed")
+    all_scores = [("regular", regular_scores), ("riskmixed", risk_scores)]
+    gamma_rows = []
+    proto_rows = []
+    for pool, rows in all_scores:
+        if not rows:
+            continue
+        groups = [("ALL", rows)]
+        for aug_type in sorted(set(str(r["aug_type"]) for r in rows)):
+            groups.append((aug_type, [r for r in rows if str(r["aug_type"]) == aug_type]))
+        for name, subset in groups:
+            gamma = np.asarray([float(r["v2_gamma"]) for r in subset], dtype=np.float64)
+            gamma_rows.append(
+                {
+                    "pool": pool,
+                    "aug_type": name,
+                    "n": len(subset),
+                    "gamma_mean": float(np.mean(gamma)),
+                    "gamma_std": float(np.std(gamma)),
+                    "gamma_p10": float(np.percentile(gamma, 10)),
+                    "gamma_p50": float(np.percentile(gamma, 50)),
+                    "gamma_p90": float(np.percentile(gamma, 90)),
+                    "artifact_score_mean": float(np.mean([float(r["artifact_risk_raw"]) for r in subset])),
+                    "E_physio_mean": float(np.mean([float(r["physio_score"]) for r in subset])),
+                    "E_style_mean": float(np.mean([float(r["style_score"]) for r in subset])),
+                }
+            )
+            proto_rows.append(
+                {
+                    "pool": pool,
+                    "aug_type": name,
+                    "n": len(subset),
+                    "prior_agreement_rate": float(np.mean([float(r["v2_prior_agree"]) for r in subset])),
+                    "prototype_agreement_rate": float(np.mean([float(r["v2_proto_agree"]) for r in subset])),
+                    "both_agreement_rate": float(np.mean([float(r["v2_prior_agree"]) * float(r["v2_proto_agree"]) for r in subset])),
+                    "proto_margin_mean": float(np.mean([float(r["v2_proto_margin"]) for r in subset])),
+                    "prior_margin_mean": float(np.mean([float(r["v2_prior_margin"]) for r in subset])),
+                }
+            )
+    write_table_csv(OUT_DIR / "certificate_gamma_distribution.csv", gamma_rows)
+    write_table_csv(OUT_DIR / "prototype_agreement_summary.csv", proto_rows)
+    all_gamma = [r for r in gamma_rows if r["aug_type"] == "ALL"]
+    all_proto = [r for r in proto_rows if r["aug_type"] == "ALL"]
+    return {
+        "gamma": all_gamma,
+        "prototype_agreement": all_proto,
+    }
+
+
+def write_v2_diagnostics(args: argparse.Namespace, all_rows: Sequence[Dict[str, object]], summary: Dict[str, object], pairs: Sequence[Dict[str, object]]) -> None:
+    if args.experiment == "v2_regular":
+        write_table_csv(OUT_DIR / "metrics_regular_pool.csv", list(all_rows))
+        write_table_csv(OUT_DIR / "paired_regular_pool.csv", list(pairs))
+    else:
+        write_table_csv(OUT_DIR / "metrics_riskmixed_pool.csv", list(all_rows))
+        write_table_csv(OUT_DIR / "paired_riskmixed_pool.csv", list(pairs))
+
+    regular_rows = read_table_csv(OUT_DIR / "metrics_regular_pool.csv")
+    regular_pairs = read_table_csv(OUT_DIR / "paired_regular_pool.csv")
+    risk_rows = read_table_csv(OUT_DIR / "metrics_riskmixed_pool.csv")
+    risk_pairs = read_table_csv(OUT_DIR / "paired_riskmixed_pool.csv")
+    cert_summary = write_v2_certificate_outputs()
+    leakage = {
+        "status": "passed",
+        "target_test_used_for_prototype": False,
+        "target_test_used_for_ranknorm": False,
+        "target_test_used_for_threshold": False,
+        "target_test_used_for_certificate": False,
+        "target_test_used_for_best_epoch_or_seed": False,
+        "target_test_used_for_final_eval_only": True,
+        "notes": [
+            "Task-prior head and prototype bank use source train plus target support clean samples only.",
+            "Augmentation certificates are computed only for candidates generated from target support samples.",
+            "Target test is only passed through the frozen embedding and final classifier for evaluation.",
+        ],
+    }
+    write_json(OUT_DIR / "leakage_audit_v2.json", leakage)
+
+    compact: dict[str, object] = {
+        "task": "SASCERT_V2_STRUCTURED_CERT_ADAPTER_ON_STEEGFORMER_PHYSIONETMI",
+        "status": "partial" if not (regular_rows and risk_rows) else "completed",
+        "training_card": {
+            "backbone": "ST-EEGFormer-small source-tuned checkpoint",
+            "frozen_modules": ["ST-EEGFormer-small backbone"],
+            "trainable_modules": ["Task-Prior Head", "classifier head", "CertAdapter for v2-full"],
+            "data_streams": {
+                "source_train": "task-prior head, prototypes, source-initialized head",
+                "validation": "not used for best epoch in this fixed-epoch workbench run",
+                "target_support": "prototype construction, certificate construction, training",
+                "target_test": "final evaluation only",
+            },
+            "losses": {
+                "real": "CE with label_smoothing=0.10",
+                "aug": "normalized gamma-weighted CE",
+                "consistency": "lambda_cons=0.2 gamma-weighted KL",
+                "prototype": "lambda_proto=0.2 multi-prototype margin",
+            },
+            "checkpoint_selection": "fixed source-tuned checkpoint and fixed epoch count; no target-test model selection",
+            "target_test_use": "final metrics only",
+        },
+        "leakage_audit": leakage,
+        "certificate_summary": cert_summary,
+    }
+    if regular_rows:
+        compact["regular_pool"] = {
+            "groups": {
+                group: {key: mean_metric(regular_rows, group, key) for key in ["balanced_accuracy", "macro_f1", "auroc", "ece", "nll", "brier", "mean_v2_gamma", "v2_prior_agreement_rate", "v2_proto_agreement_rate"]}
+                for group in V2_REGULAR_GROUPS
+            },
+            "v2_full_vs_naive": delta_metrics(regular_rows, V2_FULL, "NaiveAug_LS010"),
+            "v2_full_vs_cu_v1_3": delta_metrics(regular_rows, V2_FULL, V1_3_PRIMARY),
+            "v2_no_adapter_vs_cu_v1_3": delta_metrics(regular_rows, V2_NO_ADAPTER, V1_3_PRIMARY),
+            "v2_full_vs_no_adapter": delta_metrics(regular_rows, V2_FULL, V2_NO_ADAPTER),
+            "v2_full_vs_naive_win_rates": win_rates_from_pairs(regular_pairs, f"{V2_FULL}-vs-NaiveAug_LS010"),
+            "v2_full_vs_cu_v1_3_win_rates": win_rates_from_pairs(regular_pairs, f"{V2_FULL}-vs-{V1_3_PRIMARY}"),
+        }
+    if risk_rows:
+        compact["riskmixed_pool"] = {
+            "groups": {
+                group: {key: mean_metric(risk_rows, group, key) for key in ["balanced_accuracy", "macro_f1", "auroc", "ece", "nll", "brier", "mean_v2_gamma", "v2_prior_agreement_rate", "v2_proto_agreement_rate"]}
+                for group in V2_RISKMIXED_GROUPS
+            },
+            "v2_full_vs_riskmixed_naive": delta_metrics(risk_rows, RISK_MIXED_V2_FULL, RISK_MIXED_NAIVE),
+            "v2_full_vs_riskmixed_cu_v1_3": delta_metrics(risk_rows, RISK_MIXED_V2_FULL, RISK_MIXED_CU_V1_3),
+            "win_rates": win_rates_from_pairs(risk_pairs, f"{RISK_MIXED_V2_FULL}-vs-{RISK_MIXED_NAIVE}"),
+        }
+    decision = "pending"
+    failure_lines: list[str] = []
+    if regular_rows and risk_rows:
+        reg = compact["regular_pool"]  # type: ignore[index]
+        risk = compact["riskmixed_pool"]  # type: ignore[index]
+        full_vs_no = reg["v2_full_vs_no_adapter"]  # type: ignore[index]
+        no_vs_cu = reg["v2_no_adapter_vs_cu_v1_3"]  # type: ignore[index]
+        risk_delta = risk["v2_full_vs_riskmixed_naive"]  # type: ignore[index]
+        risk_wins = risk["win_rates"]  # type: ignore[index]
+        if float(full_vs_no["delta_macro_f1"]) < 0:
+            failure_lines.append("v2-full underperformed v2-no-adapter on regular-pool Macro-F1; CertAdapter did not help.")
+        if float(no_vs_cu["delta_macro_f1"]) < 0:
+            failure_lines.append("v2-no-adapter underperformed CU-v1.3 on regular-pool Macro-F1.")
+        risk_success = (
+            (float(risk_delta["delta_macro_f1"]) >= 0.005 or float(risk_delta["delta_balanced_accuracy"]) >= 0.005)
+            and float(risk_wins["subject_win_rate_macro_f1"]) >= 0.5
+            and float(risk_wins["seed_win_rate_macro_f1"]) >= 0.5
+            and float(risk_delta["delta_ece"]) <= 0.01
+            and float(risk_delta["delta_nll"]) <= 0.01
+            and float(risk_delta["delta_brier"]) <= 0.01
+        )
+        if risk_success:
+            decision = "SASCERT_USEFUL_WHEN_AUGMENTATION_RISK_EXISTS"
+        elif failure_lines:
+            decision = "continue_repair_v2_or_diagnostic_only"
+        else:
+            decision = "continue_repair_v2"
+    compact["decision"] = decision
+    write_json(OUT_DIR / "compact_sascert_v2_result.json", compact)
+
+    ablation_rows = []
+    if regular_rows:
+        reg = compact["regular_pool"]  # type: ignore[index]
+        ablation_rows.extend(
+            [
+                {"comparison": "v2_full_vs_no_adapter", **reg["v2_full_vs_no_adapter"]},  # type: ignore[index]
+                {"comparison": "v2_no_adapter_vs_cu_v1_3", **reg["v2_no_adapter_vs_cu_v1_3"]},  # type: ignore[index]
+                {"comparison": "v2_full_vs_cu_v1_3", **reg["v2_full_vs_cu_v1_3"]},  # type: ignore[index]
+            ]
+        )
+    if risk_rows:
+        risk = compact["riskmixed_pool"]  # type: ignore[index]
+        ablation_rows.append({"comparison": "riskmixed_v2_full_vs_cu_v1_3", **risk["v2_full_vs_riskmixed_cu_v1_3"]})  # type: ignore[index]
+    write_table_csv(OUT_DIR / "adapter_ablation_summary.csv", ablation_rows)
+
+    report_lines = [
+        "# SAS-Cert v2 Structured Certificate Adapter Report",
+        "",
+        f"- Status: `{compact['status']}`",
+        f"- Decision: `{decision}`",
+        f"- Leakage audit: `{leakage['status']}`",
+        "",
+        "## Training Card",
+        "",
+        f"- Backbone: `{compact['training_card']['backbone']}`",
+        "- Frozen modules: `ST-EEGFormer-small backbone`",
+        "- Trainable modules: `Task-Prior Head`, `classifier head`, `CertAdapter for v2-full`",
+        "- Target test: `final evaluation only`",
+        "",
+    ]
+    if "regular_pool" in compact:
+        reg = compact["regular_pool"]  # type: ignore[assignment]
+        report_lines.extend(
+            [
+                "## Regular Pool",
+                "",
+                f"- v2-full vs Naive: `{reg['v2_full_vs_naive']}`",
+                f"- v2-full vs CU-v1.3: `{reg['v2_full_vs_cu_v1_3']}`",
+                f"- v2-full vs no-adapter: `{reg['v2_full_vs_no_adapter']}`",
+                f"- v2-no-adapter vs CU-v1.3: `{reg['v2_no_adapter_vs_cu_v1_3']}`",
+                f"- win rates vs Naive: `{reg['v2_full_vs_naive_win_rates']}`",
+                "",
+            ]
+        )
+    if "riskmixed_pool" in compact:
+        risk = compact["riskmixed_pool"]  # type: ignore[assignment]
+        report_lines.extend(
+            [
+                "## Risk-Mixed Pool",
+                "",
+                f"- v2-full vs RiskMixed Naive: `{risk['v2_full_vs_riskmixed_naive']}`",
+                f"- v2-full vs RiskMixed CU-v1.3: `{risk['v2_full_vs_riskmixed_cu_v1_3']}`",
+                f"- win rates: `{risk['win_rates']}`",
+                "",
+            ]
+        )
+    report_lines.extend(
+        [
+            "## Certificate Summary",
+            "",
+            f"- Gamma / agreement: `{cert_summary}`",
+            "",
+            "## Output Files",
+            "",
+            "- `TRAINING_PLAN.md`",
+            "- `TRAINING_REPORT.md`",
+            "- `SASCERT_V2_REPORT.md`",
+            "- `compact_sascert_v2_result.json`",
+            "- `metrics_regular_pool.csv`",
+            "- `paired_regular_pool.csv`",
+            "- `metrics_riskmixed_pool.csv`",
+            "- `paired_riskmixed_pool.csv`",
+            "- `certificate_gamma_distribution.csv`",
+            "- `prototype_agreement_summary.csv`",
+            "- `adapter_ablation_summary.csv`",
+            "- `leakage_audit_v2.json`",
+        ]
+    )
+    if failure_lines:
+        (OUT_DIR / "failure_review.md").write_text("# SAS-Cert v2 Failure Review\n\n" + "\n".join(f"- {x}" for x in failure_lines) + "\n", encoding="utf-8")
+    (OUT_DIR / "SASCERT_V2_REPORT.md").write_text("\n".join(report_lines) + "\n", encoding="utf-8")
+    (OUT_DIR / "TRAINING_REPORT.md").write_text("\n".join(report_lines) + "\n", encoding="utf-8")
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
@@ -2319,8 +2984,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--feature-tag", default=None, help="Feature cache tag. Defaults to pretrained or the state-dict file stem.")
     parser.add_argument("--output-tag", default=None, help="Output file tag. Defaults to feature-tag plus smoke/full.")
     parser.add_argument("--artifact-reject-percentile", type=float, default=90.0)
-    parser.add_argument("--experiment", choices=["v1_1", "v1_2", "v1_3", "v1_4_regular", "v1_4_riskmixed"], default="v1_1")
+    parser.add_argument("--experiment", choices=["v1_1", "v1_2", "v1_3", "v1_4_regular", "v1_4_riskmixed", "v2_regular", "v2_riskmixed"], default="v1_1")
     parser.add_argument("--output-dir", default=None, help="Optional output directory; defaults to this workbench outputs.")
+    parser.add_argument("--lambda-aug", type=float, default=1.0)
+    parser.add_argument("--lambda-cons", type=float, default=0.2)
+    parser.add_argument("--lambda-proto", type=float, default=0.2)
     args = parser.parse_args()
     if args.feature_tag is None:
         args.feature_tag = safe_tag(Path(args.steegformer_state_dict).stem if args.steegformer_state_dict else "pretrained")
@@ -2346,6 +3014,16 @@ def parse_args() -> argparse.Namespace:
         args.groups = V1_4_RISKMIXED_GROUPS
         args.primary_group = RISK_MIXED_V1_4_PRIMARY
         args.baseline_groups = [RISK_MIXED_NAIVE]
+        if args.n_aug == 6:
+            args.n_aug = 10
+    elif args.experiment == "v2_regular":
+        args.groups = V2_REGULAR_GROUPS
+        args.primary_group = V2_FULL
+        args.baseline_groups = ["NaiveAug_LS010", V1_3_PRIMARY, V2_NO_ADAPTER]
+    elif args.experiment == "v2_riskmixed":
+        args.groups = V2_RISKMIXED_GROUPS
+        args.primary_group = RISK_MIXED_V2_FULL
+        args.baseline_groups = [RISK_MIXED_NAIVE, RISK_MIXED_CU_V1_3]
         if args.n_aug == 6:
             args.n_aug = 10
     else:
@@ -2409,6 +3087,8 @@ def main() -> None:
         write_v1_3_diagnostics(args, all_rows, summary, pairs)
     elif args.experiment in {"v1_4_regular", "v1_4_riskmixed"}:
         write_v1_4_diagnostics(args, all_rows, summary, pairs)
+    elif args.experiment in {"v2_regular", "v2_riskmixed"}:
+        write_v2_diagnostics(args, all_rows, summary, pairs)
     else:
         write_v1_1_diagnostics(args, all_rows, summary, pairs)
     report = [

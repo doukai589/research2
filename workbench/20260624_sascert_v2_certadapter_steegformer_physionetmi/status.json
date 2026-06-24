@@ -1,0 +1,15 @@
+{
+  "trial": "sascert_v2_certadapter_steegformer_physionetmi",
+  "created_at": "2026-06-24T12:30:00",
+  "status": "completed",
+  "promoted": false,
+  "runner_reused": "workbench/20260623_sascert_softar_ls_v1_1_steegformer_physionetmi/runner_v1_1.py",
+  "experiments": [
+    "v2_regular",
+    "v2_riskmixed"
+  ],
+  "primary_output": "outputs/SASCERT_V2_REPORT.md",
+  "compact_result": "outputs/compact_sascert_v2_result.json",
+  "decision": "continue_repair_v2_or_diagnostic_only",
+  "completed_at": "2026-06-24T13:40:00"
+}

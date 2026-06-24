@@ -1,0 +1,21 @@
+task_name: SASCERT_V2_STRUCTURED_CERT_ADAPTER_ON_STEEGFORMER_PHYSIONETMI
+backbone: ST-EEGFormer-small
+dataset: PhysioNetMI_EEGMMI
+task: left_vs_right_motor_imagery
+runs:
+  - R04
+  - R08
+  - R12
+targets: [90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109]
+seeds: [20, 21, 22, 23, 24]
+source_tuned_checkpoint: outputs/foundation_physio_mi_fullfinetune/checkpoints/st_eegformer_small_seed3407_best.pt
+runner: workbench/20260623_sascert_softar_ls_v1_1_steegformer_physionetmi/runner_v1_1.py
+experiments:
+  - v2_regular
+  - v2_riskmixed
+lambda_aug: 1.0
+lambda_cons: 0.2
+lambda_proto: 0.2
+label_smoothing: 0.10
+artifact_physio_style_training_use: diagnostic_only
+target_test_use: final_evaluation_only
