@@ -2414,3 +2414,45 @@ Primary report:
   - Push status:
     - blocked locally by missing HTTPS GitHub credentials:
       `could not read Username for 'https://github.com'`
+
+### 2026-06-24 SAS-Cert v2 Planning Stance
+
+- User provided an external AI analysis proposing a route shift from v1.x
+  heuristic certificate weighting to SAS-Cert v2 structured
+  augmentation-certificate guided adaptation.
+- Interpretation:
+  - Agree with stopping further v1.x-style small repairs as the main route.
+  - v1.1-v1.4 have already answered the important diagnostic questions:
+    - hard artifact gate can remove useful augmented samples.
+    - soft artifact/physio/style penalties do not reliably improve ST training.
+    - content utility, especially `E_proto`, has real signal but weak
+      subject/seed stability.
+    - subject/class ranknorm fixes mean weight fairness but does not fix the
+      stability problem.
+  - A v2 attempt is justified only if it changes the training structure, not
+    just the score formula.
+- Supported v2 direction:
+  - Build structured augmentation certificate supervision:
+    - task-prior head
+    - prototype-anchored certificate
+    - agreement-based confidence `gamma`
+  - Use a lightweight certificate-conditioned adapter/head on frozen
+    ST-EEGFormer embeddings.
+  - Keep artifact / physio / style as diagnostic-only unless a later audit
+    proves they improve training utility.
+  - Require `TRAINING_PLAN.md` before running and `TRAINING_REPORT.md` after
+    running.
+- Cautions:
+  - Do not over-copy SCOPE; use its structural idea but keep the scientific
+    target as augmented EEG label preservation.
+  - First v2 must be a controlled minimal version:
+    - v2 without adapter
+    - v2 full with CertAdapter
+    - CU-v1.3 baseline
+    - Naive baseline
+  - Success should require subject/seed stability, not only tiny average gains.
+  - If CertAdapter underperforms the no-adapter variant, stop and diagnose
+    rather than adding more modules.
+- Next-route preference:
+  - Start a new `workbench/` trial for v2.
+  - Do not enter CBraMod until v2 has meaningful ST + PhysioNetMI evidence.
