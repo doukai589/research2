@@ -2735,3 +2735,20 @@ Primary report:
   - Push status:
     - blocked locally by missing HTTPS GitHub credentials:
       `could not read Username for 'https://github.com'`
+
+### 2026-06-24 Reporting Detail Preference
+
+- User said the final summaries have been too brief and hard to understand.
+- Future experiment summaries should be more detailed by default, especially
+  for failed or diagnostic experiments.
+- Preferred final response structure:
+  - clear one-sentence conclusion.
+  - training card summary.
+  - main metric table or compact metric list.
+  - interpretation of what each key comparison means.
+  - whether the success criteria were met.
+  - why the next-step recommendation follows from the numbers.
+  - key output paths and GitHub upload status.
+  - optional ready-to-paste explanation for another ChatGPT when useful.
+- Avoid giving only deltas without explaining whether they are meaningful,
+  stable, or sufficient for the stated success criterion.
