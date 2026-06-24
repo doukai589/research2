@@ -1,0 +1,51 @@
+name: steegformer_physionetmi_fullft
+status: completed_reference
+protocol: paper_aligned_common_protocol
+
+dataset:
+  name: PhysioNetMI
+  root: /ai/224duibishiyan/CBraMod-main/tmp_in/MI/files
+  task: left_vs_right_motor_imagery
+  runs: [4, 8, 12]
+  labels:
+    T1: left
+    T2: right
+  window_seconds: 4
+  train_subjects: [1, 70]
+  val_subjects: [71, 89]
+  test_subjects: [90, 109]
+  raw_data_copied: false
+
+preprocessing:
+  bandpass_hz: [1.0, 40.0]
+  per_trial_channel_zscore: true
+  target_sfreq: 128
+  target_samples: 512
+
+backbone:
+  name: ST-EEGFormer-small
+  code_path: third_party/backbones/STEEGFormer
+  checkpoint: third_party/backbones/STEEGFormer/pretrained_weights/ST-EEGFormer-small/checkpoint-300.pth
+  train_mode: full_finetune
+
+training:
+  seed: 3407
+  epochs: 30
+  batch_size: 16
+  lr: 0.0001
+  weight_decay: 0.05
+  patience: 10
+
+outputs:
+  report: outputs/foundation_physio_mi_fullfinetune/PHYSIO_MI_FOUNDATION_FULLFINETUNE_REPORT.md
+  metrics: outputs/foundation_physio_mi_fullfinetune/results/physio_mi_fullfinetune_metrics.csv
+
+result:
+  test_accuracy: 0.7667
+  test_balanced_accuracy: 0.7669
+  test_macro_f1: 0.7635
+  test_kappa: 0.5336
+  test_auroc: 0.8712
+  test_nll: 0.9054
+  test_ece: 0.1816
+

@@ -1,0 +1,80 @@
+name: component_gated_cert_rule_v1
+status: score_validated_not_training_promoted
+protocol: existing_score_rows_only
+
+purpose: >
+  Define a component-gated SAS-Cert rule from the cross-backbone direction
+  audit before adding any new training expansion.
+
+scientific_question_link: >
+  Implements the SAS-Cert framing as a multi-dimensional reliability certificate
+  instead of a fixed universal scalar ranker.
+
+scope:
+  dataset: PhysioNetMI
+  task: left_vs_right_motor_imagery
+  runs: [4, 8, 12]
+  targets: [90, 91, 92]
+  seeds: [20, 21]
+  backbones:
+    - ST-EEGFormer-small_source_tuned
+    - CBraMod_frozen
+
+constraints:
+  no_retraining: true
+  no_new_augmentation_generation: true
+  no_raw_data_copy: true
+  no_target_test_labels_used: true
+  no_new_dataset: true
+  no_new_backbone: true
+
+rule:
+  name: component_gated_v1
+  artifact_gate:
+    definition: artifact_risk < fold_p90
+    purpose: reject obvious artifact-contaminated candidates
+  base_score:
+    formula: 0.75 * physio_score + 0.25 * style_score
+    rank_normalized_within: fold_candidate_pool
+  final_score:
+    formula: ranknorm(base_score) * artifact_gate_pass
+  soft_variant:
+    formula: ranknorm(base_score) * (0.2 + 0.8 * artifact_safe_rank)
+  content_policy:
+    role: diagnostic_warning_only
+    reason: >
+      content_score is backbone/bad-type dependent in the cross-backbone audit,
+      especially for BadContent.
+
+script: workbench/20260622_component_gated_cert_rule/01_define_and_validate_component_gated_rule.py
+report: workbench/20260622_component_gated_cert_rule/outputs/COMPONENT_GATED_CERT_RULE_V1.md
+compact_result: workbench/20260622_component_gated_cert_rule/outputs/compact_component_gated_cert_rule_v1.json
+
+score_only_results:
+  current_sas_auc:
+    cbramod: 0.19689814814814816
+    st: 0.16620370370370371
+  artifact_gate_physio_auc:
+    cbramod: 0.9022222222222221
+    st: 0.9022222222222221
+  component_gated_v1_auc:
+    cbramod: 0.8395370370370371
+    st: 0.8395370370370371
+  component_gated_v1_soft_auc:
+    cbramod: 0.7383101851851852
+    st: 0.7383101851851852
+
+interpretation: >
+  The rule fixes the obvious scalar-score direction failure and is interpretable,
+  but it does not beat the simpler artifact_gate_physio diagnostic score. Use
+  component_gated_v1 as the certificate policy and artifact_gate_physio as the
+  strongest score-only baseline in the next small ST reliability test.
+
+decision: component_gated_v1_defined_score_validated
+
+next_step:
+  name: small_st_reliability_test_component_gated_vs_artifact_gate_physio
+  rationale: >
+    Test whether the interpretable component-gated policy or the stronger
+    score-only artifact_gate_physio baseline improves ST reliability without
+    expanding to a full new experiment.

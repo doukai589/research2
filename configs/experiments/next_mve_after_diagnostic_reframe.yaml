@@ -1,0 +1,63 @@
+name: sas_cert_diagnostic_certificate_pack_physionetmi
+status: completed
+date_created: 2026-06-22
+
+purpose: >
+  Build the next MVE around diagnostic certification rather than deployable
+  augmentation weighting. The goal is to lock whether SAS-Cert can reliably
+  diagnose harmful augmentation modes and score-direction failures on
+  PhysioNetMI across CBraMod and ST-EEGFormer-small.
+
+scope:
+  dataset: PhysioNetMI
+  task: left_vs_right_motor_imagery
+  runs: [4, 8, 12]
+  backbones:
+    - CBraMod_frozen
+    - ST-EEGFormer-small_source_tuned_frozen
+  use_existing_outputs_only: true
+
+inputs:
+  cross_backbone_audit: workbench/20260622_cross_backbone_cert_direction_audit/outputs/compact_cross_backbone_cert_direction_audit.json
+  component_gated_rule: workbench/20260622_component_gated_cert_rule/outputs/compact_component_gated_cert_rule_v1.json
+  cbramod_current: workbench/20260622_cbramod_physionetmi_sascert_matched/outputs/compact_cbramod_physionetmi_sascert_result_mini.json
+  cbramod_repaired: workbench/20260622_cbramod_physionetmi_sascert_matched/outputs/compact_cbramod_physionetmi_sascert_result_repaired_mini.json
+  cbramod_calibrated: workbench/20260622_cbramod_physionetmi_sascert_matched/outputs/compact_cbramod_physionetmi_sascert_result_calibrated_mini.json
+  st_locked_confirm: workbench/20260622_steegformer_sascert_core/outputs/locked_confirm/compact_softweight_locked_confirm.json
+  st_utility_audit: workbench/20260622_steegformer_sascert_core/outputs/utility_alignment_audit/compact_utility_alignment_audit.json
+
+outputs:
+  report: docs/SAS_CERT_DIAGNOSTIC_CERTIFICATE_PACK_PHYSIONETMI.md
+  compact: outputs/runs/sas_cert_diagnostic_certificate_pack_physionetmi/compact_result.json
+  tables_dir: outputs/runs/sas_cert_diagnostic_certificate_pack_physionetmi/tables
+
+constraints:
+  no_new_training: true
+  no_new_backbone: true
+  no_new_dataset: true
+  no_target_test_threshold_selection: true
+  no_promotion_of_weighting_policy: true
+
+go_criteria:
+  diagnostic_auc_gate:
+    metric: component_gated_v1_or_artifact_gate_physio_auc
+    min_auc: 0.80
+  scalar_failure_gate:
+    metric: current_scalar_sas_auc
+    max_auc: 0.50
+  protocol_gate:
+    no_protocol_leakage: true
+  interpretation_gate:
+    weighting_policy_marked_non_promoted: true
+
+decision_options:
+  - write_diagnostic_certificate_paper_path
+  - park_sas_cert_as_internal_diagnostic_tool
+
+result:
+  diagnostic_auc_pass: true
+  scalar_failure_pass: true
+  protocol_pass: true
+  weighting_policy_non_promotion_pass: true
+  decision: write_diagnostic_certificate_paper_path
+  next_action: prepare_diagnostic_certificate_paper_outline

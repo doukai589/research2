@@ -1,0 +1,76 @@
+# Large/generated experiment outputs
+outputs/**
+!outputs/
+!outputs/README.md
+!outputs/runs/
+!outputs/runs/README.md
+
+workbench/*/outputs/**
+
+sas_cert_mve_outputs/**
+sas_cert_cbramod_mve/outputs/**
+
+# External repositories and downloaded artifacts
+third_party/**
+**/third_party/**
+artifacts/source_archives/**
+!artifacts/
+!artifacts/source_archives/
+!artifacts/source_archives/README.md
+
+# EEG/data/checkpoint binaries
+*.edf
+*.edf.event
+*.mat
+*.npy
+*.npz
+*.pt
+*.pth
+*.ckpt
+*.lmdb
+*.mdb
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.7z
+docs/references/*.pdf
+paper/**/main.pdf
+
+# LaTeX build artifacts
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.out
+*.synctex.gz
+
+# Runtime/cache files
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.log
+
+# Local envs
+.venv/
+venv/
+env/
+*.egg-info/
+
+# Editor/OS
+.DS_Store
+.idea/
+.vscode/
+
+# GPU hold runtime logs are local state
+显存占位/
+显存占位/*.log
+
+# Personal/local notes are not part of the public project upload
+参考论文集/
+复盘助手
+选题.txt

@@ -1,0 +1,37 @@
+{
+  "status": "reviewed_after_focused_rerun",
+  "decision": "revise_method_after_source_tuned_rerun",
+  "original_primary_failure": "subject/seed win-rate criteria failed and all original-pretrained-feature groups were near chance",
+  "original_sascert_vs_naive": {
+    "delta_balanced_accuracy": 0.012117822725949634,
+    "delta_macro_f1": 0.011587603133753177,
+    "delta_ece": -0.00298185891968189,
+    "delta_nll": -0.0011452190599466894,
+    "delta_brier": -0.00020404249429706312,
+    "subject_win_rate_macro_f1": 0.25,
+    "seed_win_rate_macro_f1": 0.4
+  },
+  "first_broken_link": "pretrained frozen ST features were not sufficiently class-separable for this few-shot protocol",
+  "focused_rerun": {
+    "state_dict": "outputs/foundation_physio_mi_fullfinetune/checkpoints/st_eegformer_small_seed3407_best.pt",
+    "feature_tag": "st_source_tuned_seed3407",
+    "output_tag": "st_source_tuned_full",
+    "n_rows": 400,
+    "substrate_repaired": true,
+    "naive_balanced_accuracy": 0.708793339473564,
+    "softweight_no_reject_balanced_accuracy": 0.7152730485974295,
+    "sascert_softar_balanced_accuracy": 0.7149415603402445,
+    "sascert_vs_naive": {
+      "delta_balanced_accuracy": 0.006148220866680432,
+      "delta_macro_f1": 0.006289231025346731,
+      "delta_ece": -0.0023313998088696775,
+      "delta_nll": -0.004357282228181991,
+      "delta_brier": -0.006221016962081161,
+      "subject_win_rate_macro_f1": 0.25,
+      "seed_win_rate_macro_f1": 0.0
+    }
+  },
+  "updated_conclusion": "source-tuned ST features repair the feature substrate, but locked SASCert_SoftAR remains unreliable across subjects/seeds and is slightly below SoftWeight_noReject on mean Macro-F1",
+  "next_experiment": "method-local artifact-gate diagnosis under source-tuned ST; compare SoftWeight_noReject as the ST-specific branch before expanding to new datasets or backbones",
+  "no_scope_expansion": true
+}

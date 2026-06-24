@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="842" height="712" viewBox="0 0 842 712">
+<rect width="100%" height="100%" fill="white"/>
+<text x="20" y="34" font-family="Arial" font-size="22" font-weight="700">Component Specificity by Bad Type</text>
+<text x="296.0" y="62" text-anchor="middle" font-family="Arial" font-size="11">content_score</text>
+<text x="388.0" y="62" text-anchor="middle" font-family="Arial" font-size="11">style_score</text>
+<text x="480.0" y="62" text-anchor="middle" font-family="Arial" font-size="11">physio_score</text>
+<text x="572.0" y="62" text-anchor="middle" font-family="Arial" font-size="11">artifact_safe_score</text>
+<text x="664.0" y="62" text-anchor="middle" font-family="Arial" font-size="11">sas_score</text>
+<text x="756.0" y="62" text-anchor="middle" font-family="Arial" font-size="11">score_artifact_gate_physio</text>
+<text x="240" y="130.0" text-anchor="end" font-family="Arial" font-size="12">CBraMod frozen / bad_artifact</text>
+<rect x="250" y="80" width="90" height="90" fill="rgb(239,120,120)"/>
+<text x="296.0" y="130.0" text-anchor="middle" font-family="Arial" font-size="13">0.005</text>
+<rect x="342" y="80" width="90" height="90" fill="rgb(162,194,120)"/>
+<text x="388.0" y="130.0" text-anchor="middle" font-family="Arial" font-size="13">0.650</text>
+<rect x="434" y="80" width="90" height="90" fill="rgb(161,195,120)"/>
+<text x="480.0" y="130.0" text-anchor="middle" font-family="Arial" font-size="13">0.653</text>
+<rect x="526" y="80" width="90" height="90" fill="rgb(120,235,120)"/>
+<text x="572.0" y="130.0" text-anchor="middle" font-family="Arial" font-size="13">1.000</text>
+<rect x="618" y="80" width="90" height="90" fill="rgb(178,178,120)"/>
+<text x="664.0" y="130.0" text-anchor="middle" font-family="Arial" font-size="13">0.508</text>
+<rect x="710" y="80" width="90" height="90" fill="rgb(140,215,120)"/>
+<text x="756.0" y="130.0" text-anchor="middle" font-family="Arial" font-size="13">0.826</text>
+<text x="240" y="222.0" text-anchor="end" font-family="Arial" font-size="12">CBraMod frozen / bad_content</text>
+<rect x="250" y="172" width="90" height="90" fill="rgb(131,223,120)"/>
+<text x="296.0" y="222.0" text-anchor="middle" font-family="Arial" font-size="13">0.903</text>
+<rect x="342" y="172" width="90" height="90" fill="rgb(162,194,120)"/>
+<text x="388.0" y="222.0" text-anchor="middle" font-family="Arial" font-size="13">0.650</text>
+<rect x="434" y="172" width="90" height="90" fill="rgb(127,228,120)"/>
+<text x="480.0" y="222.0" text-anchor="middle" font-family="Arial" font-size="13">0.941</text>
+<rect x="526" y="172" width="90" height="90" fill="rgb(240,120,120)"/>
+<text x="572.0" y="222.0" text-anchor="middle" font-family="Arial" font-size="13">0.000</text>
+<rect x="618" y="172" width="90" height="90" fill="rgb(230,129,120)"/>
+<text x="664.0" y="222.0" text-anchor="middle" font-family="Arial" font-size="13">0.082</text>
+<rect x="710" y="172" width="90" height="90" fill="rgb(127,228,120)"/>
+<text x="756.0" y="222.0" text-anchor="middle" font-family="Arial" font-size="13">0.941</text>
+<text x="240" y="314.0" text-anchor="end" font-family="Arial" font-size="12">CBraMod frozen / bad_physio</text>
+<rect x="250" y="264" width="90" height="90" fill="rgb(239,120,120)"/>
+<text x="296.0" y="314.0" text-anchor="middle" font-family="Arial" font-size="13">0.005</text>
+<rect x="342" y="264" width="90" height="90" fill="rgb(165,191,120)"/>
+<text x="388.0" y="314.0" text-anchor="middle" font-family="Arial" font-size="13">0.623</text>
+<rect x="434" y="264" width="90" height="90" fill="rgb(127,228,120)"/>
+<text x="480.0" y="314.0" text-anchor="middle" font-family="Arial" font-size="13">0.940</text>
+<rect x="526" y="264" width="90" height="90" fill="rgb(240,120,120)"/>
+<text x="572.0" y="314.0" text-anchor="middle" font-family="Arial" font-size="13">0.000</text>
+<rect x="618" y="264" width="90" height="90" fill="rgb(239,120,120)"/>
+<text x="664.0" y="314.0" text-anchor="middle" font-family="Arial" font-size="13">0.000</text>
+<rect x="710" y="264" width="90" height="90" fill="rgb(127,228,120)"/>
+<text x="756.0" y="314.0" text-anchor="middle" font-family="Arial" font-size="13">0.940</text>
+<text x="240" y="406.0" text-anchor="end" font-family="Arial" font-size="12">ST-EEGFormer-small / bad_artifact</text>
+<rect x="250" y="356" width="90" height="90" fill="rgb(236,123,120)"/>
+<text x="296.0" y="406.0" text-anchor="middle" font-family="Arial" font-size="13">0.031</text>
+<rect x="342" y="356" width="90" height="90" fill="rgb(162,194,120)"/>
+<text x="388.0" y="406.0" text-anchor="middle" font-family="Arial" font-size="13">0.650</text>
+<rect x="434" y="356" width="90" height="90" fill="rgb(161,195,120)"/>
+<text x="480.0" y="406.0" text-anchor="middle" font-family="Arial" font-size="13">0.653</text>
+<rect x="526" y="356" width="90" height="90" fill="rgb(120,235,120)"/>
+<text x="572.0" y="406.0" text-anchor="middle" font-family="Arial" font-size="13">1.000</text>
+<rect x="618" y="356" width="90" height="90" fill="rgb(203,155,120)"/>
+<text x="664.0" y="406.0" text-anchor="middle" font-family="Arial" font-size="13">0.306</text>
+<rect x="710" y="356" width="90" height="90" fill="rgb(140,215,120)"/>
+<text x="756.0" y="406.0" text-anchor="middle" font-family="Arial" font-size="13">0.826</text>
+<text x="240" y="498.0" text-anchor="end" font-family="Arial" font-size="12">ST-EEGFormer-small / bad_content</text>
+<rect x="250" y="448" width="90" height="90" fill="rgb(208,150,120)"/>
+<text x="296.0" y="498.0" text-anchor="middle" font-family="Arial" font-size="13">0.263</text>
+<rect x="342" y="448" width="90" height="90" fill="rgb(162,194,120)"/>
+<text x="388.0" y="498.0" text-anchor="middle" font-family="Arial" font-size="13">0.650</text>
+<rect x="434" y="448" width="90" height="90" fill="rgb(127,228,120)"/>
+<text x="480.0" y="498.0" text-anchor="middle" font-family="Arial" font-size="13">0.941</text>
+<rect x="526" y="448" width="90" height="90" fill="rgb(240,120,120)"/>
+<text x="572.0" y="498.0" text-anchor="middle" font-family="Arial" font-size="13">0.000</text>
+<rect x="618" y="448" width="90" height="90" fill="rgb(237,122,120)"/>
+<text x="664.0" y="498.0" text-anchor="middle" font-family="Arial" font-size="13">0.018</text>
+<rect x="710" y="448" width="90" height="90" fill="rgb(127,228,120)"/>
+<text x="756.0" y="498.0" text-anchor="middle" font-family="Arial" font-size="13">0.941</text>
+<text x="240" y="590.0" text-anchor="end" font-family="Arial" font-size="12">ST-EEGFormer-small / bad_physio</text>
+<rect x="250" y="540" width="90" height="90" fill="rgb(177,180,120)"/>
+<text x="296.0" y="590.0" text-anchor="middle" font-family="Arial" font-size="13">0.522</text>
+<rect x="342" y="540" width="90" height="90" fill="rgb(165,191,120)"/>
+<text x="388.0" y="590.0" text-anchor="middle" font-family="Arial" font-size="13">0.623</text>
+<rect x="434" y="540" width="90" height="90" fill="rgb(127,228,120)"/>
+<text x="480.0" y="590.0" text-anchor="middle" font-family="Arial" font-size="13">0.940</text>
+<rect x="526" y="540" width="90" height="90" fill="rgb(240,120,120)"/>
+<text x="572.0" y="590.0" text-anchor="middle" font-family="Arial" font-size="13">0.000</text>
+<rect x="618" y="540" width="90" height="90" fill="rgb(219,140,120)"/>
+<text x="664.0" y="590.0" text-anchor="middle" font-family="Arial" font-size="13">0.175</text>
+<rect x="710" y="540" width="90" height="90" fill="rgb(127,228,120)"/>
+<text x="756.0" y="590.0" text-anchor="middle" font-family="Arial" font-size="13">0.940</text>
+</svg>

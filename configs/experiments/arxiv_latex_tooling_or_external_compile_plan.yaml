@@ -1,0 +1,46 @@
+name: arxiv_latex_tooling_or_external_compile_plan
+status: completed
+date_created: 2026-06-23
+date_completed: 2026-06-23
+
+purpose: >
+  Obtain a trustworthy LaTeX compile result for the figure-complete arXiv-first
+  SAS-Cert package, either by using an existing external compile environment or
+  by installing/activating a minimal local LaTeX toolchain if approved.
+
+inputs:
+  venue_package_dir: paper/sas_cert_diagnostic_certificate_venue
+  compile_readiness_report: docs/SAS_CERT_ARXIV_COMPILE_REPORT.md
+
+outputs:
+  final_compile_report: docs/SAS_CERT_ARXIV_FINAL_COMPILE_REPORT.md
+  optional_pdf: paper/sas_cert_diagnostic_certificate_venue/main.pdf
+
+constraints:
+  no_new_experiments: true
+  no_new_claims_without_traceable_evidence: true
+  preserve_existing_numbers: true
+  do_not_change_scientific_interpretation: true
+
+required_work:
+  - choose_local_install_or_external_compile_route
+  - run_latex_compile_when_tooling_available
+  - inspect_compile_log_for_missing_refs_or_figures
+  - update_project_management_log
+
+result:
+  status: compiled_successfully_with_nonblocking_chktex_style_warnings
+  final_compile_report: docs/SAS_CERT_ARXIV_FINAL_COMPILE_REPORT.md
+  compile_route: local_latex_toolchain_installed_with_apt
+  compile_command: latexmk -pdf -interaction=nonstopmode -halt-on-error main.tex
+  output_pdf: paper/sas_cert_diagnostic_certificate_venue/main.pdf
+  output_pdf_size_bytes: 271202
+  output_pdf_pages: 11
+  latex_warning_count: 0
+  overfull_count: 0
+  undefined_count: 0
+  fatal_error_count: 0
+  chktex_warning_count: 31
+  no_new_experiments: true
+  no_new_claims: true
+  decision: proceed_to_submission_bundle_and_author_metadata_review

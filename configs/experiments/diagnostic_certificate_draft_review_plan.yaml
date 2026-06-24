@@ -1,0 +1,35 @@
+name: diagnostic_certificate_draft_review_plan
+status: completed
+date_created: 2026-06-22
+
+purpose: >
+  Review the first SAS-Cert diagnostic certificate draft for claim strength,
+  evidence gaps, and overclaiming before adding any new experiments.
+
+inputs:
+  draft: docs/SAS_CERT_DIAGNOSTIC_CERTIFICATE_DRAFT.md
+  claim_table: outputs/runs/sas_cert_diagnostic_certificate_pack_physionetmi/tables/claim_support_table.csv
+  evidence_checklist: docs/SAS_CERT_DIAGNOSTIC_EVIDENCE_CHECKLIST.md
+  compact_result: outputs/runs/sas_cert_diagnostic_certificate_pack_physionetmi/compact_result.json
+
+outputs:
+  review: docs/SAS_CERT_DIAGNOSTIC_CERTIFICATE_DRAFT_REVIEW.md
+  revision_checklist: outputs/runs/sas_cert_diagnostic_certificate_pack_physionetmi/tables/draft_revision_checklist.csv
+
+constraints:
+  no_new_experiments: true
+  no_promotion_of_weighting_policy: true
+  every_major_claim_must_be_traceable: true
+
+review_questions:
+  - Does the draft overclaim training utility?
+  - Are all numeric claims traceable to files?
+  - Is the diagnostic contribution clear enough without promising accuracy gains?
+  - What minimal text revisions are needed before sharing with the user as a paper plan?
+
+result:
+  decision: draft_review_passed_with_minor_scope_revision
+  action_taken: >
+    Tightened diagnostic AUC wording to the current synthetic mixed
+    bad-augmentation diagnostic pool.
+  next_action: prepare_manuscript_polish_and_citation_plan

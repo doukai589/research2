@@ -1,0 +1,34 @@
+name: diagnostic_manuscript_review_next
+status: completed
+date_created: 2026-06-22
+date_completed: 2026-06-22
+
+purpose: >
+  Review the polished diagnostic-certificate manuscript package for citation
+  completeness, figure/table traceability, and claim safety before any new
+  experiment is proposed.
+
+inputs:
+  polished_draft: docs/SAS_CERT_DIAGNOSTIC_CERTIFICATE_DRAFT_POLISHED.md
+  citation_plan: docs/SAS_CERT_CITATION_PLAN.md
+  figure_table_plan: docs/SAS_CERT_FIGURE_TABLE_PLAN.md
+  claim_table: outputs/runs/sas_cert_diagnostic_certificate_pack_physionetmi/tables/claim_support_table.csv
+
+outputs:
+  review_report: docs/SAS_CERT_DIAGNOSTIC_MANUSCRIPT_PACKAGE_REVIEW.md
+
+constraints:
+  no_new_experiments: true
+  no_new_claims_without_traceable_evidence: true
+  no_promotion_of_weighting_policy: true
+
+required_work:
+  - check_citation_placeholders_are_mapped
+  - check_figures_tables_have_source_paths
+  - check_claims_against_claim_support_table
+  - identify_minimal_submission_gaps
+
+completion:
+  review_report: docs/SAS_CERT_DIAGNOSTIC_MANUSCRIPT_PACKAGE_REVIEW.md
+  decision: proceed_to_bibliography_and_figure_generation
+  next: configs/experiments/bibliography_and_figure_generation_plan.yaml

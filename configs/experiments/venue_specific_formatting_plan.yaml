@@ -1,0 +1,50 @@
+name: venue_specific_formatting_plan
+status: completed
+date_created: 2026-06-22
+date_completed: 2026-06-22
+
+purpose: >
+  Convert the SAS-Cert diagnostic manuscript package into a venue-agnostic but
+  submission-oriented LaTeX project structure, while preserving evidence
+  traceability and conservative claim boundaries.
+
+inputs:
+  readiness_report: docs/SAS_CERT_SUBMISSION_READINESS_REVIEW.md
+  latex_submission_draft: docs/SAS_CERT_DIAGNOSTIC_CERTIFICATE_SUBMISSION_DRAFT_LATEX.md
+  references_bib: docs/SAS_CERT_REFERENCES.bib
+  manuscript_tables_dir: outputs/runs/sas_cert_diagnostic_certificate_pack_physionetmi/manuscript_tables
+  manuscript_figures_dir: outputs/runs/sas_cert_diagnostic_certificate_pack_physionetmi/manuscript_figures
+
+outputs:
+  paper_dir: paper/sas_cert_diagnostic_certificate
+  main_tex: paper/sas_cert_diagnostic_certificate/main.tex
+  references_bib: paper/sas_cert_diagnostic_certificate/references.bib
+  figures_dir: paper/sas_cert_diagnostic_certificate/figures
+  tables_dir: paper/sas_cert_diagnostic_certificate/tables
+  formatting_report: docs/SAS_CERT_VENUE_FORMATTING_REPORT.md
+
+constraints:
+  no_new_experiments: true
+  no_new_claims_without_traceable_evidence: true
+  no_promotion_of_weighting_policy: true
+  preserve_existing_numbers: true
+  venue_agnostic_first: true
+
+required_work:
+  - create_paper_directory_structure
+  - convert_markdown_latex_hybrid_to_main_tex
+  - copy_or_reference_current_figures_and_tables
+  - remove_unused_bib_entries_or_mark_them
+  - write_formatting_report
+  - update_project_management_log
+
+result:
+  status: completed
+  main_tex: paper/sas_cert_diagnostic_certificate/main.tex
+  references_bib: paper/sas_cert_diagnostic_certificate/references.bib
+  formatting_report: docs/SAS_CERT_VENUE_FORMATTING_REPORT.md
+  script: scripts/build_sas_cert_paper_package.py
+  no_new_experiments: true
+  no_new_claims: true
+  local_compile_run: false
+  local_compile_reason: latexmk_and_pdflatex_not_available

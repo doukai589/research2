@@ -1,0 +1,9 @@
+numpy==1.24.2
+scipy==1.10.1
+scikit-learn==1.3.2
+pandas==1.5.3
+mne==1.6.1
+moabb==1.0.0
+pyriemann==0.5
+lmdb==1.4.1
+tqdm==4.66.4

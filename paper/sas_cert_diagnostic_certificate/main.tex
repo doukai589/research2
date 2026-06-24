@@ -1,0 +1,311 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{svg}
+\usepackage{url}
+
+\title{SAS-Cert-EEG: Diagnostic Reliability Certificates for EEG Augmentation in Few-Shot Cross-Subject Adaptation}
+\author{SAS-Cert EEG Project}
+\date{2026-06-22}
+
+\begin{document}
+\maketitle
+\begin{abstract}
+
+Electroencephalography (EEG) augmentation is often used to reduce the label burden in few-shot cross-subject adaptation, yet augmented trials are not automatically reliable. An augmented EEG sample can preserve superficial subject style while changing task content, violating physiological structure, or introducing artifact shortcuts. We study this problem through SAS-Cert-EEG, a subject-style-aware diagnostic certificate for EEG augmentation candidates. Rather than treating augmentation selection as a single scalar ranking problem, SAS-Cert represents each candidate with a multi-component certificate profile covering content stability, style plausibility, physiological fidelity, and artifact risk. On PhysioNetMI left/right motor imagery, using CBraMod and ST-EEGFormer-small as two frozen EEG foundation backbones, the original scalar SAS score fails directionally on the current synthetic mixed bad-augmentation diagnostic pool, with AUC 0.1969 for CBraMod and 0.1662 for ST-EEGFormer-small. Component-level diagnostics recover strong separation within this pool: component-gated v1 reaches AUC 0.8395 and artifact-gate physiology reaches AUC 0.9022 on both backbones. However, these diagnostic gains do not yet justify promoting current SAS-Cert weighting or rejection policies as deployable training methods. CBraMod repaired weighting improves Macro-F1 by 4.26 percentage points but worsens ECE by 2.27 percentage points, while ST no-reject soft weighting improves mean Macro-F1 by 0.64 percentage points but fails subject and seed reliability. The current evidence therefore supports SAS-Cert as a diagnostic reliability certificate that exposes augmentation failure modes and score-direction errors, not yet as a reliable augmentation-selection policy.
+
+\end{abstract}
+\section{Introduction}
+
+Few-shot cross-subject EEG adaptation is difficult because the target subject provides only a small support set, while EEG signals vary substantially across subjects, sessions, devices, channel statistics, spectral structure, covariance patterns, and artifact burden. EEG foundation models reduce part of this burden by providing reusable representations \cite{Wang2025CBraMod,Lee2025LargeBrainwaveFoundation}, but the current literature also suggests that stronger pretraining alone does not remove the need for careful adaptation and reliability control \cite{Sirca2026LoRAEEG,Lee2025LargeBrainwaveFoundation}.
+
+Data augmentation is a natural response to scarce target labels. In many supervised pipelines, augmentation is treated as label-preserving by construction: if a transformation is applied to a labeled trial, the transformed trial inherits the same label. EEG makes this assumption fragile. A transformation can preserve subject-like amplitude or covariance statistics while damaging the task-relevant motor-imagery pattern; it can generate plausible-looking rhythms while shifting physiology outside the support distribution; or it can create artifact cues that a classifier can exploit without learning neural content. This makes augmentation quality a scientific object in its own right.
+
+The central question of this work is:
+
+\[
+\text{How can we decide whether } x' \text{ is a beneficial subject-style variation}
+\quad \text{or a harmful content/physiology/artifact distortion?}
+\]
+
+This question follows directly from style-content EEG augmentation work such as JSCCRA \cite{Ding2026JSCCRA}, which separates subject-specific style and task-content representations, and from evidence that subject and content latents can be factorized in EEG-like neural signals \cite{Bollens2022SubjectInvariantVAE}. However, a stability score that only asks whether a sample remains similar to its source trial is incomplete. For reliable few-shot adaptation, the sample should preserve label-relevant content, remain physiologically plausible, express a controlled subject-style variation, and avoid artifact shortcuts.
+
+We therefore frame SAS-Cert-EEG as a diagnostic reliability certificate. The contribution is not a claim that a current SAS-Cert weighting rule reliably improves few-shot accuracy across all subjects and seeds. Instead, the contribution supported by the current evidence is narrower and more useful: SAS-Cert exposes when augmentation candidates are harmful, when a scalar score is directionally wrong, and when diagnostic separability fails to translate into deployable training utility.
+
+The paper uses conservative claim boundaries:
+
+\begin{itemize}
+\item Supported: SAS-Cert is a diagnostic reliability certificate for EEG augmentation candidates.
+\item Supported: component-level auditing can reveal score-direction failures hidden by scalar aggregation.
+\item Not supported: current SAS-Cert weighting/rejection policies are reliable deployable training methods.
+\end{itemize}
+
+\section{Problem Definition}
+
+Let \texttt{x} be an EEG trial with label \texttt{y}, and let \texttt{x' = a(x)} be an augmentation candidate generated by transformation \texttt{a}. A useful candidate should not merely be close to \texttt{x}; it should be reliable for the target adaptation objective.
+
+SAS-Cert evaluates each candidate across four primary axes:
+
+\input{tables/inline_table_1.tex}
+
+The axes are intentionally non-interchangeable. A candidate may be artifact-safe but content-drifting, or style-plausible but physiologically wrong. The current experiments show why collapsing these axes into one fixed scalar is risky: the old scalar SAS score is directionally wrong on the current synthetic mixed bad-augmentation diagnostic pool for both locked backbones.
+
+Failure-mode definitions are reported in the appendix.
+
+\section{Diagnostic Certificate Formulation}
+
+\subsection{Candidate Set and Support-Only Anchors}
+
+For a target subject \texttt{t}, let \texttt{S\_t} be the few-shot target support set and \texttt{H\_t} be the held-out target evaluation set. Candidate generation and certificate computation may use \texttt{S\_t}, source data, and augmentation metadata, but must not use \texttt{H\_t} labels or held-out target trials for ranking, thresholding, score normalization, checkpoint selection, or score-variant choice.
+
+For each source or support trial \texttt{x\_i}, an augmentation operator generates candidates:
+
+\[
+x'_{ij} = a_j(x_i), \qquad j = 1,\ldots,m .
+\]
+
+Each candidate receives a certificate profile:
+
+\[
+C(x_i, x'_{ij}; S_t)=
+\left[C_{\mathrm{content}}, C_{\mathrm{style}},
+C_{\mathrm{physio}}, C_{\mathrm{artifact\_safe}}\right].
+\]
+
+All ranks and thresholds used in the diagnostic pack are computed within the legal candidate pool for the current fold, not from target held-out data.
+
+\subsection{Content Stability}
+
+Content stability estimates whether the augmentation preserves label-relevant task content. With a frozen EEG encoder \texttt{f\_theta}, a simple embedding-based component is:
+
+\[
+C_{\mathrm{content}}(x,x') =
+\cos\left(f_{\theta}(x), f_{\theta}(x')\right).
+\]
+
+In MI, content should also respect task-relevant mu/beta structure and lateralized patterns \cite{Li2025FrequencyTemporalMI}. The current diagnostic pack treats content as a component to be audited rather than as an absolute guarantee. This is necessary because the content component is backbone- and bad-type-dependent: the bad-type table shows a BadContent direction conflict between CBraMod and ST-EEGFormer-small.
+
+\subsection{Style Plausibility}
+
+Style plausibility estimates whether the candidate falls in a plausible support-style neighborhood. Let \texttt{s(x)} denote a style vector containing channel mean, channel standard deviation, bandpower summaries, and covariance-like summaries. A support style anchor is:
+
+\[
+\mu_{\mathrm{style}}(S_t)=\frac{1}{|S_t|}\sum_{x\in S_t}s(x).
+\]
+
+A distance-based style score can be written as:
+
+\[
+C_{\mathrm{style}}(x';S_t)=
+-d_{\mathrm{style}}\left(s(x'),\mu_{\mathrm{style}}(S_t)\right).
+\]
+
+This follows the broader style/content motivation from JSCCRA \cite{Ding2026JSCCRA} and covariance-style augmentation work \cite{Ding2025RCC}, while extending beyond mean/std style alone.
+
+\subsection{Physiological Fidelity}
+
+Physiological fidelity estimates whether the candidate preserves plausible EEG structure. In this diagnostic pack, the component emphasizes mu/beta power deviation and covariance-like structure:
+
+\[
+C_{\mathrm{physio}}(x,x') =
+-\alpha_{\mu/\beta}D_{\mathrm{band}}(x,x')
+-\alpha_{\mathrm{cov}}D_{\mathrm{cov}}(x,x').
+\]
+
+The sign and relative scale of this component must be audited per candidate pool. In the current PhysioNetMI pack, \texttt{physio\_score} is the strongest broad component: its overall AUC is 0.8444 on both locked backbones.
+
+\subsection{Artifact Safety}
+
+Artifact safety estimates whether the candidate avoids non-neural shortcuts such as low-frequency drift, high-frequency bursts, abnormal channel energy, kurtosis outliers, and line-noise-like behavior. Let \texttt{R\_artifact(x')} be an artifact-risk proxy. Then:
+
+\[
+C_{\mathrm{artifact\_safe}}(x')=-R_{\mathrm{artifact}}(x').
+\]
+
+Artifact processing is a central reliability issue in EEG \cite{Sawangjai2022EEGANet,Winkler2011ICArtifact}. The current pack confirms that this component is highly specific: \texttt{artifact\_safe\_score} reaches AUC 1.0000 for bad-artifact separation, but is inverted for BadContent and BadPhysio in the mixed pool. This specificity is one reason the certificate should be interpreted as a profile rather than a universal scalar.
+
+\subsection{Component-Gated Diagnostic Rules}
+
+The old scalar score can be written abstractly as:
+
+\[
+S_{\mathrm{old}} =
+w_c\,\mathrm{rank}(C_{\mathrm{content}})
++w_s\,\mathrm{rank}(C_{\mathrm{style}})
++w_p\,\mathrm{rank}(C_{\mathrm{physio}})
++w_a\,\mathrm{rank}(C_{\mathrm{artifact\_safe}}).
+\]
+
+The diagnostic pack shows that \texttt{S\_old} fails directionally on the current synthetic mixed bad-augmentation pool. A more interpretable diagnostic rule gates high artifact-risk candidates before using physiology/style:
+
+\[
+g_{\mathrm{artifact}}(x') =
+\mathbb{I}\left[R_{\mathrm{artifact}}(x')<\tau_{\mathrm{artifact}}\right],
+\]
+\[
+B = 0.75\,\mathrm{rank}(C_{\mathrm{physio}})
++0.25\,\mathrm{rank}(C_{\mathrm{style}}),
+\qquad
+S_{\mathrm{component\_gated\_v1}}=\mathrm{rank}(B)\,g_{\mathrm{artifact}}(x').
+\]
+
+The strongest score-only variant in the pack is:
+
+\[
+S_{\mathrm{artifact\_gate\_physio}} =
+\mathrm{rank}(C_{\mathrm{physio}})\,g_{\mathrm{artifact}}(x').
+\]
+
+These rules are diagnostic rules, not promoted training policies. Their purpose is to identify whether clean and bad candidates are separable within the diagnostic pool.
+
+\section{Experimental Protocol}
+
+The locked diagnostic pack uses:
+
+\begin{itemize}
+\item Dataset: PhysioNetMI / EEGMMI.
+\item Task: left vs right motor imagery.
+\item Runs: R04, R08, R12.
+\item Backbones:
+\item CBraMod frozen encoder \cite{Wang2025CBraMod}.
+\item ST-EEGFormer-small source-tuned frozen encoder \cite{Yang2026STEEGFormer}.
+\item Target support: few-shot target support used for adaptation and candidate generation in prior workbench outputs.
+\item Target held-out trials: final evaluation only.
+\item Diagnostic pack mode: existing-output-only summarization.
+\end{itemize}
+
+No new training, no new backbone, and no new dataset were introduced in the diagnostic certificate pack. A protocol leakage audit was included in the evidence package.
+
+\section{Results}
+
+\subsection{The Old Scalar Score Fails Directionally}
+
+The old scalar SAS score fails on the current synthetic mixed bad-augmentation diagnostic pool:
+
+\input{tables/inline_table_2.tex}
+
+The AUC is computed with higher score meaning cleaner candidate. Values far below 0.5 show that the scalar score is directionally wrong on this pool. This is not a small miss; it means scalar aggregation can invert the intended interpretation of the certificate.
+
+\subsection{Component Diagnostics Recover Clean-vs-Bad Separation}
+
+Component-level diagnostic variants recover strong separation within the current pool:
+
+\input{tables/inline_table_3.tex}
+
+This supports the diagnostic certificate claim. It also supports moving away from a fixed universal scalar score toward a multi-component profile with direction auditing.
+
+\subsection{Bad-Type Evidence Shows Component Specificity}
+
+The bad-type table shows that each component has a distinct failure-mode profile:
+
+\begin{itemize}
+\item \texttt{artifact\_safe\_score} identifies bad artifact strongly, with AUC 1.0000 for bad-artifact separation on both backbones.
+\item \texttt{physio\_score} separates bad-content and bad-physio candidates strongly, with AUC around 0.94.
+\item \texttt{content\_score} is backbone- and bad-type-dependent, including a BadContent conflict between CBraMod and ST-EEGFormer-small.
+\item The old scalar \texttt{sas\_score} is inverted or weak for several bad types.
+\end{itemize}
+
+\subsection{Diagnostic Success Does Not Imply Training-Policy Success}
+
+The diagnostic evidence does not yet translate into a deployable weighting or rejection policy:
+
+\input{tables/inline_table_4.tex}
+
+CBraMod repaired weighting produces a large Macro-F1 gain but violates the calibration gate. ST no-reject soft weighting has a positive mean effect and nearly stable calibration, but subject/seed reliability fails: majority-seed subject win rate is 0.15 and seed win rate is 0.00.
+
+\subsection{Candidate-Only Utility Alignment Is Weak}
+
+The ST utility-alignment audit tested whether support/candidate-only fold summaries explain which folds benefit from SoftWeight no-reject. The strongest candidate-only feature was \texttt{clean\_artifact\_risk\_raw\_mean}, with Spearman correlation 0.1168 against SoftWeight Macro-F1 gain. This is below the actionable threshold of 0.35.
+
+Therefore, the project parks ST weighting variants instead of designing another support gate from weak retrospective correlations.
+
+\section{Discussion}
+
+The current evidence supports a distinction that is easy to miss:
+
+\[
+\text{diagnostic separability} \ne \text{deployable training utility}.
+\]
+
+The successful causal chain is:
+
+\begin{verbatim}
+bad/clean augmentation is separable
+  -> score direction must be audited
+  -> component diagnostics can recover separation
+\end{verbatim}
+
+The unsupported chain is:
+
+\begin{verbatim}
+component diagnostics
+  -> stable augmentation weights or rejection policies
+  -> reliable few-shot gains across subjects and seeds
+\end{verbatim}
+
+This distinction is not a weakness of the diagnostic contribution. It is the main scientific message. EEG augmentation quality is multi-dimensional, and reliable training utility introduces additional constraints involving target-subject heterogeneity, model calibration, support-set representativeness, and the interaction between candidate weights and the classifier head.
+
+For CBraMod, the repaired artifact-gate physiology score shows that component direction matters and can recover classification signal, but the calibration cost prevents method promotion. For ST-EEGFormer-small, the mean SoftWeight effect is positive but not stable enough across subjects and seeds. These results motivate a diagnostic-certificate paper path rather than another round of unconstrained weighting-policy search.
+
+\section{Limitations}
+
+The diagnostic pack is intentionally narrow:
+
+\begin{itemize}
+\item It uses one core dataset, PhysioNetMI.
+\item It uses two locked backbones, CBraMod and ST-EEGFormer-small.
+\item The bad augmentation pool is synthetic and defines the current diagnostic task.
+\item Training policy evidence comes from existing workbench outputs and is explicitly not promoted.
+\item External dataset validation and real artifact annotations are not yet included.
+\item The current certificate components are proxy measures, not clinical artifact labels or direct physiological ground truth.
+\end{itemize}
+
+These limitations bound the claims. The current contribution is a diagnostic reliability certificate and an empirical warning against un-audited scalar augmentation scores.
+
+\section{Conclusion}
+
+SAS-Cert-EEG is currently best supported as a diagnostic reliability certificate for EEG augmentation candidates. On PhysioNetMI, two frozen EEG foundation backbones show that the old scalar SAS score can be directionally wrong on the current synthetic mixed bad-augmentation pool, while component-gated and artifact-gate-physio diagnostics recover strong separation within that pool. At the same time, current weighting and rejection policies are not reliable enough to be promoted as deployable training methods. The paper should therefore emphasize diagnostic reliability, score-direction auditing, component specificity, and the gap between augmentation diagnosis and training utility.
+
+\section{Manuscript Figures}
+\begin{figure}[H]
+\centering
+\includesvg[width=0.95\linewidth]{figures/figure1_certificate_overview}
+\caption{SAS-Cert diagnostic certificate overview.}
+\label{fig:certificate-overview}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includesvg[width=0.95\linewidth]{figures/figure2_diagnostic_auc}
+\caption{Diagnostic AUC comparison between scalar and component-gated scores.}
+\label{fig:diagnostic-auc}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includesvg[width=0.95\linewidth]{figures/figure3_component_specificity_heatmap}
+\caption{Component specificity across augmentation failure types.}
+\label{fig:component-specificity}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includesvg[width=0.95\linewidth]{figures/figure4_training_policy_non_promotion}
+\caption{Training-policy evidence and non-promotion boundary.}
+\label{fig:training-policy}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includesvg[width=0.95\linewidth]{figures/figure5_causal_chain}
+\caption{Supported and unsupported causal chains.}
+\label{fig:causal-chain}
+\end{figure}
+
+\bibliographystyle{plain}
+\bibliography{references}
+\end{document}

@@ -1,0 +1,24 @@
+stable_config: configs/experiments/cbramod_physionetmi_sascert_matched.yaml
+trial_name: cbramod_physionetmi_sascert_matched
+status: created_ready_for_smoke
+
+dataset:
+  name: PhysioNetMI
+  task: left_vs_right_motor_imagery
+  runs: [4, 8, 12]
+  root: /ai/224duibishiyan/CBraMod-main/tmp_in/MI/files
+
+backbone:
+  name: CBraMod
+  code_path_candidates:
+    - third_party/CBraMod-main
+    - ../新研究/CBraMod-main
+  checkpoint_candidates:
+    - third_party/CBraMod-main/pretrained_weights/pretrained_weights.pth
+    - ../新研究/CBraMod-main/pretrained_weights/pretrained_weights.pth
+
+first_step:
+  name: cbramod_physionetmi_smoke
+  outputs:
+    - outputs/cbramod_smoke_report.json
+    - outputs/cbramod_smoke_log.txt

@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="460" viewBox="0 0 900 460">
+<rect width="100%" height="100%" fill="white"/>
+<text x="450.0" y="34" text-anchor="middle" font-family="Arial" font-size="22" font-weight="700">Training Policy Deltas and Non-Promotion</text>
+<line x1="90" y1="360" x2="810" y2="360" stroke="#222"/>
+<line x1="90" y1="60" x2="90" y2="360" stroke="#222"/>
+<line x1="90" y1="360.0" x2="810" y2="360.0" stroke="#ddd"/>
+<text x="78" y="364.0" text-anchor="end" font-family="Arial" font-size="12">0.0</text>
+<line x1="90" y1="210.0" x2="810" y2="210.0" stroke="#ddd"/>
+<text x="78" y="214.0" text-anchor="end" font-family="Arial" font-size="12">0.5</text>
+<line x1="90" y1="150.0" x2="810" y2="150.0" stroke="#ddd"/>
+<text x="78" y="154.0" text-anchor="end" font-family="Arial" font-size="12">0.7</text>
+<line x1="90" y1="60.0" x2="810" y2="60.0" stroke="#ddd"/>
+<text x="78" y="64.0" text-anchor="end" font-family="Arial" font-size="12">1.0</text>
+<text x="180.0" y="394" text-anchor="middle" font-family="Arial" font-size="13">current SASCert SoftAR</text>
+<rect x="112.5" y="356.3" width="36.9" height="3.7" fill="#4f81bd"/>
+<text x="130.9" y="351.3" text-anchor="middle" font-family="Arial" font-size="11">0.012</text>
+<rect x="157.5" y="359.9" width="36.9" height="0.1" fill="#5f9e6e"/>
+<text x="175.9" y="354.9" text-anchor="middle" font-family="Arial" font-size="11">0.000</text>
+<rect x="202.5" y="351.7" width="36.9" height="8.3" fill="#b94a48"/>
+<text x="220.9" y="346.7" text-anchor="middle" font-family="Arial" font-size="11">0.028</text>
+<text x="360.0" y="394" text-anchor="middle" font-family="Arial" font-size="13">repaired artifact gate physio</text>
+<rect x="292.5" y="356.7" width="36.9" height="3.3" fill="#4f81bd"/>
+<text x="310.9" y="351.7" text-anchor="middle" font-family="Arial" font-size="11">0.011</text>
+<rect x="337.5" y="347.2" width="36.9" height="12.8" fill="#5f9e6e"/>
+<text x="355.9" y="342.2" text-anchor="middle" font-family="Arial" font-size="11">0.043</text>
+<rect x="382.5" y="353.2" width="36.9" height="6.8" fill="#b94a48"/>
+<text x="400.9" y="348.2" text-anchor="middle" font-family="Arial" font-size="11">0.023</text>
+<text x="540.0" y="394" text-anchor="middle" font-family="Arial" font-size="13">repaired temperature scaled</text>
+<rect x="472.5" y="356.7" width="36.9" height="3.3" fill="#4f81bd"/>
+<text x="490.9" y="351.7" text-anchor="middle" font-family="Arial" font-size="11">0.011</text>
+<rect x="517.5" y="347.2" width="36.9" height="12.8" fill="#5f9e6e"/>
+<text x="536.0" y="342.2" text-anchor="middle" font-family="Arial" font-size="11">0.043</text>
+<rect x="562.5" y="353.4" width="36.9" height="6.6" fill="#b94a48"/>
+<text x="581.0" y="348.4" text-anchor="middle" font-family="Arial" font-size="11">0.022</text>
+<text x="720.0" y="394" text-anchor="middle" font-family="Arial" font-size="13">SoftWeight noReject</text>
+<rect x="652.5" y="358.1" width="36.9" height="1.9" fill="#4f81bd"/>
+<text x="671.0" y="353.1" text-anchor="middle" font-family="Arial" font-size="11">0.006</text>
+<rect x="697.5" y="358.1" width="36.9" height="1.9" fill="#5f9e6e"/>
+<text x="716.0" y="353.1" text-anchor="middle" font-family="Arial" font-size="11">0.006</text>
+<rect x="742.5" y="359.9" width="36.9" height="0.1" fill="#b94a48"/>
+<text x="761.0" y="354.9" text-anchor="middle" font-family="Arial" font-size="11">0.000</text>
+<rect x="90" y="424" width="16" height="16" fill="#4f81bd"/>
+<text x="114" y="437" font-family="Arial" font-size="13">Delta BAcc</text>
+<rect x="320" y="424" width="16" height="16" fill="#5f9e6e"/>
+<text x="344" y="437" font-family="Arial" font-size="13">Delta Macro-F1</text>
+<rect x="550" y="424" width="16" height="16" fill="#b94a48"/>
+<text x="574" y="437" font-family="Arial" font-size="13">Delta ECE</text>
+</svg>

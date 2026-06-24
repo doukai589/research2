@@ -1,0 +1,49 @@
+name: venue_template_selection_plan
+status: completed
+date_created: 2026-06-22
+date_completed: 2026-06-22
+
+purpose: >
+  Choose a concrete submission template path for the SAS-Cert diagnostic
+  certificate paper, then adapt the venue-agnostic LaTeX package without adding
+  experiments or changing claim boundaries.
+
+inputs:
+  paper_dir: paper/sas_cert_diagnostic_certificate
+  integrity_report: docs/SAS_CERT_VENUE_PACKAGE_INTEGRITY_REVIEW.md
+  formatting_report: docs/SAS_CERT_VENUE_FORMATTING_REPORT.md
+
+outputs:
+  venue_selection_report: docs/SAS_CERT_VENUE_SELECTION_REPORT.md
+  optional_template_dir: paper/sas_cert_diagnostic_certificate_venue
+
+constraints:
+  no_new_experiments: true
+  no_new_claims_without_traceable_evidence: true
+  no_training_policy_promotion: true
+  preserve_existing_numbers: true
+
+candidate_routes:
+  - arxiv_article_first
+  - ieee_conference_style
+  - acm_conference_style
+  - journal_template_after_author_decision
+
+required_work:
+  - compare_candidate_venue_constraints
+  - choose_default_template_route_if_user_has_no_preference
+  - identify_required_figure_format_conversions
+  - identify_author_metadata_gaps
+  - update_project_management_log
+
+result:
+  status: completed
+  selected_route: arxiv_article_first
+  venue_selection_report: docs/SAS_CERT_VENUE_SELECTION_REPORT.md
+  venue_package_dir: paper/sas_cert_diagnostic_certificate_venue
+  builder: scripts/build_sas_cert_arxiv_package.py
+  no_new_experiments: true
+  no_new_claims: true
+  figure_conversion_done: false
+  figure_conversion_reason: no_inkscape_rsvg_convert_or_cairosvg_available
+  decision: proceed_to_figure_conversion_and_compile_env

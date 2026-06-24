@@ -1,0 +1,76 @@
+name: cross_backbone_cert_direction_audit
+status: completed
+protocol: existing_score_rows_only
+
+purpose: >
+  Compare SAS-Cert component directions across the two locked backbones on the
+  same PhysioNetMI mini scope before adding any new training variant.
+
+scientific_question_link: >
+  Tests whether augmented EEG sample certificates should be treated as a fixed
+  scalar score or as a multi-dimensional, component-gated reliability signal.
+
+scope:
+  dataset: PhysioNetMI
+  task: left_vs_right_motor_imagery
+  runs: [4, 8, 12]
+  targets: [90, 91, 92]
+  seeds: [20, 21]
+  backbones:
+    - ST-EEGFormer-small_source_tuned
+    - CBraMod_frozen
+
+constraints:
+  no_retraining: true
+  no_new_augmentation_generation: true
+  no_raw_data_copy: true
+  no_target_test_labels_used: true
+  no_new_dataset: true
+  no_new_backbone: true
+
+inputs:
+  st_score_rows: workbench/20260622_steegformer_sascert_core/outputs/score_rows/st_source_tuned_full
+  cbramod_score_rows: workbench/20260622_cbramod_physionetmi_sascert_matched/outputs/score_rows/mini
+
+script: workbench/20260622_cross_backbone_cert_direction_audit/01_cross_backbone_cert_direction_audit.py
+report: workbench/20260622_cross_backbone_cert_direction_audit/outputs/CROSS_BACKBONE_CERT_DIRECTION_AUDIT.md
+compact_result: workbench/20260622_cross_backbone_cert_direction_audit/outputs/compact_cross_backbone_cert_direction_audit.json
+
+results:
+  current_sas_score:
+    cbramod_auc: 0.19689814814814816
+    st_auc: 0.16620370370370371
+    direction: bad_high_or_inverted_on_both
+  best_score_only_variant:
+    name: score_artifact_gate_physio
+    cbramod_auc: 0.9022222222222221
+    st_auc: 0.9022222222222221
+  stable_components:
+    style_score:
+      cbramod_auc: 0.6408333333333334
+      st_auc: 0.6408333333333334
+    physio_score:
+      cbramod_auc: 0.8444444444444444
+      st_auc: 0.8444444444444444
+  unstable_or_context_dependent_components:
+    content_score:
+      overall_direction: bad_high_or_inverted_on_both
+      bad_content_st_auc: 0.2629861111111111
+      bad_content_cbramod_auc: 0.9025000000000002
+      interpretation: backbone_and_bad_type_dependent
+    artifact_safe_score:
+      overall_direction: bad_high_or_inverted_on_both
+      bad_artifact_auc: 1.0
+      bad_content_auc: 0.0
+      bad_physio_auc: 0.0
+      interpretation: artifact_specific_gate_not_universal_positive_component
+
+decision: revise_scalar_score_before_training_expansion
+
+next_step:
+  name: define_component_gated_certificate_rule
+  rationale: >
+    Fixed scalar SAS score fails on both locked backbones. A component-gated
+    certificate should use artifact_safe only as an artifact gate, physio/style
+    as stable clean-high components, and treat content as backbone/bad-type
+    dependent rather than universally positive.

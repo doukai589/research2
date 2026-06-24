@@ -1,0 +1,54 @@
+name: sas_cert_diagnostic_reframe_after_weighting_failures
+status: completed
+date_created: 2026-06-22
+
+purpose: >
+  Reframe the main SAS-Cert claim after both ST and CBraMod show that
+  clean-vs-bad/certificate diagnostics do not yet become reliable deployable
+  augmentation weighting rules.
+
+evidence:
+  cbramod_physionetmi:
+    repaired_score_macro_f1_gain_vs_naive: 0.0426
+    repaired_score_ece_delta_vs_naive: 0.0227
+    decision: park_cbramod_physionetmi_full_expansion
+    reason: classification gain exists but calibration fails
+  steegformer_physionetmi:
+    softweight_macro_f1_gain_vs_naive: 0.006401909521548154
+    softweight_majority_seed_subject_win_rate: 0.15
+    utility_alignment_max_candidate_spearman: 0.11680246397602216
+    decision: park_st_weighting_variants
+    reason: positive mean signal exists but reliability and utility alignment fail
+  cross_backbone_certificate:
+    component_gated_v1_auc: 0.8395370370370371
+    artifact_gate_physio_auc: 0.9022222222222221
+    interpretation: diagnostics are meaningful, training deployment is not yet reliable
+
+reframed_claim: >
+  SAS-Cert should currently be treated as a diagnostic reliability certificate
+  for EEG augmentation candidates. It can expose harmful augmentation modes and
+  score-direction failures, but the present hard rejection or soft weighting
+  strategies are not yet reliable deployable training policies across target
+  subjects and seeds.
+
+next_outputs:
+  - docs/SAS_CERT_DIAGNOSTIC_REFRAME.md
+  - configs/experiments/next_mve_after_diagnostic_reframe.yaml
+  - docs/SAS_CERT_DIAGNOSTIC_CERTIFICATE_PACK_PHYSIONETMI.md
+
+constraints:
+  no_new_training_before_reframe: true
+  no_new_dataset_before_reframe: true
+  no_new_backbone_before_reframe: true
+  preserve_two_backbone_one_dataset_scope: true
+  update_project_management: true
+
+next_decision_options:
+  - diagnostic_certificate_paper_path
+  - calibration_aware_training_hypothesis
+  - park_augmentation_weighting_and_shift_to_reporting
+
+result:
+  diagnostic_certificate_pack: outputs/runs/sas_cert_diagnostic_certificate_pack_physionetmi/compact_result.json
+  decision: write_diagnostic_certificate_paper_path
+  next_action: prepare_diagnostic_certificate_paper_outline

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="260" viewBox="0 0 1000 260">
+<rect width="100%" height="100%" fill="white"/>
+<text x="500" y="35" text-anchor="middle" font-family="Arial" font-size="22" font-weight="700">SAS-Cert Evidence Chain</text>
+<g font-family="Arial" font-size="15" text-anchor="middle">
+<rect x="40" y="90" width="190" height="70" rx="8" fill="#e8f1fb" stroke="#4f81bd"/>
+<text x="135" y="120">Bad/clean augmentation</text><text x="135" y="142">is separable</text>
+<rect x="285" y="90" width="190" height="70" rx="8" fill="#e8f1fb" stroke="#4f81bd"/>
+<text x="380" y="120">Score direction</text><text x="380" y="142">must be audited</text>
+<rect x="530" y="90" width="190" height="70" rx="8" fill="#e8f1fb" stroke="#4f81bd"/>
+<text x="625" y="120">Component diagnostics</text><text x="625" y="142">recover separation</text>
+<rect x="775" y="90" width="190" height="70" rx="8" fill="#fde9e7" stroke="#b94a48"/>
+<text x="870" y="115">Stable deployable</text><text x="870" y="137">training utility</text><text x="870" y="159">not yet supported</text>
+<text x="255" y="130" font-size="28">-&gt;</text>
+<text x="500" y="130" font-size="28">-&gt;</text>
+<text x="745" y="130" font-size="28" fill="#b94a48">-X-&gt;</text>
+</g>
+</svg>

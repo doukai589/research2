@@ -1,0 +1,132 @@
+name: steegformer_physionetmi_softweight_no_reject_confirm
+status: completed_not_promoted
+protocol: fewshot_target_support_sascert
+
+purpose: >
+  Summarize whether ST-EEGFormer-small benefits more reliably from no-reject
+  soft weighting than from artifact-gated SoftAR on PhysioNetMI.
+
+scientific_question_link: >
+  Tests whether certificate weighting can preserve beneficial subject-style
+  variation without over-pruning augmentation candidates that may still help
+  few-shot target adaptation.
+
+dataset:
+  name: PhysioNetMI
+  root: /ai/224duibishiyan/CBraMod-main/tmp_in/MI/files
+  task: left_vs_right_motor_imagery
+  runs: [4, 8, 12]
+  labels:
+    T1: left
+    T2: right
+  window_seconds: 4
+  source_train_subjects: [1, 70]
+  validation_subjects: [71, 89]
+  target_test_subjects: [90, 109]
+  support_shot_per_class: 5
+  raw_data_copied: false
+
+preprocessing:
+  bandpass_hz: [1.0, 40.0]
+  per_trial_channel_zscore: true
+  target_sfreq: 128
+  target_samples: 512
+
+backbone:
+  name: ST-EEGFormer-small
+  code_path: third_party/backbones/STEEGFormer
+  pretrained_checkpoint: third_party/backbones/STEEGFormer/pretrained_weights/ST-EEGFormer-small/checkpoint-300.pth
+  source_tuned_state_dict: outputs/foundation_physio_mi_fullfinetune/checkpoints/st_eegformer_small_seed3407_best.pt
+  frozen_during_fewshot: true
+  feature_tag: st_source_tuned_seed3407
+
+method_under_test:
+  name: SoftWeight_noReject_LS010
+  reject_artifacts: false
+  w_min: 0.2
+  weight_score: content_rank
+  label_smoothing: 0.10
+  forbid_hard_top50: true
+
+diagnostic_comparators:
+  - NaiveAug_LS010
+  - ArtifactReject_LS010
+  - SASCert_SoftAR_LS010
+
+training:
+  seeds: [20, 21, 22, 23, 24]
+  source_epochs: 30
+  finetune_epochs: 80
+  batch_size: 64
+  tune_hyperparameters: false
+
+metrics:
+  - accuracy
+  - balanced_accuracy
+  - macro_f1
+  - kappa
+  - auroc
+  - ece
+  - nll
+  - brier
+  - subject_win_rate
+  - seed_win_rate
+
+confirm_criteria:
+  primary_vs: NaiveAug_LS010
+  secondary_vs: SASCert_SoftAR_LS010
+  delta_macro_f1_vs_naive_min: 0.005
+  delta_balanced_acc_vs_naive_min: 0.0
+  delta_ece_vs_naive_max: 0.01
+  delta_nll_vs_naive_max: 0.01
+  delta_brier_vs_naive_max: 0.01
+  subject_win_rate_macro_f1_vs_naive_min: 0.65
+  seed_win_rate_macro_f1_vs_naive_min: 0.65
+  should_not_underperform_softar_macro_f1: true
+
+known_prior_result:
+  from_output_tag: st_source_tuned_full
+  softweight_no_reject:
+    balanced_accuracy: 0.7152730485974295
+    macro_f1: 0.7109399006315767
+    ece: 0.20820253054048213
+    nll: 0.6831626502905006
+  naive:
+    balanced_accuracy: 0.708793339473564
+    macro_f1: 0.7045379911100288
+    ece: 0.2079087014568807
+    nll: 0.685334156404121
+  limitation: >
+    Paired summary from existing outputs shows positive mean effects but low
+    subject/seed reliability. Do not promote this as confirmed.
+  softweight_vs_naive:
+    delta_balanced_accuracy: 0.0064797091238654745
+    delta_macro_f1: 0.006401909521548154
+    delta_ece: 0.00029382908360143096
+    delta_nll: -0.0021715061136201833
+    subject_win_rate_macro_f1: 0.15
+    seed_win_rate_macro_f1: 0.0
+  softweight_vs_softar:
+    delta_balanced_accuracy: 0.0003314882571848571
+    delta_macro_f1: 0.00011267849620133052
+    delta_ece: 0.0026252288924711333
+    delta_nll: 0.0021857761145616886
+    subject_win_rate_macro_f1: 0.05
+    seed_win_rate_macro_f1: 0.0
+  decision: do_not_promote_any_st_method_yet
+  locked_confirm_report: workbench/20260622_steegformer_sascert_core/outputs/locked_confirm/ST_SOFTWEIGHT_NO_REJECT_LOCKED_CONFIRM.md
+  failure_review: workbench/20260622_steegformer_sascert_core/outputs/locked_confirm/SOFTWEIGHT_FAILURE_REVIEW.md
+  next_config: configs/experiments/st_score_weight_training_mismatch_failure_synthesis.yaml
+
+expected_command_template: >
+  PYTHONPATH=outputs/foundation_physio_mi_fullfinetune/local_python_deps:.
+  python workbench/20260622_steegformer_sascert_core/runner.py
+  --targets 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109
+  --seeds 20 21 22 23 24
+  --device cuda
+  --source-epochs 30
+  --finetune-epochs 80
+  --batch-size 64
+  --steegformer-state-dict outputs/foundation_physio_mi_fullfinetune/checkpoints/st_eegformer_small_seed3407_best.pt
+  --feature-tag st_source_tuned_seed3407
+  --output-tag st_source_tuned_softweight_confirm

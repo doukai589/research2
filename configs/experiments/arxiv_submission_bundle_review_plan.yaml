@@ -1,0 +1,30 @@
+name: arxiv_submission_bundle_review_plan
+status: active_next
+date_created: 2026-06-23
+
+purpose: >
+  Prepare the locally compiling arXiv-first SAS-Cert package for a clean
+  submission bundle by separating required source assets from build artifacts
+  and auditing author metadata, acknowledgements, funding, ethics, and
+  claim-boundary statements.
+
+inputs:
+  venue_package_dir: paper/sas_cert_diagnostic_certificate_venue
+  final_compile_report: docs/SAS_CERT_ARXIV_FINAL_COMPILE_REPORT.md
+
+outputs:
+  submission_bundle_report: docs/SAS_CERT_ARXIV_SUBMISSION_BUNDLE_REVIEW.md
+  optional_bundle_dir: paper/sas_cert_diagnostic_certificate_arxiv_bundle
+
+constraints:
+  no_new_experiments: true
+  no_new_claims_without_traceable_evidence: true
+  preserve_existing_numbers: true
+  do_not_change_scientific_interpretation: true
+
+required_work:
+  - identify_required_arxiv_source_files
+  - exclude_auxiliary_build_artifacts_from_submission_bundle
+  - audit_author_affiliation_funding_acknowledgement_metadata
+  - verify_claim_boundary_in_submission_source
+  - update_project_management_log

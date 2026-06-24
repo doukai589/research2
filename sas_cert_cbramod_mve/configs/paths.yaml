@@ -1,0 +1,8 @@
+project_root: /ai/224duibishiyan/615新研究/sas_cert_cbramod_mve
+workspace_root: /ai/224duibishiyan/615新研究
+cbramod_src: ../新研究/CBraMod-main
+cbramod_root: third_party/CBraMod
+bcic2a_root: ../CBraMod-main/tmp_in/BCIC2a/MNE-bnci-data/database/data-sets/001-2014
+old_eegnet_report: /ai/224duibishiyan/615新研究/sas_cert_mve_outputs/SAS_CERT_MVE_FULL_OUTPUT_AND_ANALYSIS.md
+outputs_root: outputs
+

@@ -1,0 +1,18 @@
+\begin{table}[H]
+\centering
+\caption{Diagnostic Success Does Not Imply Training-Policy Success}
+\label{tab:inline-4}
+\small
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{llllll}
+\toprule
+Backbone & Policy & Delta BAcc & Delta Macro-F1 & Delta ECE & Decision \\
+\midrule
+CBraMod frozen & current SASCert SoftAR & +0.0124 & +0.0005 & +0.0277 & not promoted \\
+CBraMod frozen & repaired artifact-gate physio & +0.0111 & +0.0426 & +0.0227 & not promoted \\
+CBraMod frozen & repaired temperature scaling & +0.0111 & +0.0426 & +0.0221 & not promoted \\
+ST-EEGFormer-small & SoftWeight no-reject & +0.0065 & +0.0064 & +0.0003 & not promoted \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}

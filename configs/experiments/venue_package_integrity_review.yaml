@@ -1,0 +1,43 @@
+name: venue_package_integrity_review
+status: completed
+date_created: 2026-06-22
+date_completed: 2026-06-22
+
+purpose: >
+  Review the generated venue-agnostic LaTeX package for compile readiness,
+  venue-template gaps, table/figure layout risks, and claim-boundary integrity
+  before choosing a specific submission venue or running additional experiments.
+
+inputs:
+  paper_dir: paper/sas_cert_diagnostic_certificate
+  main_tex: paper/sas_cert_diagnostic_certificate/main.tex
+  references_bib: paper/sas_cert_diagnostic_certificate/references.bib
+  formatting_report: docs/SAS_CERT_VENUE_FORMATTING_REPORT.md
+
+outputs:
+  integrity_report: docs/SAS_CERT_VENUE_PACKAGE_INTEGRITY_REVIEW.md
+
+constraints:
+  no_new_experiments: true
+  no_new_claims_without_traceable_evidence: true
+  no_training_policy_promotion: true
+  preserve_existing_numbers: true
+
+required_work:
+  - inspect_main_tex_for_latex_risks
+  - verify_citation_and_bibliography_consistency
+  - verify_figure_and_table_paths
+  - identify_venue_template_conversion_gaps
+  - update_project_management_log
+
+result:
+  status: passed_with_environment_limitation
+  integrity_report: docs/SAS_CERT_VENUE_PACKAGE_INTEGRITY_REVIEW.md
+  citation_consistency: passed
+  figure_paths: passed
+  table_inputs: passed
+  markdown_residue: none_detected
+  internal_path_exposure: none_detected
+  local_compile_run: false
+  local_compile_reason: latexmk_and_pdflatex_not_available
+  decision: proceed_to_venue_template_selection

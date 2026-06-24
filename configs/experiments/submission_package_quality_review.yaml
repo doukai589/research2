@@ -1,0 +1,35 @@
+name: submission_package_quality_review
+status: completed
+date_created: 2026-06-22
+date_completed: 2026-06-22
+
+purpose: >
+  Review the generated submission-preparation package for completeness,
+  consistency, and remaining manuscript-cleanup tasks before any new scientific
+  experiment is considered.
+
+inputs:
+  submission_clean_draft: docs/SAS_CERT_DIAGNOSTIC_CERTIFICATE_SUBMISSION_DRAFT.md
+  bibliography_trace: docs/SAS_CERT_BIBLIOGRAPHY_TRACE.md
+  manuscript_asset_manifest: outputs/runs/sas_cert_diagnostic_certificate_pack_physionetmi/manuscript_asset_manifest.json
+  manuscript_tables_dir: outputs/runs/sas_cert_diagnostic_certificate_pack_physionetmi/manuscript_tables
+  manuscript_figures_dir: outputs/runs/sas_cert_diagnostic_certificate_pack_physionetmi/manuscript_figures
+
+outputs:
+  review_report: docs/SAS_CERT_SUBMISSION_PACKAGE_QUALITY_REVIEW.md
+
+constraints:
+  no_new_experiments: true
+  no_new_claims_without_traceable_evidence: true
+  no_promotion_of_weighting_policy: true
+
+required_work:
+  - verify_manifest_outputs_exist
+  - verify_submission_draft_removed_project_notes
+  - verify_figures_tables_match_plan
+  - list_remaining_bibtex_and_formatting_gaps
+
+completion:
+  review_report: docs/SAS_CERT_SUBMISSION_PACKAGE_QUALITY_REVIEW.md
+  decision: proceed_to_bibtex_latex_figure_polish
+  next: configs/experiments/bibtex_latex_figure_polish_plan.yaml

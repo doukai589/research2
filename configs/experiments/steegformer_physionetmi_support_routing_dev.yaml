@@ -1,0 +1,109 @@
+name: steegformer_physionetmi_support_routing_dev
+status: completed_not_promoted
+protocol: validation_subject_support_only_routing
+
+purpose: >
+  Develop a deployable routing rule that decides when to use NaiveAug,
+  SoftWeight_noReject, or SASCert_SoftAR for ST-EEGFormer-small few-shot
+  adaptation without using target-test labels.
+
+motivation: >
+  Target-subject posthoc diagnostics show that soft weighting helps lower
+  baseline subjects but can hurt strong-baseline subjects. A deployable method
+  needs a support-only proxy for this baseline/adaptation regime.
+
+dataset:
+  name: PhysioNetMI
+  task: left_vs_right_motor_imagery
+  runs: [4, 8, 12]
+  source_train_subjects: [1, 70]
+  routing_dev_subjects: [71, 89]
+  final_target_subjects: [90, 109]
+  support_shot_per_class: 5
+  raw_data_copied: false
+
+backbone:
+  name: ST-EEGFormer-small
+  source_tuned_state_dict: outputs/foundation_physio_mi_fullfinetune/checkpoints/st_eegformer_small_seed3407_best.pt
+  feature_tag: st_source_tuned_seed3407
+  frozen_during_fewshot: true
+
+candidate_methods:
+  - NaiveAug_LS010
+  - SoftWeight_noReject_LS010
+  - SASCert_SoftAR_LS010
+
+allowed_routing_features:
+  - support_feature_margin
+  - support_feature_class_distance
+  - support_entropy_or_confidence_from_source_head
+  - candidate_content_score_mean
+  - candidate_content_score_dispersion
+  - candidate_artifact_risk_summary
+  - candidate_clean_bad_score_separation
+
+forbidden_routing_inputs:
+  - final_target_test_labels
+  - final_target_test_metrics
+  - target_subject_id_as_shortcut
+  - seed_or_trial_order_shortcuts
+
+planned_steps:
+  - run_same_protocol_on_routing_dev_subjects_71_to_89
+  - compute_support_only_features_per_subject_seed
+  - label_best_method_on_dev_subjects_from_dev_eval_only
+  - derive_simple_threshold_or_rule
+  - freeze_rule_before_applying_to_final_target_subjects_90_to_109
+
+decision_gate:
+  min_dev_subjects: 19
+  require_rule_beats_naive_mean_macro_f1: true
+  require_rule_not_worse_ece_than_naive_by_more_than: 0.01
+  require_final_test_only_after_rule_frozen: true
+
+expected_outputs:
+  - workbench/20260622_steegformer_sascert_core/outputs/support_routing_dev/dev_metrics.csv
+  - workbench/20260622_steegformer_sascert_core/outputs/support_routing_dev/routing_features.csv
+  - workbench/20260622_steegformer_sascert_core/outputs/support_routing_dev/routing_rule.json
+  - workbench/20260622_steegformer_sascert_core/outputs/support_routing_dev/SUPPORT_ROUTING_DEV_REPORT.md
+
+results:
+  output_tag: st_source_tuned_routing_dev
+  dev_folds: 95
+  dev_subjects: 19
+  constant_strategies:
+    NaiveAug_LS010:
+      macro_f1: 0.6620622327802094
+      balanced_accuracy: 0.6665093981307646
+      ece: 0.235025075022897
+      nll: 0.811865509293711
+    SoftWeight_noReject_LS010:
+      macro_f1: 0.6649319250531943
+      balanced_accuracy: 0.6700309863196152
+      ece: 0.23161419591213717
+      nll: 0.8090580859763316
+    SASCert_SoftAR_LS010:
+      macro_f1: 0.6654309409565888
+      balanced_accuracy: 0.6700237787113721
+      ece: 0.23331706519060907
+      nll: 0.8062314115154042
+  loso_support_routing:
+    macro_f1: 0.6593601106529761
+    balanced_accuracy: 0.664130725054886
+    ece: 0.23268528339596217
+    nll: 0.8132403963831302
+  full_dev_best_rule:
+    rule: "threshold:mean_artifact_risk<=475.104?SASCert_SoftAR_LS010:NaiveAug_LS010"
+    macro_f1: 0.6675216798315278
+    note: full-dev fit is not deployable because LOSO validation fails
+  decision: do_not_freeze_routing_rule
+  interpretation: >
+    Support-only one-threshold routing does not beat the best constant dev
+    strategy under leave-one-subject-out validation. Do not apply a routed
+    method to final target subjects.
+
+next:
+  config: configs/experiments/cbramod_physionetmi_sascert_matched.yaml
+  rationale: >
+    ST branch reached a clear pause point. Continue the two-backbone one-dataset
+    plan by running matched CBraMod PhysioNetMI validation.

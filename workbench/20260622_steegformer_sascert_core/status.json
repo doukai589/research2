@@ -1,0 +1,238 @@
+{
+  "trial": "steegformer_sascert_core",
+  "created_at": "2026-06-22T20:05:55",
+  "status": "reviewed_after_source_tuned_rerun",
+  "promoted": false,
+  "current_step": "support-only routing dev completed and not promoted; ST branch paused; next mainline step is CBraMod PhysioNetMI matched validation",
+  "validated": {
+    "physionet_cache_shape": [
+      4917,
+      64,
+      640
+    ],
+    "splits": {
+      "train": 3150,
+      "val": 867,
+      "test": 900
+    },
+    "steegformer_input_shape": [
+      2,
+      64,
+      512
+    ],
+    "steegformer_logits_shape": [
+      2,
+      2
+    ],
+    "steegformer_loaded_keys": 101
+  },
+  "runner": {
+    "path": "workbench/20260622_steegformer_sascert_core/runner.py",
+    "smoke_completed": true,
+    "mini_matrix_completed": true,
+    "full_matrix_completed": true,
+    "feature_cache_tag_support": true,
+    "optional_source_tuned_state_dict_support": true,
+    "source_tuned_smoke_completed": true,
+    "source_tuned_mini_completed": true,
+    "source_tuned_full_completed": true,
+    "artifact_gate_diagnostic_completed": true,
+    "p80_mini_completed": true,
+    "subject_heterogeneity_completed": true,
+    "support_routing_dev_completed": true,
+    "full_matrix": {
+      "targets": [
+        90,
+        91,
+        92,
+        93,
+        94,
+        95,
+        96,
+        97,
+        98,
+        99,
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109
+      ],
+      "seeds": [
+        20,
+        21,
+        22,
+        23,
+        24
+      ],
+      "n_rows": 400,
+      "sascert_vs_naive": {
+        "delta_balanced_accuracy": 0.012117822725949634,
+        "delta_macro_f1": 0.011587603133753177,
+        "delta_ece": -0.00298185891968189,
+        "delta_nll": -0.0011452190599466894,
+        "delta_brier": -0.00020404249429706312,
+        "subject_win_rate_macro_f1": 0.25,
+        "seed_win_rate_macro_f1": 0.4
+      },
+      "interpretation": "positive average signal, but full Go criteria failed because subject and seed win rates were too low and all groups stayed near chance"
+    }
+    ,
+    "source_tuned_full": {
+      "state_dict": "outputs/foundation_physio_mi_fullfinetune/checkpoints/st_eegformer_small_seed3407_best.pt",
+      "feature_tag": "st_source_tuned_seed3407",
+      "output_tag": "st_source_tuned_full",
+      "targets": [
+        90,
+        91,
+        92,
+        93,
+        94,
+        95,
+        96,
+        97,
+        98,
+        99,
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109
+      ],
+      "seeds": [
+        20,
+        21,
+        22,
+        23,
+        24
+      ],
+      "n_rows": 400,
+      "groups": {
+        "NaiveAug_LS010": {
+          "balanced_accuracy": 0.708793339473564,
+          "macro_f1": 0.7045379911100288,
+          "ece": 0.2079087014568807,
+          "nll": 0.685334156404121
+        },
+        "SoftWeight_noReject_LS010": {
+          "balanced_accuracy": 0.7152730485974295,
+          "macro_f1": 0.7109399006315767,
+          "ece": 0.20820253054048213,
+          "nll": 0.6831626502905006
+        },
+        "SASCert_SoftAR_LS010": {
+          "balanced_accuracy": 0.7149415603402445,
+          "macro_f1": 0.7108272221353755,
+          "ece": 0.20557730164801102,
+          "nll": 0.680976874175939
+        }
+      },
+      "sascert_vs_naive": {
+        "delta_balanced_accuracy": 0.006148220866680432,
+        "delta_macro_f1": 0.006289231025346731,
+        "delta_ece": -0.0023313998088696775,
+        "delta_nll": -0.004357282228181991,
+        "delta_brier": -0.006221016962081161,
+        "subject_win_rate_macro_f1": 0.25,
+        "seed_win_rate_macro_f1": 0.0
+      },
+      "interpretation": "source-tuned ST features restore a useful MI feature space, but locked SASCert_SoftAR does not meet reliability criteria and is slightly below SoftWeight_noReject on mean Macro-F1"
+    }
+  },
+  "failure_review": {
+    "path": "workbench/20260622_steegformer_sascert_core/FAILURE_REVIEW.md",
+    "summary_path": "workbench/20260622_steegformer_sascert_core/failure_review_summary.json",
+    "decision": "revise_method_after_source_tuned_rerun",
+    "first_broken_link": "pretrained frozen ST features were not sufficiently class-separable for this few-shot protocol",
+    "source_tuned_result": "feature substrate repaired; locked artifact-reject soft weighting is not subject/seed reliable",
+    "next_experiment": "compare SoftWeight_noReject as the ST-specific method branch and diagnose whether artifact reject is over-pruning useful target-support augmentations"
+  },
+  "artifact_gate_diagnostic": {
+    "script": "workbench/20260622_steegformer_sascert_core/diagnose_artifact_gate.py",
+    "p90": {
+      "decision": "artifact_gate_precise_but_conservative",
+      "reject_rate": 0.1,
+      "clean_reject_rate": 0.0,
+      "bad_artifact_reject_rate": 0.5
+    },
+    "p80": {
+      "decision": "artifact_gate_calibration_tradeoff",
+      "reject_rate": 0.2,
+      "clean_reject_rate": 0.0,
+      "bad_artifact_reject_rate": 1.0,
+      "mini_sascert_vs_naive_delta_macro_f1": -0.008105624702603453,
+      "mini_sascert_vs_naive_delta_ece": -0.014100265096808867
+    },
+    "p70": {
+      "decision": "artifact_gate_overprunes_clean_or_useful_candidates",
+      "reject_rate": 0.3,
+      "clean_reject_rate": 0.25,
+      "bad_artifact_reject_rate": 1.0
+    },
+    "method_local_decision": "prefer_softweight_no_reject_for_mean_classification; keep_artifact_gate_as_calibration_diagnostic"
+  },
+  "subject_heterogeneity": {
+    "script": "workbench/20260622_steegformer_sascert_core/diagnose_subject_heterogeneity.py",
+    "report": "workbench/20260622_steegformer_sascert_core/outputs/subject_heterogeneity/SUBJECT_HETEROGENEITY_REPORT.md",
+    "primary_group": "SoftWeight_noReject_LS010",
+    "secondary_group": "SASCert_SoftAR_LS010",
+    "baseline": "NaiveAug_LS010",
+    "primary_subject_win_rate": 0.6,
+    "secondary_subject_win_rate": 0.65,
+    "primary_mean_subject_delta_macro_f1": 0.006401909521548155,
+    "secondary_mean_subject_delta_macro_f1": 0.006289231025346824,
+    "primary_losing_subjects": [
+      92,
+      93,
+      97,
+      101,
+      102,
+      105,
+      107,
+      109
+    ],
+    "primary_winning_subjects": [
+      90,
+      91,
+      94,
+      95,
+      96,
+      98,
+      99,
+      100,
+      103,
+      104,
+      106,
+      108
+    ],
+    "correlation_primary_delta_with_baseline_macro_f1": -0.42088409387404135,
+    "decision": "do_not_promote_any_st_method_yet; develop support-only routing on validation subjects",
+    "next_config": "configs/experiments/steegformer_physionetmi_support_routing_dev.yaml"
+  },
+  "support_routing_dev": {
+    "script": "workbench/20260622_steegformer_sascert_core/develop_support_routing.py",
+    "report": "workbench/20260622_steegformer_sascert_core/outputs/support_routing_dev/SUPPORT_ROUTING_DEV_REPORT.md",
+    "dev_subjects": [
+      71,
+      89
+    ],
+    "n_folds": 95,
+    "best_constant_strategy": "SASCert_SoftAR_LS010",
+    "best_constant_macro_f1": 0.6654309409565888,
+    "loso_routing_macro_f1": 0.6593601106529761,
+    "full_dev_best_rule": "threshold:mean_artifact_risk<=475.104?SASCert_SoftAR_LS010:NaiveAug_LS010",
+    "full_dev_best_rule_macro_f1": 0.6675216798315278,
+    "decision": "do_not_freeze_routing_rule",
+    "next_mainline_config": "configs/experiments/cbramod_physionetmi_sascert_matched.yaml"
+  }
+}

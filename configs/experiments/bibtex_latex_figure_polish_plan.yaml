@@ -1,0 +1,45 @@
+name: bibtex_latex_figure_polish_plan
+status: completed
+date_created: 2026-06-22
+date_completed: 2026-06-22
+
+purpose: >
+  Polish the submission-preparation package without adding experiments by
+  resolving bibliography placeholders, converting method formulas to LaTeX, and
+  improving figure/table presentation from existing evidence only.
+
+inputs:
+  package_review: docs/SAS_CERT_SUBMISSION_PACKAGE_QUALITY_REVIEW.md
+  submission_draft: docs/SAS_CERT_DIAGNOSTIC_CERTIFICATE_SUBMISSION_DRAFT.md
+  bibliography_trace: docs/SAS_CERT_BIBLIOGRAPHY_TRACE.md
+  manuscript_tables_dir: outputs/runs/sas_cert_diagnostic_certificate_pack_physionetmi/manuscript_tables
+  manuscript_figures_dir: outputs/runs/sas_cert_diagnostic_certificate_pack_physionetmi/manuscript_figures
+
+outputs:
+  polished_submission_draft: docs/SAS_CERT_DIAGNOSTIC_CERTIFICATE_SUBMISSION_DRAFT_LATEX.md
+  references_bib: docs/SAS_CERT_REFERENCES.bib
+  bibliography_resolution_report: docs/SAS_CERT_BIBLIOGRAPHY_RESOLUTION_REPORT.md
+  figure_table_polish_report: docs/SAS_CERT_FIGURE_TABLE_POLISH_REPORT.md
+
+constraints:
+  no_new_experiments: true
+  no_new_claims_without_traceable_evidence: true
+  no_promotion_of_weighting_policy: true
+  preserve_existing_numbers: true
+
+required_work:
+  - resolve_bibliography_placeholders_where_possible
+  - record_unresolved_reference_gaps
+  - convert_plaintext_formulas_to_latex
+  - polish_figure_table_presentation_without_data_changes
+  - update_project_management_log
+
+completion:
+  generator: scripts/generate_diagnostic_manuscript_assets.py
+  polished_submission_draft: docs/SAS_CERT_DIAGNOSTIC_CERTIFICATE_SUBMISSION_DRAFT_LATEX.md
+  references_bib: docs/SAS_CERT_REFERENCES.bib
+  bibliography_resolution_report: docs/SAS_CERT_BIBLIOGRAPHY_RESOLUTION_REPORT.md
+  figure_table_polish_report: docs/SAS_CERT_FIGURE_TABLE_POLISH_REPORT.md
+  manifest: outputs/runs/sas_cert_diagnostic_certificate_pack_physionetmi/manuscript_asset_manifest.json
+  decision: proceed_to_submission_readiness_review
+  next: configs/experiments/submission_readiness_review.yaml

@@ -1,0 +1,86 @@
+name: steegformer_physionetmi_subject_heterogeneity_diagnostic
+status: completed_diagnostic
+protocol: posthoc_subject_level_diagnostic
+
+purpose: >
+  Explain why ST-EEGFormer-small soft weighting improves mean metrics but fails
+  subject/seed win-rate reliability.
+
+dataset:
+  name: PhysioNetMI
+  task: left_vs_right_motor_imagery
+  runs: [4, 8, 12]
+  target_test_subjects: [90, 109]
+  raw_data_copied: false
+
+backbone:
+  name: ST-EEGFormer-small
+  source_tuned_state_dict: outputs/foundation_physio_mi_fullfinetune/checkpoints/st_eegformer_small_seed3407_best.pt
+  feature_tag: st_source_tuned_seed3407
+
+inputs:
+  metrics_csv: workbench/20260622_steegformer_sascert_core/outputs/steegformer_physionetmi_sascert_metrics_st_source_tuned_full.csv
+  score_rows_dir: workbench/20260622_steegformer_sascert_core/outputs/score_rows/st_source_tuned_full
+  group_summaries_dir: workbench/20260622_steegformer_sascert_core/outputs/group_comparisons
+
+comparisons:
+  primary:
+    group: SoftWeight_noReject_LS010
+    baseline: NaiveAug_LS010
+  calibration:
+    group: SASCert_SoftAR_LS010
+    baseline: NaiveAug_LS010
+  component:
+    group: SoftWeight_noReject_LS010
+    baseline: SASCert_SoftAR_LS010
+
+diagnostics:
+  - subject_mean_delta_macro_f1
+  - subject_win_rate_macro_f1
+  - seed_mean_delta_macro_f1
+  - baseline_performance_vs_delta
+  - support_candidate_score_dispersion_vs_delta
+  - artifact_risk_distribution_vs_delta
+  - clean_bad_candidate_composition_vs_delta
+  - identify_consistent_winners_and_losers
+
+decision_questions:
+  - Do soft weighting gains concentrate on low-baseline subjects?
+  - Are losses associated with high score dispersion or artifact-risk tails?
+  - Does SoftAR mainly help calibration while SoftWeight helps classification?
+  - Is there a subject-level rule that can route between NaiveAug, SoftWeight, and SoftAR without target-test leakage?
+
+constraints:
+  no_retraining: true
+  no_new_backbone: true
+  no_new_dataset: true
+  no_target_test_used_for_method_selection_beyond_posthoc_diagnostic: true
+  output_must_be_marked_diagnostic: true
+
+expected_outputs:
+  - workbench/20260622_steegformer_sascert_core/outputs/subject_heterogeneity/subject_delta_table.csv
+  - workbench/20260622_steegformer_sascert_core/outputs/subject_heterogeneity/heterogeneity_summary.json
+  - workbench/20260622_steegformer_sascert_core/outputs/subject_heterogeneity/SUBJECT_HETEROGENEITY_REPORT.md
+
+results:
+  output_tag: st_source_tuned_full
+  primary_group: SoftWeight_noReject_LS010
+  secondary_group: SASCert_SoftAR_LS010
+  baseline: NaiveAug_LS010
+  primary_subject_win_rate: 0.6
+  secondary_subject_win_rate: 0.65
+  primary_mean_subject_delta_macro_f1: 0.006401909521548155
+  secondary_mean_subject_delta_macro_f1: 0.006289231025346824
+  primary_losing_subjects: [92, 93, 97, 101, 102, 105, 107, 109]
+  primary_winning_subjects: [90, 91, 94, 95, 96, 98, 99, 100, 103, 104, 106, 108]
+  correlation_primary_delta_with_baseline_macro_f1: -0.42088409387404135
+  interpretation: >
+    Soft weighting tends to help lower-baseline subjects and can hurt or fail
+    to help strong-baseline subjects. This explains positive mean gains with
+    weak reliability.
+
+next:
+  config: configs/experiments/steegformer_physionetmi_support_routing_dev.yaml
+  rationale: >
+    Use validation subjects, not target test subjects, to develop a support-only
+    routing rule between NaiveAug, SoftWeight_noReject, and SoftAR.

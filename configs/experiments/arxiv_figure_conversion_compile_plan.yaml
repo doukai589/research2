@@ -1,0 +1,49 @@
+name: arxiv_figure_conversion_compile_plan
+status: completed
+date_created: 2026-06-22
+date_completed: 2026-06-23
+
+purpose: >
+  Make the arXiv-first SAS-Cert venue package compile-clean by converting SVG
+  figures to PDF or regenerating equivalent PDF/PNG figures from existing
+  evidence, then run a local compile check if LaTeX tooling is available.
+
+inputs:
+  venue_package_dir: paper/sas_cert_diagnostic_certificate_venue
+  venue_selection_report: docs/SAS_CERT_VENUE_SELECTION_REPORT.md
+  source_figures: paper/sas_cert_diagnostic_certificate_venue/figures_svg_original
+
+outputs:
+  compile_report: docs/SAS_CERT_ARXIV_COMPILE_REPORT.md
+  converted_figures_dir: paper/sas_cert_diagnostic_certificate_venue/figures
+
+constraints:
+  no_new_experiments: true
+  no_new_claims_without_traceable_evidence: true
+  preserve_existing_numbers: true
+  do_not_change_scientific_interpretation: true
+
+required_work:
+  - provide_or_install_safe_figure_conversion_path
+  - convert_or_regenerate_figures_from_existing_evidence
+  - verify_main_tex_uses_converted_figures
+  - run_latex_compile_if_tooling_available
+  - update_project_management_log
+
+result:
+  status: figures_ready_compile_not_run
+  compile_report: docs/SAS_CERT_ARXIV_COMPILE_REPORT.md
+  figure_generator: scripts/generate_arxiv_pdf_figures.py
+  converted_figures:
+    - paper/sas_cert_diagnostic_certificate_venue/figures/figure1_certificate_overview.pdf
+    - paper/sas_cert_diagnostic_certificate_venue/figures/figure2_diagnostic_auc.pdf
+    - paper/sas_cert_diagnostic_certificate_venue/figures/figure3_component_specificity_heatmap.pdf
+    - paper/sas_cert_diagnostic_certificate_venue/figures/figure4_training_policy_non_promotion.pdf
+    - paper/sas_cert_diagnostic_certificate_venue/figures/figure5_causal_chain.pdf
+  missing_referenced_figures: 0
+  citation_consistency: passed
+  no_new_experiments: true
+  no_new_claims: true
+  local_compile_run: false
+  local_compile_reason: no_latexmk_pdflatex_xelatex_lualatex_or_tectonic
+  decision: await_latex_tooling_or_external_compile

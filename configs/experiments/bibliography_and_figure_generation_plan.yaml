@@ -1,0 +1,45 @@
+name: bibliography_and_figure_generation_plan
+status: completed
+date_created: 2026-06-22
+date_completed: 2026-06-22
+
+purpose: >
+  Convert the reviewed diagnostic manuscript package into submission-prep
+  artifacts by resolving citation placeholders and generating figure/table
+  drafts from existing evidence files only.
+
+inputs:
+  polished_draft: docs/SAS_CERT_DIAGNOSTIC_CERTIFICATE_DRAFT_POLISHED.md
+  package_review: docs/SAS_CERT_DIAGNOSTIC_MANUSCRIPT_PACKAGE_REVIEW.md
+  citation_plan: docs/SAS_CERT_CITATION_PLAN.md
+  figure_table_plan: docs/SAS_CERT_FIGURE_TABLE_PLAN.md
+  evidence_tables_dir: outputs/runs/sas_cert_diagnostic_certificate_pack_physionetmi/tables
+
+outputs:
+  bibliography_trace: docs/SAS_CERT_BIBLIOGRAPHY_TRACE.md
+  submission_clean_draft: docs/SAS_CERT_DIAGNOSTIC_CERTIFICATE_SUBMISSION_DRAFT.md
+  generated_tables_dir: outputs/runs/sas_cert_diagnostic_certificate_pack_physionetmi/manuscript_tables
+  generated_figures_dir: outputs/runs/sas_cert_diagnostic_certificate_pack_physionetmi/manuscript_figures
+
+constraints:
+  no_new_experiments: true
+  no_new_claims_without_traceable_evidence: true
+  no_promotion_of_weighting_policy: true
+  use_existing_csv_json_only: true
+
+required_work:
+  - resolve_or_trace_citation_placeholders
+  - remove_project_management_notes_from_submission_draft
+  - generate_manuscript_ready_tables
+  - generate_simple_figure_drafts_from_existing_outputs
+  - update_project_management_log
+
+completion:
+  script: scripts/generate_diagnostic_manuscript_assets.py
+  manifest: outputs/runs/sas_cert_diagnostic_certificate_pack_physionetmi/manuscript_asset_manifest.json
+  bibliography_trace: docs/SAS_CERT_BIBLIOGRAPHY_TRACE.md
+  submission_clean_draft: docs/SAS_CERT_DIAGNOSTIC_CERTIFICATE_SUBMISSION_DRAFT.md
+  generated_tables_dir: outputs/runs/sas_cert_diagnostic_certificate_pack_physionetmi/manuscript_tables
+  generated_figures_dir: outputs/runs/sas_cert_diagnostic_certificate_pack_physionetmi/manuscript_figures
+  decision: proceed_to_submission_package_quality_review
+  next: configs/experiments/submission_package_quality_review.yaml

@@ -1,0 +1,8 @@
+candidate_pool: clean_and_bad
+n_aug: 5
+weights:
+  content: 0.35
+  physio: 0.25
+  artifact_safe: 0.25
+  style: 0.15
+

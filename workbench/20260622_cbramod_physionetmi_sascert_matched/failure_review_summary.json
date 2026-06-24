@@ -1,0 +1,242 @@
+{
+  "status": "completed",
+  "decision": "revise_cert_calibration",
+  "first_broken_link": "current_mixed_bad_sas_score_direction_wrong_on_physionetmi",
+  "mini_group_means": {
+    "ArtifactReject_LS010": {
+      "accuracy": 0.5334346504559271,
+      "balanced_accuracy": 0.5302396514161221,
+      "macro_f1": 0.500148403347774,
+      "kappa": 0.061938519530357006,
+      "auroc": 0.5110140621905328,
+      "ece": 0.0922664097014894,
+      "nll": 0.6930659255544948,
+      "brier": 0.49988606572151184
+    },
+    "NaiveAug_LS010": {
+      "accuracy": 0.5370820668693009,
+      "balanced_accuracy": 0.5349475143592791,
+      "macro_f1": 0.4982986240311926,
+      "kappa": 0.07250681947674666,
+      "auroc": 0.5152525252525253,
+      "ece": 0.08428846678291772,
+      "nll": 0.6930602790648893,
+      "brier": 0.4998801201581955
+    },
+    "SASCert_SoftAR_LS010": {
+      "accuracy": 0.553596757852077,
+      "balanced_accuracy": 0.5473182808476926,
+      "macro_f1": 0.49875509434967563,
+      "kappa": 0.0969041113874079,
+      "auroc": 0.5074390968508615,
+      "ece": 0.11203608822677635,
+      "nll": 0.693240935943425,
+      "brier": 0.5000512003898621
+    },
+    "SoftWeight_noReject_LS010": {
+      "accuracy": 0.540628166160081,
+      "balanced_accuracy": 0.5360101010101009,
+      "macro_f1": 0.49247345817395827,
+      "kappa": 0.074749246933718,
+      "auroc": 0.5108338284808873,
+      "ece": 0.08655587995487142,
+      "nll": 0.6936845553590133,
+      "brier": 0.5004987865686417
+    }
+  },
+  "noaug_group_mean": {
+    "accuracy": 0.5441742654508612,
+    "balanced_accuracy": 0.542431174489998,
+    "macro_f1": 0.5158804293537684,
+    "kappa": 0.08689898222101715,
+    "auroc": 0.524212715389186,
+    "ece": 0.08172323531655193,
+    "nll": 0.6917753197081887,
+    "brier": 0.4986101935307185
+  },
+  "source_only_target_metrics": {
+    "accuracy": 0.5034013605442177,
+    "balanced_accuracy": 0.5067642698295033,
+    "macro_f1": 0.5000698812019567,
+    "kappa": 0.01342281879194629,
+    "auroc": 0.4595997034840623,
+    "nll": 0.6954259486764109,
+    "ece": 0.004278898239135742,
+    "brier": 0.5022771954536438
+  },
+  "sascert_vs_naive": {
+    "delta_balanced_accuracy": 0.01237076648841351,
+    "delta_macro_f1": 0.00045647031848300434,
+    "delta_ece": 0.02774762144385863,
+    "delta_nll": 0.0001806568785356344,
+    "delta_brier": 0.00017108023166656494
+  },
+  "score_audit": {
+    "n_score_rows": 300,
+    "overall_clean_vs_bad_auc_high_score_is_clean": {
+      "content_score": 0.3044444444444444,
+      "style_score": 0.6408333333333334,
+      "physio_score": 0.8444444444444444,
+      "artifact_safe_score": 0.33333333333333337,
+      "sas_score": 0.19689814814814816
+    },
+    "clean_vs_bad_type_auc_high_score_is_clean": {
+      "bad_artifact": {
+        "content_score": 0.005416666666666668,
+        "style_score": 0.65,
+        "physio_score": 0.6530555555555555,
+        "artifact_safe_score": 1.0,
+        "sas_score": 0.5084722222222222
+      },
+      "bad_content": {
+        "content_score": 0.9025000000000002,
+        "style_score": 0.65,
+        "physio_score": 0.9406944444444445,
+        "artifact_safe_score": 0.0,
+        "sas_score": 0.08194444444444446
+      },
+      "bad_physio": {
+        "content_score": 0.0054166666666666695,
+        "style_score": 0.6225,
+        "physio_score": 0.9395833333333334,
+        "artifact_safe_score": 0.0,
+        "sas_score": 0.00027777777777777864
+      }
+    },
+    "score_variant_auc_high_score_is_clean": {
+      "current_sas_score": 0.19689814814814816,
+      "physio_only": 0.8444444444444444,
+      "style_only": 0.6408333333333334,
+      "physio_style": 0.7584953703703703,
+      "direction_fixed_total": 0.8911111111111112,
+      "artifact_gate_physio": 0.9022222222222221
+    },
+    "direction_fixed_components": {
+      "content_inverted": true,
+      "artifact_safe_inverted": true,
+      "physio_inverted": false,
+      "style_inverted": false
+    },
+    "artifact_p90_reject_rate_by_aug_type": {
+      "bad_artifact": {
+        "p90_reject_rate": 0.5,
+        "folds": 6
+      },
+      "bad_content": {
+        "p90_reject_rate": 0.0,
+        "folds": 6
+      },
+      "bad_physio": {
+        "p90_reject_rate": 0.0,
+        "folds": 6
+      },
+      "clean": {
+        "p90_reject_rate": 0.0,
+        "folds": 6
+      }
+    }
+  },
+  "repaired_score_mini": {
+    "stage": "cbramod_physionetmi_sascert_matched_mini",
+    "status": "completed_mini",
+    "protocol": {
+      "dataset": "PhysioNetMI",
+      "task": "left_vs_right_motor_imagery",
+      "runs": [
+        4,
+        8,
+        12
+      ],
+      "targets": [
+        90,
+        91,
+        92
+      ],
+      "seeds": [
+        20,
+        21
+      ],
+      "shot_per_class": 5,
+      "n_aug": 5,
+      "source_epochs": 30,
+      "finetune_epochs": 80,
+      "label_smoothing": 0.1,
+      "artifact_reject_percentile": 90.0,
+      "experiment": "repaired",
+      "primary_group": "RepairedSoftWeight_artifact_gate_physio_LS010"
+    },
+    "groups": {
+      "NaiveAug_LS010": {
+        "accuracy": 0.5370820668693009,
+        "balanced_accuracy": 0.5349475143592791,
+        "macro_f1": 0.4982986240311926,
+        "kappa": 0.07250681947674666,
+        "auroc": 0.5152525252525253,
+        "ece": 0.08428846678291772,
+        "nll": 0.6930602807267171,
+        "brier": 0.4998801251252492
+      },
+      "NoAug_LS010": {
+        "accuracy": 0.5251266464032421,
+        "balanced_accuracy": 0.5230956625074272,
+        "macro_f1": 0.49543860516622873,
+        "kappa": 0.04755839922258057,
+        "auroc": 0.5147692612398495,
+        "ece": 0.05953978728408629,
+        "nll": 0.69266108540871,
+        "brier": 0.49948735535144806
+      },
+      "RepairedSoftWeight_artifact_gate_physio_LS010": {
+        "accuracy": 0.5500506585612969,
+        "balanced_accuracy": 0.5460714993067934,
+        "macro_f1": 0.540944898899341,
+        "kappa": 0.09289860694414569,
+        "auroc": 0.5124678154089918,
+        "ece": 0.10701033646182327,
+        "nll": 0.691584284810952,
+        "brier": 0.49841371675332385
+      }
+    },
+    "primary_vs_naive": {
+      "delta_balanced_accuracy": 0.01112398494751432,
+      "delta_macro_f1": 0.042646274868148426,
+      "delta_ece": 0.02272186967890555,
+      "delta_nll": -0.0014759959157650826,
+      "delta_brier": -0.001466408371925354,
+      "subject_win_rate_macro_f1": 0.6666666666666666,
+      "seed_win_rate_macro_f1": 1.0
+    },
+    "n_rows": 18,
+    "backbone_audit": {
+      "checkpoint_path": "/ai/224duibishiyan/新研究/CBraMod-main/pretrained_weights/pretrained_weights.pth",
+      "checkpoint_keys": 211,
+      "model_keys": 211,
+      "loaded_keys": 211,
+      "missing_in_checkpoint": [],
+      "missing_after_load": [],
+      "unexpected_after_load": [],
+      "shape_mismatch": [],
+      "unexpected_checkpoint_keys": [],
+      "code_path": "/ai/224duibishiyan/615新研究/third_party/CBraMod-main",
+      "n_channels": 64,
+      "target_samples": 800,
+      "patch_size": 200,
+      "patch_num": 4,
+      "proj_out_replaced_with_identity": true,
+      "frozen_backbone": true
+    },
+    "leakage_audit": {
+      "raw_data_copied": false,
+      "raw_augmented_arrays_saved": false,
+      "target_test_used_for_ranking_threshold_or_training": false,
+      "cbramod_backbone_frozen": true
+    }
+  },
+  "next_experiment": "define one calibration-aware repaired score/loss before any full CBraMod PhysioNetMI expansion",
+  "leakage_audit": {
+    "raw_data_copied": false,
+    "raw_augmented_arrays_saved": false,
+    "target_test_used_for_ranking_threshold_or_training": false,
+    "target_test_used_for_final_evaluation_only": true
+  }
+}

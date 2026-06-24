@@ -1,0 +1,66 @@
+name: sas_cert_eeg_mainline_scope
+status: active
+date_locked: 2026-06-22
+
+scientific_question: >
+  How can we decide whether an augmented EEG sample is a beneficial
+  subject-style variation or a harmful task-content/physiology/artifact
+  distortion for few-shot cross-subject adaptation of EEG foundation models?
+
+main_backbones:
+  - CBraMod
+  - ST-EEGFormer-small
+
+core_dataset:
+  name: PhysioNetMI
+  task: left_vs_right_motor_imagery
+  runs: [4, 8, 12]
+  root: /ai/224duibishiyan/CBraMod-main/tmp_in/MI/files
+
+method_policy:
+  global_candidate: SASCert_weighted_augmentation
+  by_backbone:
+    CBraMod:
+      active_branch: score_direction_diagnostic
+      status: cbramod_physionetmi_full_expansion_parked
+      note: >
+        CBraMod remains a historical anchor, but the PhysioNetMI matched mini
+        showed fixed scalar SAS score direction failure. Direction repair
+        improved Macro-F1, but calibration repair failed, so full expansion is
+        parked.
+    ST-EEGFormer-small:
+      active_branch: parked_weighting_variants_after_utility_audit
+      best_mean_classification_branch: SoftWeight_noReject_LS010
+      diagnostic_branch: SASCert_SoftAR_LS010
+      status: st_weighting_variants_parked
+      note: >
+        Source-tuned ST features are useful. SoftWeight_noReject is the best
+        current ST training branch by mean metrics, but the locked confirmation
+        failed subject/seed reliability. Support-only routing and the
+        component-gated mini test also did not justify a routed or gated
+        expansion. The follow-up utility-alignment audit found no strong
+        candidate-only predictor of SoftWeight benefit, so ST weighting variants
+        are parked for now.
+
+default_method_parameters:
+  w_min: 0.2
+  label_smoothing: 0.10
+  score_variant: content_rank_or_artifact_gate_content_rank
+  forbid_hard_top50: true
+
+secondary_baselines:
+  - LaBraM-base
+
+paused:
+  - EEGPT-large4E
+  - MIRepNet
+  - paper_reproduction_unless_blocking
+
+active_next_experiment:
+  name: arxiv_submission_bundle_review_plan
+  config: configs/experiments/arxiv_submission_bundle_review_plan.yaml
+  basis: >
+    The arXiv-first package now compiles locally with latexmk/pdflatex and has
+    no LaTeX warnings, overfull boxes, undefined references, or fatal errors in
+    the final log. Next, prepare a clean submission bundle and audit author
+    metadata without adding experiments or claims.

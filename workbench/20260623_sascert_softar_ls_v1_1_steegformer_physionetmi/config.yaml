@@ -1,0 +1,43 @@
+trial: sascert_softar_ls_v1_1_steegformer_physionetmi
+backbone: ST-EEGFormer-small
+dataset: PhysioNetMI
+task: left_vs_right_motor_imagery
+runs: [R04, R08, R12]
+targets: [90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109]
+seeds: [20, 21, 22, 23, 24]
+shot_per_class: 5
+source_tuned_checkpoint: outputs/foundation_physio_mi_fullfinetune/checkpoints/st_eegformer_small_seed3407_best.pt
+feature_tag: st_source_tuned_seed3407
+output_tag: v1_1_source_tuned_full
+source_epochs: 30
+finetune_epochs: 80
+batch_size: 64
+feature_batch_size: 64
+artifact_reject_percentile: 90.0
+artifact_reject_ratio: 0.10
+w_min: 0.2
+label_smoothing: 0.10
+candidate_augmentations:
+  - gaussian_noise
+  - time_shift
+  - time_crop
+  - frequency_mask
+  - channel_dropout
+  - mild_frequency_mixup
+groups:
+  - NaiveAug_LS010
+  - ArtifactReject_LS010
+  - SoftWeight_noReject_LS010
+  - SAS-Cert-SoftAR-LS-v1.1
+tool_status:
+  pyRiemann: used
+  MNE-Features: used
+  Autoreject: available_offline_not_integrated
+leakage_policy:
+  target_test_for_thresholds: false
+  target_test_for_ranknorm: false
+  target_test_for_prototype: false
+  target_test_for_style_anchor: false
+  target_test_for_best_epoch_or_seed: false
+  target_test_for_final_eval_only: true
+decision: do_not_promote_v1_1_on_st

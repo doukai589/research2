@@ -1,0 +1,90 @@
+name: steegformer_component_gated_reliability_mini
+status: completed_do_not_expand
+date_run: 2026-06-22
+
+purpose: >
+  Test whether the score-validated component-gated certificate rule converts
+  into reliable ST-EEGFormer-small few-shot training gains before any full
+  target-subject expansion.
+
+scope:
+  dataset: PhysioNetMI
+  task: left_vs_right_motor_imagery
+  runs: [4, 8, 12]
+  targets: [90, 91, 92]
+  seeds: [20, 21]
+  backbone: ST-EEGFormer-small_source_tuned_frozen
+  source_tuned_checkpoint: outputs/foundation_physio_mi_fullfinetune/checkpoints/st_eegformer_small_seed3407_best.pt
+  shot_per_class: 5
+  n_aug_per_support_trial: 5
+
+constraints:
+  no_raw_data_copy: true
+  no_target_test_labels_used_for_scores_or_weights: true
+  backbone_frozen: true
+  same_support_split_across_groups: true
+  same_candidate_pool_across_groups: true
+
+groups:
+  - NaiveAug_LS010
+  - SoftWeight_noReject_LS010
+  - SASCert_SoftAR_LS010
+  - ArtifactGatePhysio_LS010
+  - ComponentGatedV1_LS010
+
+score_rules:
+  component_gated_v1: >
+    ranknorm(0.75 * physio_score + 0.25 * style_score) multiplied by
+    artifact_gate_pass, where artifact_gate_pass is artifact_risk < fold_p90.
+  artifact_gate_physio: >
+    physio_score with candidates at or above artifact_risk fold_p90 set to 0,
+    then rank-normalized for soft weighting.
+
+results:
+  NaiveAug_LS010:
+    balanced_accuracy: 0.7868855218855219
+    macro_f1: 0.7862171868786362
+    ece: 0.14133808026590367
+    nll: 0.5065228215845616
+  SoftWeight_noReject_LS010:
+    balanced_accuracy: 0.7902188552188552
+    macro_f1: 0.7897617935513281
+    ece: 0.1471253108621972
+    nll: 0.4907866332525664
+  SASCert_SoftAR_LS010:
+    balanced_accuracy: 0.786043771043771
+    macro_f1: 0.785206972804052
+    ece: 0.14590795885888516
+    nll: 0.49660083838614755
+  ArtifactGatePhysio_LS010:
+    balanced_accuracy: 0.7822558922558923
+    macro_f1: 0.7816537518451248
+    ece: 0.13847027614244695
+    nll: 0.5047830720775149
+  ComponentGatedV1_LS010:
+    balanced_accuracy: 0.7822558922558923
+    macro_f1: 0.7816537518451248
+    ece: 0.14731908772733315
+    nll: 0.5092593361180967
+
+decision: do_not_expand_component_gated_or_artifact_gate_physio_on_st
+
+interpretation: >
+  Component-gated v1 and artifact-gate-physio were strong score-only clean-vs-bad
+  diagnostics, but they did not improve ST few-shot adaptation in the mini
+  training check. This separates certificate detection quality from training
+  utility. For ST-EEGFormer-small, the no-reject soft weighting branch remains
+  the best current training candidate.
+
+outputs:
+  metrics: workbench/20260622_steegformer_sascert_core/outputs/steegformer_physionetmi_sascert_metrics_st_source_tuned_component_gated_mini.csv
+  paired: workbench/20260622_steegformer_sascert_core/outputs/steegformer_physionetmi_paired_comparison_st_source_tuned_component_gated_mini.csv
+  compact: workbench/20260622_steegformer_sascert_core/outputs/compact_steegformer_sascert_result_st_source_tuned_component_gated_mini.json
+  score_rows: workbench/20260622_steegformer_sascert_core/outputs/score_rows/st_source_tuned_component_gated_mini
+
+next_step:
+  name: st_softweight_no_reject_locked_confirm
+  rationale: >
+    Do not add more gate variants. Confirm the simplest positive ST branch
+    with better reporting and then decide whether it is strong enough for
+    paper-level use.

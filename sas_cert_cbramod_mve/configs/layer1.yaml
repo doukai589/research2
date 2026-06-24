@@ -1,0 +1,4 @@
+conditions: [NoAug, CleanAug, BadContent, BadStyle, BadPhysio, BadArtifact]
+intensity: 0.75
+n_aug: 5
+

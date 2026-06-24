@@ -1,0 +1,35 @@
+name: submission_readiness_review
+status: completed
+date_created: 2026-06-22
+date_completed: 2026-06-22
+
+purpose: >
+  Perform a final manuscript-readiness review of the SAS-Cert diagnostic paper
+  package before deciding whether to prepare a venue-specific version or return
+  to experiments.
+
+inputs:
+  latex_submission_draft: docs/SAS_CERT_DIAGNOSTIC_CERTIFICATE_SUBMISSION_DRAFT_LATEX.md
+  references_bib: docs/SAS_CERT_REFERENCES.bib
+  bibliography_resolution_report: docs/SAS_CERT_BIBLIOGRAPHY_RESOLUTION_REPORT.md
+  figure_table_polish_report: docs/SAS_CERT_FIGURE_TABLE_POLISH_REPORT.md
+  manuscript_asset_manifest: outputs/runs/sas_cert_diagnostic_certificate_pack_physionetmi/manuscript_asset_manifest.json
+
+outputs:
+  readiness_report: docs/SAS_CERT_SUBMISSION_READINESS_REVIEW.md
+
+constraints:
+  no_new_experiments: true
+  no_new_claims_without_traceable_evidence: true
+  no_promotion_of_weighting_policy: true
+
+required_work:
+  - verify_all_citations_resolve_to_bib_entries
+  - verify_claim_boundary_after_latex_conversion
+  - verify_figure_table_package_is_complete
+  - decide_submission_specific_next_step
+
+completion:
+  readiness_report: docs/SAS_CERT_SUBMISSION_READINESS_REVIEW.md
+  decision: proceed_to_venue_specific_formatting
+  next: configs/experiments/venue_specific_formatting_plan.yaml

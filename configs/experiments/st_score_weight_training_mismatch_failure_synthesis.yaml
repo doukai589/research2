@@ -1,0 +1,73 @@
+name: st_score_weight_training_mismatch_failure_synthesis
+status: completed_park_st_weighting_variants
+date_created: 2026-06-22
+
+purpose: >
+  Perform exactly one focused failure synthesis after the ST SoftWeight
+  no-reject locked confirmation failed reliability gates despite positive mean
+  effects.
+
+scope:
+  dataset: PhysioNetMI
+  task: left_vs_right_motor_imagery
+  runs: [4, 8, 12]
+  targets: [90, 109]
+  seeds: [20, 21, 22, 23, 24]
+  backbone: ST-EEGFormer-small_source_tuned_frozen
+  input_outputs:
+    metrics: workbench/20260622_steegformer_sascert_core/outputs/steegformer_physionetmi_sascert_metrics_st_source_tuned_full.csv
+    score_rows: workbench/20260622_steegformer_sascert_core/outputs/score_rows/st_source_tuned_full
+    locked_confirm: workbench/20260622_steegformer_sascert_core/outputs/locked_confirm/ST_SOFTWEIGHT_NO_REJECT_LOCKED_CONFIRM.md
+
+review_protocol: docs/FAILURE_REVIEW_PROTOCOL.md
+
+facts:
+  softweight_vs_naive:
+    delta_balanced_accuracy: 0.0064797091238654745
+    delta_macro_f1: 0.006401909521548154
+    delta_ece: 0.00029382908360143096
+    delta_nll: -0.0021715061136201833
+    delta_brier: -0.00566867308691144
+    positive_subject_mean_delta_macro_f1_rate: 0.6
+    majority_seed_subject_win_rate_macro_f1: 0.15
+    seed_win_rate_macro_f1: 0.0
+  decision: do_not_promote_softweight_no_reject
+
+causal_break:
+  first_broken_link: >
+    Certificate-derived soft weighting changes the training signal, but the
+    improvement is heterogeneous and not stable enough across target subjects
+    and seeds.
+  likely_decision: revise_training
+
+next_experiment:
+  name: support_candidate_utility_alignment_audit
+  type: existing_outputs_only
+  purpose: >
+    Test whether per-fold candidate score summaries and support difficulty
+    indicators explain SoftWeight benefit. This distinguishes score/utility
+    mismatch from a purely noisy training effect without running another model.
+  constraints:
+    no_new_training: true
+    no_new_dataset: true
+    no_new_backbone: true
+    no_target_test_labels_for_selection: true
+    one_diagnostic_only: true
+
+stop_rule: >
+  If utility alignment is weak, park ST weighting variants and revise the
+  scientific claim toward diagnostic certification rather than deployable
+  augmentation selection. If alignment is strong, design one locked
+  support-only routing or weighting rule before any rerun.
+
+outputs:
+  report: workbench/20260622_steegformer_sascert_core/outputs/utility_alignment_audit/SUPPORT_CANDIDATE_UTILITY_ALIGNMENT_AUDIT.md
+  compact: workbench/20260622_steegformer_sascert_core/outputs/utility_alignment_audit/compact_utility_alignment_audit.json
+  fold_features: workbench/20260622_steegformer_sascert_core/outputs/utility_alignment_audit/fold_utility_alignment_features.csv
+  correlations: workbench/20260622_steegformer_sascert_core/outputs/utility_alignment_audit/utility_alignment_correlations.csv
+
+result:
+  max_candidate_only_abs_spearman: 0.11680246397602216
+  strong_alignment_found: false
+  decision: park_st_weighting_variants
+  next_config: configs/experiments/sas_cert_diagnostic_reframe_after_weighting_failures.yaml

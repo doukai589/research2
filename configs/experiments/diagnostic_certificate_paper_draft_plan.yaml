@@ -1,0 +1,36 @@
+name: diagnostic_certificate_paper_draft_plan
+status: completed
+date_created: 2026-06-22
+
+purpose: >
+  Convert the completed PhysioNetMI diagnostic certificate pack into a first
+  paper draft skeleton with traceable evidence tables and conservative claims.
+
+inputs:
+  outline: docs/SAS_CERT_DIAGNOSTIC_CERTIFICATE_PAPER_OUTLINE.md
+  evidence_checklist: docs/SAS_CERT_DIAGNOSTIC_EVIDENCE_CHECKLIST.md
+  diagnostic_pack_report: docs/SAS_CERT_DIAGNOSTIC_CERTIFICATE_PACK_PHYSIONETMI.md
+  compact_result: outputs/runs/sas_cert_diagnostic_certificate_pack_physionetmi/compact_result.json
+
+outputs:
+  draft: docs/SAS_CERT_DIAGNOSTIC_CERTIFICATE_DRAFT.md
+  claim_table: outputs/runs/sas_cert_diagnostic_certificate_pack_physionetmi/tables/claim_support_table.csv
+
+constraints:
+  no_new_experiments: true
+  no_promotion_of_weighting_policy: true
+  every_claim_must_reference_file_path: true
+
+draft_claim_policy:
+  supported: >
+    SAS-Cert is a diagnostic reliability certificate that identifies bad
+    augmentation modes and score-direction failures.
+  unsupported: >
+    SAS-Cert is not yet a reliable deployable augmentation weighting/rejection
+    method across subjects and seeds.
+
+result:
+  draft_created: true
+  claim_table_created: true
+  decision: draft_ready_for_evidence_gap_review
+  next_action: review_diagnostic_certificate_draft_for_claim_gaps

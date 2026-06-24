@@ -1,0 +1,3 @@
+groups: [NoAug, NaiveAug, Random50, SASCertTop50]
+top_fraction: 0.5
+
