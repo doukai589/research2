@@ -1,0 +1,71 @@
+{
+  "training_utility_candidates": [
+    "E_embed",
+    "E_proto",
+    "E_content"
+  ],
+  "diagnostic_or_unstable_scores": [
+    "E_pred",
+    "artifact_score",
+    "artifact_safe",
+    "E_physio",
+    "E_style",
+    "D_band",
+    "D_cov",
+    "D_style"
+  ],
+  "strongest_low_ce_correlations": [
+    {
+      "score_name": "E_proto",
+      "spearman_raw_CE_loss": -0.8877065383156971,
+      "spearman_correctness": 0.46231975012501064
+    },
+    {
+      "score_name": "E_pred",
+      "spearman_raw_CE_loss": -0.7553262463700665,
+      "spearman_correctness": 0.2392768478752641
+    },
+    {
+      "score_name": "E_content",
+      "spearman_raw_CE_loss": -0.5292942591915053,
+      "spearman_correctness": 0.29719942528059984
+    },
+    {
+      "score_name": "E_embed",
+      "spearman_raw_CE_loss": -0.08915250656403448,
+      "spearman_correctness": 0.05029508559862703
+    },
+    {
+      "score_name": "artifact_safe",
+      "spearman_raw_CE_loss": -0.03390224430562344,
+      "spearman_correctness": 0.01771743684281611
+    }
+  ],
+  "strongest_correctness_correlations": [
+    {
+      "score_name": "E_proto",
+      "spearman_raw_CE_loss": -0.8877065383156971,
+      "spearman_correctness": 0.46231975012501064
+    },
+    {
+      "score_name": "E_content",
+      "spearman_raw_CE_loss": -0.5292942591915053,
+      "spearman_correctness": 0.29719942528059984
+    },
+    {
+      "score_name": "E_pred",
+      "spearman_raw_CE_loss": -0.7553262463700665,
+      "spearman_correctness": 0.2392768478752641
+    },
+    {
+      "score_name": "E_embed",
+      "spearman_raw_CE_loss": -0.08915250656403448,
+      "spearman_correctness": 0.05029508559862703
+    },
+    {
+      "score_name": "E_style",
+      "spearman_raw_CE_loss": -0.02203811412091699,
+      "spearman_correctness": 0.021155217350510812
+    }
+  ]
+}

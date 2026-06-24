@@ -1,0 +1,22 @@
+trial: sascert_cu_v1_3_steegformer_physionetmi
+runner_reused: workbench/20260623_sascert_softar_ls_v1_1_steegformer_physionetmi/runner_v1_1.py
+experiment: v1_3
+backbone: ST-EEGFormer-small
+dataset: PhysioNetMI
+runs: [R04, R08, R12]
+task: left_vs_right_motor_imagery
+targets: [90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109]
+seeds: [20,21,22,23,24]
+source_tuned_checkpoint: outputs/foundation_physio_mi_fullfinetune/checkpoints/st_eegformer_small_seed3407_best.pt
+output_dir: workbench/20260623_sascert_cu_v1_3_steegformer_physionetmi/outputs
+label_smoothing: 0.10
+content_utility:
+  training_weight_inputs: [E_embed, E_proto]
+  diagnostic_only_inputs: [artifact_score, E_physio, E_style, E_pred]
+  weight_formula: "w = 0.75 + 0.5 * ranknorm(E_content)"
+  expected_weight_range: [0.75, 1.25]
+  artifact_hard_gate: false
+  nonfinite_content_skip_only: true
+loss:
+  augmented_loss: "sum(w_i * CE_i) / (sum(w_i) + eps)"
+  total_loss: "CE_real + L_aug"

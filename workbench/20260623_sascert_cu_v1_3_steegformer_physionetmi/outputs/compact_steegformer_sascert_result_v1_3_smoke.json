@@ -1,0 +1,85 @@
+{
+  "stage": "steegformer_sascert_core_workbench",
+  "status": "completed_smoke",
+  "experiment": "v1_3",
+  "primary_group": "SAS-Cert-CU-LS-v1.3",
+  "groups": {
+    "NaiveAug_LS010": {
+      "accuracy": 0.8571428571428571,
+      "balanced_accuracy": 0.8611111111111112,
+      "macro_f1": 0.8552522746071133,
+      "kappa": 0.7163695299837926,
+      "auroc": 0.9967320261437909,
+      "ece": 0.12616617679595948,
+      "nll": 0.4270313251534014,
+      "brier": 0.2534480094909668
+    },
+    "SoftWeight_noReject_LS010": {
+      "accuracy": 0.8571428571428571,
+      "balanced_accuracy": 0.8611111111111112,
+      "macro_f1": 0.8552522746071133,
+      "kappa": 0.7163695299837926,
+      "auroc": 0.9967320261437909,
+      "ece": 0.1387352534702846,
+      "nll": 0.40402547891927043,
+      "brier": 0.24381817877292633
+    },
+    "SAS-Cert-CU-LS-v1.3": {
+      "accuracy": 0.8571428571428571,
+      "balanced_accuracy": 0.8611111111111112,
+      "macro_f1": 0.8552522746071133,
+      "kappa": 0.7163695299837926,
+      "auroc": 0.9967320261437909,
+      "ece": 0.14078684874943323,
+      "nll": 0.41597105705730275,
+      "brier": 0.24862509965896606
+    }
+  },
+  "primary_vs_naive": {
+    "primary_group": "SAS-Cert-CU-LS-v1.3",
+    "baseline_group": "NaiveAug_LS010",
+    "delta_balanced_accuracy": 0.0,
+    "delta_macro_f1": 0.0,
+    "delta_ece": 0.014620671953473746,
+    "delta_nll": -0.011060268096098669,
+    "delta_brier": -0.004822909832000732,
+    "subject_win_rate_macro_f1": 0.0,
+    "seed_win_rate_macro_f1": 0.0
+  },
+  "sascert_vs_naive": {
+    "primary_group": "SAS-Cert-CU-LS-v1.3",
+    "baseline_group": "NaiveAug_LS010",
+    "delta_balanced_accuracy": 0.0,
+    "delta_macro_f1": 0.0,
+    "delta_ece": 0.014620671953473746,
+    "delta_nll": -0.011060268096098669,
+    "delta_brier": -0.004822909832000732,
+    "subject_win_rate_macro_f1": 0.0,
+    "seed_win_rate_macro_f1": 0.0
+  },
+  "paired_comparisons": {
+    "SAS-Cert-CU-LS-v1.3-vs-NaiveAug_LS010": {
+      "delta_balanced_accuracy": 0.0,
+      "delta_macro_f1": 0.0,
+      "delta_ece": 0.014620671953473746,
+      "delta_nll": -0.011060268096098669,
+      "delta_brier": -0.004822909832000732,
+      "win_macro_f1": 0.0
+    },
+    "SAS-Cert-CU-LS-v1.3-vs-SoftWeight_noReject_LS010": {
+      "delta_balanced_accuracy": 0.0,
+      "delta_macro_f1": 0.0,
+      "delta_ece": 0.002051595279148638,
+      "delta_nll": 0.01194557813803232,
+      "delta_brier": 0.004806920886039734,
+      "win_macro_f1": 0.0
+    }
+  },
+  "component_ablation": {
+    "beats_artifact_reject_macro_f1": null,
+    "beats_softweight_no_reject_macro_f1": false,
+    "mean_delta_macro_f1_vs_artifact_reject": null,
+    "mean_delta_macro_f1_vs_softweight_no_reject": 0.0
+  },
+  "n_rows": 3
+}

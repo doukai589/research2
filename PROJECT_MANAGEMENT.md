@@ -2086,3 +2086,191 @@ Primary report:
   - The uploaded project contains the expected SAS-Cert, SoftAR/SoftSafe,
     ST-EEGFormer, PhysioNetMI, pyRiemann, MNE-Features, and v1.1/v1.2
     references.
+
+### 2026-06-24 Interpretation of External v1.2 Analysis
+
+- User provided an external AI analysis of the v1.2 SoftSafe result and asked
+  only to understand it.
+- No experiment code was changed and no new experiment was launched.
+- Key absorbed interpretation:
+  - v1.2 is not a successful reliable augmentation method.
+  - v1.2 is still scientifically useful because it confirms the failure
+    diagnosis:
+    - v1.1 hard artifact gate rejected samples with higher mean content and
+      physio scores than kept samples.
+    - v1.2 repaired part of the low augmentation loss-mass problem.
+    - v1.2 still did not recover classification utility on ST-EEGFormer-small +
+      PhysioNetMI.
+  - Artifact, physio, and style scores are useful as diagnostic certificate
+    components, but current evidence does not support directly using them as
+    ST training weights.
+- Important conceptual split to preserve:
+  - Diagnostic Certificate:
+    - content stability
+    - artifact risk
+    - physiological fidelity
+    - style plausibility
+    - prediction consistency
+  - Utility Policy:
+    - should be decoupled from the full diagnostic certificate
+    - next ST training utility should be content-only unless audit evidence says
+      otherwise
+- Proposed next branch from the external analysis:
+  - `SAS-Cert-CU-LS v1.3`
+  - CU = Content Utility
+  - diagnosis remains multidimensional
+  - training weight uses only:
+    - `E_embed`
+    - `E_proto`
+    - `E_content = ranknorm(E_embed) + ranknorm(E_proto)`
+  - exclude from main training weight:
+    - `artifact_score`
+    - `E_physio`
+    - `E_style`
+    - `E_pred`
+  - suggested weight:
+    - `q = ranknorm(E_content)`
+    - `w = 0.75 + 0.5 * q`
+    - weight range `[0.75, 1.25]`
+  - preserve normalized augmented loss:
+    - `L_aug = sum(w_i * CE_i) / (sum(w_i) + eps)`
+    - `L = CE_real + L_aug`
+    - label smoothing `0.10`
+- Recommended before v1.3 experiment:
+  - run a Component Utility Audit over existing v1.1/v1.2 cached scores.
+  - test correlations between score components and:
+    - raw CE loss
+    - augmented-sample correctness
+    - augmentation type
+    - subject
+    - label
+  - use Spearman correlation and top/bottom score comparisons.
+- CBraMod replication should wait:
+  - enter CBraMod only if v1.3 is at least not worse on ST, or shows a clear
+    reliability/calibration trade-off.
+  - if v1.3 fails on ST, mark ST branch as diagnostic-only or move to a
+    risk-mixed candidate pool experiment.
+- Working conclusion:
+  - Do not continue searching for more tools at this stage.
+  - The next decision point is algorithmic: whether content-only utility can
+    provide training benefit while the full SAS-Cert remains diagnostic.
+
+### 2026-06-24 SAS-Cert-CU-LS v1.3 ST-EEGFormer PhysioNetMI
+
+- Task:
+  - `SASCERT_V1_3_CONTENT_UTILITY_REPAIR_ON_STEEGFORMER_PHYSIONETMI`
+- Goal:
+  - decouple multidimensional diagnostic certificate from training utility.
+  - keep artifact / physio / style / prediction consistency as diagnostics.
+  - use content-only utility for training weight.
+- Implementation:
+  - Reused and extended existing runner:
+    - `workbench/20260623_sascert_softar_ls_v1_1_steegformer_physionetmi/runner_v1_1.py`
+  - Added `v1_3` experiment branch.
+  - Added `SAS-Cert-CU-LS-v1.3` group.
+  - Added candidate-level raw CE loss and correctness audit from augmented
+    training candidates only.
+  - Added content-only training weight:
+    - `E_content = ranknorm(E_embed) + ranknorm(E_proto)`
+    - `w = 0.75 + 0.5 * ranknorm(E_content)`
+  - Preserved normalized augmented loss:
+    - `L_aug = sum(w_i * CE_i) / (sum(w_i) + eps)`
+    - `L = CE_real + L_aug`
+    - label smoothing `0.10`
+  - No artifact hard gate was used for v1.3.
+  - NaN/Inf content samples are skipped only through zero weight; observed
+    skipped count was `0`.
+- Trial directory:
+  - `workbench/20260623_sascert_cu_v1_3_steegformer_physionetmi`
+- Full run:
+  - Backbone: ST-EEGFormer-small
+  - Dataset: PhysioNetMI / EEGMMI left-vs-right MI
+  - Runs: R04/R08/R12
+  - Targets: `90-109`
+  - Seeds: `20-24`
+  - Groups:
+    - `NaiveAug_LS010`
+    - `SoftWeight_noReject_LS010`
+    - `SAS-Cert-CU-LS-v1.3`
+- Component Utility Audit:
+  - Training utility candidates:
+    - `E_embed`
+    - `E_proto`
+    - `E_content`
+  - Diagnostic-only or unstable for training utility:
+    - `E_pred`
+    - `artifact_score`
+    - `artifact_safe`
+    - `E_physio`
+    - `E_style`
+    - `D_band`
+    - `D_cov`
+    - `D_style`
+  - Strongest low-CE / high-correctness signals:
+    - `E_proto`: Spearman CE `-0.8877`, correctness `+0.4623`
+    - `E_content`: Spearman CE `-0.5293`, correctness `+0.2972`
+    - `E_embed`: Spearman CE `-0.0892`, correctness `+0.0503`
+- Main results:
+  - `NaiveAug_LS010`:
+    - BAcc `0.7567`
+    - Macro-F1 `0.7524`
+    - ECE `0.1857`
+    - NLL `0.6221`
+    - Brier `0.3594`
+  - `SoftWeight_noReject_LS010`:
+    - BAcc `0.7568`
+    - Macro-F1 `0.7527`
+    - ECE `0.1826`
+    - NLL `0.6150`
+    - Brier `0.3559`
+  - `SAS-Cert-CU-LS-v1.3`:
+    - BAcc `0.7588`
+    - Macro-F1 `0.7543`
+    - ECE `0.1861`
+    - NLL `0.6206`
+    - Brier `0.3587`
+- Required comparisons:
+  - v1.3 vs `NaiveAug_LS010`:
+    - delta BAcc `+0.002078`
+    - delta Macro-F1 `+0.001935`
+    - delta ECE `+0.000444`
+    - delta NLL `-0.001490`
+    - delta Brier `-0.000763`
+  - v1.3 vs `SoftWeight_noReject_LS010`:
+    - delta BAcc `+0.001959`
+    - delta Macro-F1 `+0.001634`
+    - delta ECE `+0.003503`
+    - delta NLL `+0.005643`
+    - delta Brier `+0.002736`
+  - Subject win rate Macro-F1 vs Naive:
+    - `0.05`
+  - Seed win rate Macro-F1 vs Naive:
+    - `0.00`
+  - Mean weight:
+    - `1.000000`
+  - Weight range:
+    - `[0.75, 1.25]`
+- Leakage audit:
+  - `passed`
+  - target test was not used for thresholds, ranknorm, prototype, style anchor,
+    component utility audit, best epoch, or best seed.
+- Decision:
+  - `enter_cbramod_recheck`
+  - Rationale:
+    - v1.3 improves BAcc and Macro-F1 vs both NaiveAug and SoftWeight.
+    - v1.3 improves NLL/Brier vs Naive with only tiny ECE increase.
+    - v1.3 has a small calibration trade-off vs SoftWeight, so CBraMod should
+      be treated as a recheck rather than broad promotion.
+- Required outputs:
+  - `workbench/20260623_sascert_cu_v1_3_steegformer_physionetmi/outputs/SASCERT_CU_V1_3_REPORT.md`
+  - `workbench/20260623_sascert_cu_v1_3_steegformer_physionetmi/outputs/compact_sascert_v1_3_result.json`
+  - `workbench/20260623_sascert_cu_v1_3_steegformer_physionetmi/outputs/metrics_v1_3.csv`
+  - `workbench/20260623_sascert_cu_v1_3_steegformer_physionetmi/outputs/paired_comparison_v1_3.csv`
+  - `workbench/20260623_sascert_cu_v1_3_steegformer_physionetmi/outputs/component_utility_audit.csv`
+  - `workbench/20260623_sascert_cu_v1_3_steegformer_physionetmi/outputs/component_utility_summary.json`
+  - `workbench/20260623_sascert_cu_v1_3_steegformer_physionetmi/outputs/diagnostic_scores_v1_3.csv`
+  - `workbench/20260623_sascert_cu_v1_3_steegformer_physionetmi/outputs/leakage_audit_v1_3.json`
+- GitHub tracking:
+  - Code/config/doc changes and lightweight outputs should be committed.
+  - Heavy feature cache remains ignored:
+    - `outputs/features/original_st_features_st_source_tuned_seed3407.npz`

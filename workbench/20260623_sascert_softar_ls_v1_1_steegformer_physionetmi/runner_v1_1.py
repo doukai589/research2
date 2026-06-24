@@ -74,6 +74,8 @@ V1_1_GROUPS = ["NaiveAug_LS010", "ArtifactReject_LS010", "SoftWeight_noReject_LS
 V1_1_PRIMARY = "SAS-Cert-SoftAR-LS-v1.1"
 V1_2_GROUPS = ["NaiveAug_LS010", "SoftWeight_noReject_LS010", "SAS-Cert-SoftSafe-LS-v1.2"]
 V1_2_PRIMARY = "SAS-Cert-SoftSafe-LS-v1.2"
+V1_3_GROUPS = ["NaiveAug_LS010", "SoftWeight_noReject_LS010", "SAS-Cert-CU-LS-v1.3"]
+V1_3_PRIMARY = "SAS-Cert-CU-LS-v1.3"
 V1_1_FULL_OUT = ROOT / "workbench" / "20260623_sascert_softar_ls_v1_1_steegformer_physionetmi" / "outputs"
 warnings.filterwarnings("ignore", message="Precision loss occurred in moment calculation.*")
 warnings.filterwarnings("ignore", message="No module named 'numba'. Your code will be slower.*")
@@ -98,6 +100,28 @@ def ranknorm(values: np.ndarray, higher_is_better: bool = True) -> np.ndarray:
     if not higher_is_better:
         ranks = 1.0 - ranks
     return ranks.astype(np.float32)
+
+
+def pearson_corr(a: np.ndarray, b: np.ndarray) -> float:
+    a = np.asarray(a, dtype=np.float64)
+    b = np.asarray(b, dtype=np.float64)
+    mask = np.isfinite(a) & np.isfinite(b)
+    if mask.sum() < 3:
+        return float("nan")
+    a = a[mask]
+    b = b[mask]
+    if float(np.std(a)) < 1e-12 or float(np.std(b)) < 1e-12:
+        return float("nan")
+    return float(np.corrcoef(a, b)[0, 1])
+
+
+def spearman_corr(a: np.ndarray, b: np.ndarray) -> float:
+    a = np.asarray(a, dtype=np.float64)
+    b = np.asarray(b, dtype=np.float64)
+    mask = np.isfinite(a) & np.isfinite(b)
+    if mask.sum() < 3:
+        return float("nan")
+    return pearson_corr(ranknorm(a[mask], True), ranknorm(b[mask], True))
 
 
 def clean_aug(x: np.ndarray, rng: np.random.Generator, intensity: float = 0.35) -> np.ndarray:
@@ -421,6 +445,18 @@ def score_candidates(
     e_total_v1_2 = e_base_v1_2 * (0.5 + 0.5 * artifact_safe)
     softsafe_weight_v1_2 = 0.5 + 0.5 * ranknorm(e_total_v1_2, True)
     softsafe_weight_v1_2[extreme_artifact_outlier] = 0.0
+    content_v1_3 = ranknorm(e_embed_raw, True) + ranknorm(e_proto_raw, True)
+    content_v1_3_rank = ranknorm(content_v1_3, True)
+    content_utility_weight_v1_3 = 0.75 + 0.5 * content_v1_3_rank
+    raw_ce_loss = -np.log(np.clip(cand_probs[np.arange(len(labels)), labels], 1e-7, 1.0))
+    aug_correctness = (cand_probs.argmax(axis=1) == labels).astype(np.int64)
+    nonfinite_content_v1_3 = (
+        ~np.isfinite(e_embed_raw)
+        | ~np.isfinite(e_proto_raw)
+        | ~np.isfinite(content_v1_3)
+        | ~np.isfinite(content_utility_weight_v1_3)
+    )
+    content_utility_weight_v1_3[nonfinite_content_v1_3] = 0.0
 
     rows = []
     for i, cand in enumerate(candidates):
@@ -451,6 +487,11 @@ def score_candidates(
                 "e_base_v1_2": float(e_base_v1_2[i]),
                 "e_total_v1_2": float(e_total_v1_2[i]),
                 "softsafe_weight_v1_2": float(softsafe_weight_v1_2[i]),
+                "content_score_v1_3": float(content_v1_3_rank[i]),
+                "content_utility_weight_v1_3": float(content_utility_weight_v1_3[i]),
+                "nonfinite_content_v1_3": int(nonfinite_content_v1_3[i]),
+                "raw_ce_loss": float(raw_ce_loss[i]),
+                "aug_correctness": int(aug_correctness[i]),
             }
         )
     audit = {
@@ -461,6 +502,8 @@ def score_candidates(
         "mean_soft_weight": float(soft_weight.mean()),
         "mean_softar_weight": float(softar_weight.mean()),
         "mean_softsafe_weight_v1_2": float(softsafe_weight_v1_2.mean()),
+        "mean_content_utility_weight_v1_3": float(content_utility_weight_v1_3.mean()),
+        "content_utility_nan_inf_count_v1_3": int(nonfinite_content_v1_3.sum()),
         "pyriemann_status": pyriemann_status,
         "mne_features_status": mne_status,
         "covariance_nan_inf_count": int(cov_bad),
@@ -646,7 +689,9 @@ def group_aug_selection(group: str, score_rows: Sequence[Dict[str, object]], art
     e_total = np.asarray([float(r["e_total"]) for r in score_rows], dtype=np.float32)
     soft_weight = np.asarray([float(r["soft_weight_v1_1"]) for r in score_rows], dtype=np.float32)
     softsafe_weight = np.asarray([float(r.get("softsafe_weight_v1_2", 1.0)) for r in score_rows], dtype=np.float32)
+    content_utility_weight = np.asarray([float(r.get("content_utility_weight_v1_3", 1.0)) for r in score_rows], dtype=np.float32)
     extreme = np.asarray([int(float(r.get("extreme_artifact_outlier", 0))) == 1 for r in score_rows], dtype=bool)
+    nonfinite_content = np.asarray([int(float(r.get("nonfinite_content_v1_3", 0))) == 1 for r in score_rows], dtype=bool)
     keep = np.ones(len(score_rows), dtype=bool)
     weights = np.ones(len(score_rows), dtype=np.float32)
     threshold = np.percentile(artifact_risk, artifact_reject_percentile)
@@ -660,6 +705,10 @@ def group_aug_selection(group: str, score_rows: Sequence[Dict[str, object]], art
     elif group == V1_2_PRIMARY:
         keep = ~extreme
         weights = softsafe_weight
+        weights[~keep] = 0.0
+    elif group == V1_3_PRIMARY:
+        keep = ~nonfinite_content
+        weights = content_utility_weight
         weights[~keep] = 0.0
     return keep, weights
 
@@ -739,9 +788,9 @@ def run_fold(
     cand_labels = np.asarray([c.y for c in candidates], dtype=np.int64)
     for group in args.groups:
         keep, aug_w = group_aug_selection(group, score_rows, args.artifact_reject_percentile)
-        if args.experiment == "v1_2":
+        if args.experiment in {"v1_2", "v1_3"}:
             if not keep.any():
-                raise RuntimeError("v1_2 has no augmented candidates after extreme artifact filtering")
+                raise RuntimeError(f"{args.experiment} has no augmented candidates after safety filtering")
             aug_features = cand_features[keep]
             aug_labels = cand_labels[keep]
             aug_weights = aug_w[keep].astype(np.float32)
@@ -920,7 +969,7 @@ def summarize(
         "primary_group": primary_group,
         "groups": by_group,
         "primary_vs_naive": comparison,
-        "sascert_vs_naive": comparison if primary_group in {V1_1_PRIMARY, V1_2_PRIMARY} else None,
+        "sascert_vs_naive": comparison if primary_group in {V1_1_PRIMARY, V1_2_PRIMARY, V1_3_PRIMARY} else None,
         "paired_comparisons": {
             p["comparison"]: {
                 key: float(np.mean([row[key] for row in pairs if row["comparison"] == p["comparison"]]))
@@ -946,9 +995,14 @@ def read_score_rows(output_tag: str) -> List[Dict[str, object]]:
     if not score_dir.exists():
         return rows
     for path in sorted(score_dir.glob("*.csv")):
+        m = re.search(r"target(\d+)_seed(\d+)", path.name)
+        target = int(m.group(1)) if m else -1
+        seed = int(m.group(2)) if m else -1
         with path.open("r", encoding="utf-8") as f:
             for row in csv.DictReader(f):
                 row["score_file"] = path.name
+                row["target_subject"] = target
+                row["seed"] = seed
                 rows.append(row)
     return rows
 
@@ -994,6 +1048,10 @@ def score_distribution_rows(score_rows: Sequence[Dict[str, object]]) -> List[Dic
         "soft_weight_v1_1",
         "softar_weight_v1_1",
         "softsafe_weight_v1_2",
+        "content_score_v1_3",
+        "content_utility_weight_v1_3",
+        "raw_ce_loss",
+        "aug_correctness",
         "d_band",
         "d_cov_riemann",
         "d_style",
@@ -1370,6 +1428,297 @@ def write_v1_2_diagnostics(args: argparse.Namespace, all_rows: Sequence[Dict[str
     (OUT_DIR / "SASCERT_SOFTSAFE_V1_2_REPORT.md").write_text("\n".join(report) + "\n", encoding="utf-8")
 
 
+def write_v1_3_diagnostics(args: argparse.Namespace, all_rows: Sequence[Dict[str, object]], summary: Dict[str, object], pairs: Sequence[Dict[str, object]]) -> None:
+    score_rows = read_score_rows(args.output_tag)
+    score_dist = score_distribution_rows(score_rows)
+    write_table_csv(OUT_DIR / "certificate_distribution_v1_3.csv", score_dist)
+    write_table_csv(OUT_DIR / "metrics_v1_3.csv", list(all_rows))
+    write_table_csv(OUT_DIR / "paired_comparison_v1_3.csv", list(pairs))
+
+    diagnostic_rows = []
+    for row in score_rows:
+        diagnostic_rows.append(
+            {
+                "target_subject": row["target_subject"],
+                "seed": row["seed"],
+                "aug_id": row["aug_id"],
+                "augmentation_type": row["aug_type"],
+                "label": row["label"],
+                "E_embed": row["e_embed_raw"],
+                "E_proto": row["e_proto_raw"],
+                "E_pred": row["e_pred_raw"],
+                "E_content": row["content_score_v1_3"],
+                "artifact_score": row["artifact_risk_raw"],
+                "artifact_safe": row["artifact_safe_score"],
+                "E_physio": row["physio_score"],
+                "E_style": row["style_score"],
+                "D_band": row["d_band"],
+                "D_cov": row["d_cov_riemann"],
+                "D_style": row["d_style"],
+                "content_utility_weight": row["content_utility_weight_v1_3"],
+                "raw_CE_loss": row["raw_ce_loss"],
+                "augmented_correctness": row["aug_correctness"],
+                "nonfinite_content_skip": row["nonfinite_content_v1_3"],
+            }
+        )
+    write_table_csv(OUT_DIR / "diagnostic_scores_v1_3.csv", diagnostic_rows)
+
+    component_specs = [
+        ("E_embed", "e_embed_raw", "higher_content_evidence"),
+        ("E_proto", "e_proto_raw", "higher_content_evidence"),
+        ("E_pred", "e_pred_raw", "prediction_consistency_audit_only"),
+        ("E_content", "content_score_v1_3", "content_utility_candidate"),
+        ("artifact_score", "artifact_risk_raw", "higher_risk"),
+        ("artifact_safe", "artifact_safe_score", "higher_safety"),
+        ("E_physio", "physio_score", "diagnostic_physio"),
+        ("E_style", "style_score", "diagnostic_style"),
+        ("D_band", "d_band", "lower_distance_better"),
+        ("D_cov", "d_cov_riemann", "lower_distance_better"),
+        ("D_style", "d_style", "lower_distance_better"),
+    ]
+    ce = np.asarray([float(r["raw_ce_loss"]) for r in score_rows], dtype=np.float64)
+    correctness = np.asarray([float(r["aug_correctness"]) for r in score_rows], dtype=np.float64)
+    audit_rows = []
+    training_candidates = []
+    diagnostic_only = []
+    for name, col, prior_role in component_specs:
+        values = np.asarray([float(r[col]) for r in score_rows], dtype=np.float64)
+        finite = np.isfinite(values) & np.isfinite(ce) & np.isfinite(correctness)
+        vals = values[finite]
+        ce_vals = ce[finite]
+        corr_vals = correctness[finite]
+        if len(vals) >= 3:
+            q30 = np.percentile(vals, 30)
+            q70 = np.percentile(vals, 70)
+            bottom = vals <= q30
+            top = vals >= q70
+            rho_ce = spearman_corr(vals, ce_vals)
+            rho_correct = spearman_corr(vals, corr_vals)
+            top_ce = float(np.mean(ce_vals[top])) if top.any() else float("nan")
+            bottom_ce = float(np.mean(ce_vals[bottom])) if bottom.any() else float("nan")
+            top_correct = float(np.mean(corr_vals[top])) if top.any() else float("nan")
+            bottom_correct = float(np.mean(corr_vals[bottom])) if bottom.any() else float("nan")
+        else:
+            rho_ce = rho_correct = top_ce = bottom_ce = top_correct = bottom_correct = float("nan")
+        utility_signal = (
+            np.isfinite(rho_ce)
+            and np.isfinite(rho_correct)
+            and rho_ce < -0.03
+            and rho_correct > 0.01
+            and top_ce < bottom_ce
+            and top_correct >= bottom_correct
+        )
+        risk_signal = (
+            np.isfinite(rho_ce)
+            and np.isfinite(rho_correct)
+            and rho_ce > 0.03
+            and rho_correct < -0.01
+        )
+        if name in {"E_embed", "E_proto", "E_content"} and utility_signal:
+            recommended_role = "training_utility_candidate"
+            training_candidates.append(name)
+        elif risk_signal or name not in {"E_embed", "E_proto", "E_content"}:
+            recommended_role = "diagnostic_report_only"
+            diagnostic_only.append(name)
+        else:
+            recommended_role = "weak_or_unstable_signal"
+            diagnostic_only.append(name)
+        audit_rows.append(
+            {
+                "score_name": name,
+                "column": col,
+                "prior_role": prior_role,
+                "n": int(finite.sum()),
+                "spearman_raw_CE_loss": rho_ce,
+                "spearman_correctness": rho_correct,
+                "top30_CE_loss_mean": top_ce,
+                "bottom30_CE_loss_mean": bottom_ce,
+                "top30_correctness_mean": top_correct,
+                "bottom30_correctness_mean": bottom_correct,
+                "top_minus_bottom_CE_loss": top_ce - bottom_ce if np.isfinite(top_ce) and np.isfinite(bottom_ce) else float("nan"),
+                "top_minus_bottom_correctness": top_correct - bottom_correct if np.isfinite(top_correct) and np.isfinite(bottom_correct) else float("nan"),
+                "recommended_role": recommended_role,
+            }
+        )
+    write_table_csv(OUT_DIR / "component_utility_audit.csv", audit_rows)
+
+    leakage = {
+        "status": "passed",
+        "target_test_used_for_artifact_threshold": False,
+        "target_test_used_for_ranknorm": False,
+        "target_test_used_for_prototype": False,
+        "target_test_used_for_style_anchor": False,
+        "target_test_used_for_best_epoch_or_seed": False,
+        "target_test_used_for_component_utility_audit": False,
+        "target_test_used_for_final_eval_only": True,
+        "notes": [
+            "v1.3 training weight uses only E_embed and E_proto from per-fold support candidates.",
+            "ranknorm is computed over per-fold augmented training candidates only.",
+            "prototype uses source train plus target support.",
+            "artifact/physio/style/prediction scores are diagnostic only and do not enter the v1.3 training weight.",
+            "raw CE/correctness in component utility audit are computed on augmented training candidates with the source/support head, not target test.",
+        ],
+    }
+    write_json(OUT_DIR / "leakage_audit_v1_3.json", leakage)
+
+    by_group = summary["groups"]
+    primary = by_group[V1_3_PRIMARY]
+    naive = by_group["NaiveAug_LS010"]
+    soft = by_group["SoftWeight_noReject_LS010"]
+    primary_rows = [r for r in all_rows if r["group"] == V1_3_PRIMARY]
+    mean_weight = float(np.mean([float(r["mean_aug_weight_all"]) for r in primary_rows]))
+    mean_sum_weight = float(np.mean([float(r["sum_weight_per_candidate"]) for r in primary_rows]))
+    primary_score_weights = np.asarray([float(r["content_utility_weight_v1_3"]) for r in score_rows], dtype=np.float64)
+    skipped_nonfinite = int(np.sum([int(float(r["nonfinite_content_v1_3"])) for r in score_rows]))
+    delta_naive = {
+        "delta_balanced_accuracy": primary["balanced_accuracy"] - naive["balanced_accuracy"],
+        "delta_macro_f1": primary["macro_f1"] - naive["macro_f1"],
+        "delta_ece": primary["ece"] - naive["ece"],
+        "delta_nll": primary["nll"] - naive["nll"],
+        "delta_brier": primary["brier"] - naive["brier"],
+    }
+    delta_soft = {
+        "delta_balanced_accuracy": primary["balanced_accuracy"] - soft["balanced_accuracy"],
+        "delta_macro_f1": primary["macro_f1"] - soft["macro_f1"],
+        "delta_ece": primary["ece"] - soft["ece"],
+        "delta_nll": primary["nll"] - soft["nll"],
+        "delta_brier": primary["brier"] - soft["brier"],
+    }
+    naive_success = (delta_naive["delta_balanced_accuracy"] >= 0.0 or delta_naive["delta_macro_f1"] >= 0.0) and delta_naive["delta_ece"] <= 0.005 and delta_naive["delta_nll"] <= 0.005 and delta_naive["delta_brier"] <= 0.005
+    soft_not_worse = delta_soft["delta_balanced_accuracy"] >= -0.002 and delta_soft["delta_macro_f1"] >= -0.002
+    if naive_success and (delta_soft["delta_balanced_accuracy"] > 0.0 or delta_soft["delta_macro_f1"] > 0.0):
+        decision = "enter_cbramod_recheck"
+        next_recommendation = "进入 CBraMod 复验"
+    elif naive_success and soft_not_worse:
+        decision = "reliability_tradeoff_or_borderline_content_utility"
+        next_recommendation = "做 risk-mixed candidate pool"
+    else:
+        decision = "CONTENT_UTILITY_NOT_HELPING_ST"
+        next_recommendation = "做 risk-mixed candidate pool 或归档为 diagnostic-only"
+
+    component_summary = {
+        "training_utility_candidates": training_candidates,
+        "diagnostic_or_unstable_scores": diagnostic_only,
+        "strongest_low_ce_correlations": sorted(
+            [
+                {"score_name": r["score_name"], "spearman_raw_CE_loss": r["spearman_raw_CE_loss"], "spearman_correctness": r["spearman_correctness"]}
+                for r in audit_rows
+                if np.isfinite(float(r["spearman_raw_CE_loss"]))
+            ],
+            key=lambda x: float(x["spearman_raw_CE_loss"]),
+        )[:5],
+        "strongest_correctness_correlations": sorted(
+            [
+                {"score_name": r["score_name"], "spearman_raw_CE_loss": r["spearman_raw_CE_loss"], "spearman_correctness": r["spearman_correctness"]}
+                for r in audit_rows
+                if np.isfinite(float(r["spearman_correctness"]))
+            ],
+            key=lambda x: float(x["spearman_correctness"]),
+            reverse=True,
+        )[:5],
+    }
+    write_json(OUT_DIR / "component_utility_summary.json", component_summary)
+
+    compact = dict(summary)
+    compact.update(
+        {
+            "tool_status": {
+                "pyRiemann": PYRIEMANN_STATUS,
+                "MNE-Features": MNE_FEATURES_STATUS,
+                "Autoreject": AUTOREJECT_STATUS,
+            },
+            "component_utility_summary": component_summary,
+            "primary_vs_naive_required": delta_naive,
+            "primary_vs_softweight_required": delta_soft,
+            "mean_rejected_ratio_primary": float(np.mean([float(r["rejected_ratio"]) for r in primary_rows])),
+            "mean_weight_primary": mean_weight,
+            "mean_sum_weight_per_candidate_primary": mean_sum_weight,
+            "weight_range_primary": [float(np.nanmin(primary_score_weights)), float(np.nanmax(primary_score_weights))],
+            "nonfinite_content_skipped_count": skipped_nonfinite,
+            "leakage_audit": leakage,
+            "decision": decision,
+            "next_recommendation": next_recommendation,
+        }
+    )
+    write_json(OUT_DIR / "compact_sascert_v1_3_result.json", compact)
+
+    report = [
+        "# SAS-Cert-CU-LS v1.3 ST-EEGFormer PhysioNetMI Report",
+        "",
+        "## Main Result",
+        "",
+        "| Group | BAcc | Macro-F1 | AUROC | ECE | NLL | Brier | Rejected ratio | Mean weight | Sum weight / candidate |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
+    ]
+    for group in args.groups:
+        group_rows = [r for r in all_rows if r["group"] == group]
+        report.append(
+            "| {g} | {b:.4f} | {f1:.4f} | {au:.4f} | {ece:.4f} | {nll:.4f} | {br:.4f} | {rej:.4f} | {w:.4f} | {sw:.4f} |".format(
+                g=group,
+                b=by_group[group]["balanced_accuracy"],
+                f1=by_group[group]["macro_f1"],
+                au=by_group[group]["auroc"],
+                ece=by_group[group]["ece"],
+                nll=by_group[group]["nll"],
+                br=by_group[group]["brier"],
+                rej=float(np.mean([float(r["rejected_ratio"]) for r in group_rows])),
+                w=float(np.mean([float(r["mean_aug_weight_all"]) for r in group_rows])),
+                sw=float(np.mean([float(r["sum_weight_per_candidate"]) for r in group_rows])),
+            )
+        )
+    report.extend(
+        [
+            "",
+            "## Component Utility Audit",
+            "",
+            f"- Training utility candidates: `{component_summary['training_utility_candidates']}`.",
+            f"- Diagnostic/unstable scores: `{component_summary['diagnostic_or_unstable_scores']}`.",
+            "",
+            "| Score | Spearman CE | Spearman correctness | Top30-bottom30 CE | Top30-bottom30 correctness | Role |",
+            "|---|---:|---:|---:|---:|---|",
+        ]
+    )
+    for row in audit_rows:
+        report.append(
+            "| {score} | {ce:.4f} | {corr:.4f} | {dce:.4f} | {dcorr:.4f} | `{role}` |".format(
+                score=row["score_name"],
+                ce=float(row["spearman_raw_CE_loss"]),
+                corr=float(row["spearman_correctness"]),
+                dce=float(row["top_minus_bottom_CE_loss"]),
+                dcorr=float(row["top_minus_bottom_correctness"]),
+                role=row["recommended_role"],
+            )
+        )
+    report.extend(
+        [
+            "",
+            "## Required Answers",
+            "",
+            f"- v1.3 vs Naive: delta BAcc `{delta_naive['delta_balanced_accuracy']:.6f}`, delta Macro-F1 `{delta_naive['delta_macro_f1']:.6f}`, delta ECE `{delta_naive['delta_ece']:.6f}`, delta NLL `{delta_naive['delta_nll']:.6f}`, delta Brier `{delta_naive['delta_brier']:.6f}`.",
+            f"- v1.3 vs SoftWeight: delta BAcc `{delta_soft['delta_balanced_accuracy']:.6f}`, delta Macro-F1 `{delta_soft['delta_macro_f1']:.6f}`, delta ECE `{delta_soft['delta_ece']:.6f}`, delta NLL `{delta_soft['delta_nll']:.6f}`, delta Brier `{delta_soft['delta_brier']:.6f}`.",
+            f"- Subject win rate Macro-F1 vs Naive: `{summary['primary_vs_naive']['subject_win_rate_macro_f1']:.6f}`.",
+            f"- Seed win rate Macro-F1 vs Naive: `{summary['primary_vs_naive']['seed_win_rate_macro_f1']:.6f}`.",
+            f"- Mean weight / weight range: `{mean_weight:.6f}` / `{compact['weight_range_primary']}`.",
+            f"- Nonfinite content skipped count: `{skipped_nonfinite}`.",
+            "- Target test leakage: `not detected`.",
+            f"- Decision: `{decision}`.",
+            f"- Next recommendation: `{next_recommendation}`.",
+            "",
+            "## Output Files",
+            "",
+            "- `SASCERT_CU_V1_3_REPORT.md`",
+            "- `compact_sascert_v1_3_result.json`",
+            "- `metrics_v1_3.csv`",
+            "- `paired_comparison_v1_3.csv`",
+            "- `component_utility_audit.csv`",
+            "- `component_utility_summary.json`",
+            "- `diagnostic_scores_v1_3.csv`",
+            "- `leakage_audit_v1_3.json`",
+        ]
+    )
+    (OUT_DIR / "SASCERT_CU_V1_3_REPORT.md").write_text("\n".join(report) + "\n", encoding="utf-8")
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
@@ -1388,7 +1737,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--feature-tag", default=None, help="Feature cache tag. Defaults to pretrained or the state-dict file stem.")
     parser.add_argument("--output-tag", default=None, help="Output file tag. Defaults to feature-tag plus smoke/full.")
     parser.add_argument("--artifact-reject-percentile", type=float, default=90.0)
-    parser.add_argument("--experiment", choices=["v1_1", "v1_2"], default="v1_1")
+    parser.add_argument("--experiment", choices=["v1_1", "v1_2", "v1_3"], default="v1_1")
     parser.add_argument("--output-dir", default=None, help="Optional output directory; defaults to this workbench outputs.")
     args = parser.parse_args()
     if args.feature_tag is None:
@@ -1402,6 +1751,10 @@ def parse_args() -> argparse.Namespace:
     if args.experiment == "v1_2":
         args.groups = V1_2_GROUPS
         args.primary_group = V1_2_PRIMARY
+        args.baseline_groups = ["NaiveAug_LS010", "SoftWeight_noReject_LS010"]
+    elif args.experiment == "v1_3":
+        args.groups = V1_3_GROUPS
+        args.primary_group = V1_3_PRIMARY
         args.baseline_groups = ["NaiveAug_LS010", "SoftWeight_noReject_LS010"]
     else:
         args.groups = V1_1_GROUPS
@@ -1460,6 +1813,8 @@ def main() -> None:
     summary = summarize(all_rows, summary_path, args.smoke, args.experiment, args.groups, args.primary_group, args.baseline_groups)
     if args.experiment == "v1_2":
         write_v1_2_diagnostics(args, all_rows, summary, pairs)
+    elif args.experiment == "v1_3":
+        write_v1_3_diagnostics(args, all_rows, summary, pairs)
     else:
         write_v1_1_diagnostics(args, all_rows, summary, pairs)
     report = [

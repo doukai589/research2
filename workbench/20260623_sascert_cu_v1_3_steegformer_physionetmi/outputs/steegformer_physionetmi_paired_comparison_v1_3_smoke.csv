@@ -1,0 +1,3 @@
+target_subject,seed,comparison,delta_balanced_accuracy,delta_macro_f1,delta_ece,delta_nll,delta_brier,win_macro_f1
+90,20,SAS-Cert-CU-LS-v1.3-vs-NaiveAug_LS010,0.0,0.0,0.014620671953473746,-0.011060268096098669,-0.004822909832000732,0
+90,20,SAS-Cert-CU-LS-v1.3-vs-SoftWeight_noReject_LS010,0.0,0.0,0.002051595279148638,0.01194557813803232,0.004806920886039734,0
