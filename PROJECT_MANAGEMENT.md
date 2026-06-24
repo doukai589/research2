@@ -2557,3 +2557,87 @@ Primary report:
   - Push status:
     - blocked locally by missing HTTPS GitHub credentials:
       `could not read Username for 'https://github.com'`
+
+### 2026-06-24 Interpretation Notes for SAS-Cert v2 Result
+
+- User asked for a more detailed explanation of the v2 result to provide to
+  another ChatGPT for judgment.
+- High-level interpretation:
+  - v2 did not become a successful training method on ST-EEGFormer-small +
+    PhysioNetMI.
+  - v2-full slightly improved calibration/probability metrics in some
+    comparisons, but did not improve the classification metrics that matter
+    most for the task.
+  - The key failure is structural:
+    - `SAS-Cert-v2-full` underperformed `SAS-Cert-v2-no-adapter`.
+    - The CertAdapter is currently hurting Macro-F1 instead of converting
+      certificate evidence into useful adaptation.
+- Regular pool:
+  - v2-full vs Naive:
+    - BAcc slightly positive `+0.000391`.
+    - Macro-F1 negative `-0.001638`.
+    - ECE/NLL/Brier slightly better.
+  - Interpretation:
+    - Probability quality improved a little, but class decision quality did not.
+    - This is not a robust classification gain.
+  - v2-full vs CU-v1.3:
+    - BAcc `-0.001687`.
+    - Macro-F1 `-0.003572`.
+  - Interpretation:
+    - v2-full is worse than the simpler v1.3 content-only utility branch.
+- Adapter ablation:
+  - v2-full vs v2-no-adapter:
+    - BAcc `-0.001643`.
+    - Macro-F1 `-0.003465`.
+    - ECE/NLL/Brier also worse.
+  - Interpretation:
+    - The current CertAdapter is not helping.
+    - This is the most important ablation result.
+    - Do not add more modules on top of this adapter before diagnosing it.
+- v2-no-adapter:
+  - v2-no-adapter vs CU-v1.3:
+    - BAcc `-0.000044`.
+    - Macro-F1 `-0.000108`.
+    - ECE/NLL/Brier improved.
+  - Interpretation:
+    - Structured gamma/prototype certificate without adapter is roughly tied
+      with CU-v1.3 on classification and better on calibration.
+    - This may be useful diagnostically, but it is not yet a classification
+      improvement.
+- Risk-mixed pool:
+  - v2-full vs RiskMixed_Naive:
+    - BAcc `-0.000726`.
+    - Macro-F1 `-0.001651`.
+    - ECE worsened `+0.002264`.
+    - NLL/Brier improved.
+    - subject / seed win rate `0.25 / 0.00`.
+  - Interpretation:
+    - v2 did not protect training in the risk-mixed scenario.
+    - It failed the intended success criterion of at least `+0.005` BAcc or
+      Macro-F1 and subject/seed win rates at least `0.50`.
+- Certificate behavior:
+  - regular gamma mean `0.6528`.
+  - risk-mixed gamma mean `0.6533`.
+  - regular p10/p50/p90 `0.0539 / 0.8292 / 0.8611`.
+  - risk-mixed p10/p50/p90 `0.0537 / 0.8290 / 0.8611`.
+  - Interpretation:
+    - gamma distribution is almost identical between regular and risk-mixed
+      pools.
+    - Since artifact/physio/style were kept diagnostic-only, gamma mainly
+      reflects content/prototype/prior agreement and does not strongly
+      downweight artifact-like risky augmentations.
+    - This explains why risk-mixed protection did not appear.
+- Diagnostic scores:
+  - artifact risk did distinguish pools:
+    - regular artifact mean `1.58`.
+    - risk-mixed artifact mean `3.95`.
+    - EMG-like burst artifact mean was especially high in the diagnostic table.
+  - Interpretation:
+    - diagnostic sensors can see risk, but the v2 training gamma does not use
+      that information.
+- Recommendation recorded:
+  - Do not enter CBraMod from this result.
+  - Best next options:
+    - treat SAS-Cert as diagnostic-only for now; or
+    - diagnose/repair v2 by first fixing gamma risk separation and adapter
+      behavior, with a very small controlled experiment.
