@@ -2274,3 +2274,143 @@ Primary report:
   - Code/config/doc changes and lightweight outputs should be committed.
   - Heavy feature cache remains ignored:
     - `outputs/features/original_st_features_st_source_tuned_seed3407.npz`
+
+### 2026-06-24 Explanation of v1.3 Algorithm Improvement Effect
+
+- User asked for a detailed explanation of the effect after the v1.3 algorithm
+  improvement.
+- Interpretation recorded:
+  - v1.3 is the first ST-EEGFormer-small + PhysioNetMI SAS-Cert training branch
+    that improves both BAcc and Macro-F1 over `NaiveAug_LS010`.
+  - v1.3 also improves BAcc and Macro-F1 over `SoftWeight_noReject_LS010`, but
+    with a small calibration/probability-quality trade-off compared with
+    SoftWeight:
+    - ECE `+0.003503`
+    - NLL `+0.005643`
+    - Brier `+0.002736`
+  - The main algorithmic lesson is that the diagnostic certificate and training
+    utility policy should be decoupled.
+  - `E_proto` and `E_content` provide strong evidence for content utility:
+    - `E_proto` Spearman CE `-0.8877`, correctness `+0.4623`
+    - `E_content` Spearman CE `-0.5293`, correctness `+0.2972`
+  - `artifact_score`, `E_physio`, and `E_style` did not show enough direct
+    training-utility signal for ST and should remain diagnostic-only.
+  - The effect is a real but modest repair:
+    - classification direction is positive.
+    - Naive calibration is not harmed materially.
+    - subject/seed reliability remains weak, so this is not yet a fully robust
+      method.
+- Practical conclusion:
+  - Proceed to CBraMod recheck as a validation step.
+  - Do not broadly promote v1.3 as final until cross-backbone behavior and
+    reliability are checked.
+
+### 2026-06-24 Workbench Relay and Project Management Reminder
+
+- User asked whether the project relay/intermediate system and project
+  management rules are remembered.
+- Confirmed:
+  - The "中转站" is the `workbench/` trial-box workflow.
+  - New exploratory experiments should start in `workbench/<date>_<trial_name>/`.
+  - Each trial should keep `TRIAL.md`, `config.yaml`, `status.json`, and
+    lightweight `outputs/`.
+  - Reusable stable code should be promoted back into `sas_core/`, stable
+    `scripts/`, or `configs/experiments/` only after validation.
+  - `PROJECT_MANAGEMENT.md` remains the long-term project ledger and should be
+    updated after each answered request.
+  - Final responses should state what changed, what outputs were produced, and
+    what should be uploaded to GitHub.
+
+### 2026-06-24 SAS-Cert v1.4 SCB-CU Risk-Mixed Stress Test
+
+- Task:
+  - `SASCERT_V1_4_SUBJECT_CLASS_BALANCED_CU_AND_RISK_MIXED_STRESS_TEST`
+- Workbench trial:
+  - `workbench/20260623_sascert_v1_4_scb_cu_riskmixed_steegformer_physionetmi`
+- Code policy:
+  - Reused and extended existing runner:
+    - `workbench/20260623_sascert_softar_ls_v1_1_steegformer_physionetmi/runner_v1_1.py`
+  - Did not download new tools.
+  - Did not switch backbone or dataset.
+  - Did not add artifact / physio / style / prediction consistency back into
+    training weights.
+- Implemented:
+  - v1.4 `SAS-Cert-SCB-CU-LS-v1.4`.
+  - Subject-class ranknorm over `E_content = ranknorm(E_embed) + ranknorm(E_proto)`.
+  - Weight rule:
+    - `w = 0.75 + 0.5 * ranknorm_subject_class(E_content)`
+  - Class-balanced weighted augmentation loss:
+    - `L_aug = mean_c sum(w_i * CE_i) / (sum(w_i) + eps)`
+    - `L = CE_real + L_aug`
+  - Risk-mixed candidate pool:
+    - 70% mild augmentations.
+    - 30% risky augmentations.
+    - risky types include strong frequency mask, strong channel dropout,
+      EMG-like burst, EOG-like drift, and covariance perturbation.
+- v1.3 localization audit:
+  - `E_proto` remains strongest:
+    - mean Spearman CE `-0.8503`
+    - mean Spearman correctness `+0.4572`
+  - `E_content` remains useful:
+    - mean Spearman CE `-0.5669`
+    - mean Spearman correctness `+0.3305`
+  - `E_embed` is weak:
+    - mean Spearman CE `-0.0748`
+    - mean Spearman correctness `+0.0794`
+  - Subject/class balancing removed average weight unfairness:
+    - all subject/class bins have mean v1.4 weight `1.0`
+    - ranknorm scope used: `subject_class`
+  - Subject win stability remained weak, so global ranknorm unfairness is not
+    the main failure mode.
+- Regular pool results:
+  - v1.4 vs `NaiveAug_LS010`:
+    - delta BAcc `+0.000626`
+    - delta Macro-F1 `+0.000295`
+    - delta ECE `-0.001412`
+    - delta NLL `-0.001908`
+    - delta Brier `-0.000977`
+  - v1.4 vs v1.3:
+    - delta BAcc `-0.001453`
+    - delta Macro-F1 `-0.001640`
+    - subject win rate Macro-F1 `0.00`
+- Risk-mixed pool results:
+  - v1.4 vs `RiskMixed_NaiveAug_LS010`:
+    - delta BAcc `+0.000476`
+    - delta Macro-F1 `+0.000450`
+    - delta ECE `-0.001121`
+    - delta NLL `-0.003801`
+    - delta Brier `-0.002236`
+    - subject win rate Macro-F1 `0.00`
+    - seed win rate Macro-F1 `0.00`
+- Leakage audit:
+  - `passed`
+  - target test was not used for ranknorm, prototype, threshold, risk-mixed
+    pool construction, best epoch, or best seed.
+- Decision:
+  - `limit_training_use_to_diagnostic_or_riskmixed`
+  - v1.4 does not justify CBraMod recheck.
+  - If continuing the training branch, focus on subject-balanced utility repair
+    or explicitly risk-mixed augmentation settings rather than treating v1.4 as
+    a general ST improvement.
+- Required outputs:
+  - `workbench/20260623_sascert_v1_4_scb_cu_riskmixed_steegformer_physionetmi/outputs/SASCERT_V1_4_SCB_CU_RISKMIXED_REPORT.md`
+  - `workbench/20260623_sascert_v1_4_scb_cu_riskmixed_steegformer_physionetmi/outputs/compact_sascert_v1_4_result.json`
+  - `workbench/20260623_sascert_v1_4_scb_cu_riskmixed_steegformer_physionetmi/outputs/metrics_v1_4_regular_pool.csv`
+  - `workbench/20260623_sascert_v1_4_scb_cu_riskmixed_steegformer_physionetmi/outputs/paired_comparison_v1_4_regular_pool.csv`
+  - `workbench/20260623_sascert_v1_4_scb_cu_riskmixed_steegformer_physionetmi/outputs/metrics_v1_4_riskmixed_pool.csv`
+  - `workbench/20260623_sascert_v1_4_scb_cu_riskmixed_steegformer_physionetmi/outputs/paired_comparison_v1_4_riskmixed_pool.csv`
+  - `workbench/20260623_sascert_v1_4_scb_cu_riskmixed_steegformer_physionetmi/outputs/per_subject_delta_table.csv`
+  - `workbench/20260623_sascert_v1_4_scb_cu_riskmixed_steegformer_physionetmi/outputs/per_class_delta_table.csv`
+  - `workbench/20260623_sascert_v1_4_scb_cu_riskmixed_steegformer_physionetmi/outputs/per_subject_component_corr.csv`
+  - `workbench/20260623_sascert_v1_4_scb_cu_riskmixed_steegformer_physionetmi/outputs/weight_distribution_by_subject_class.csv`
+  - `workbench/20260623_sascert_v1_4_scb_cu_riskmixed_steegformer_physionetmi/outputs/riskmixed_diagnostic_summary.csv`
+  - `workbench/20260623_sascert_v1_4_scb_cu_riskmixed_steegformer_physionetmi/outputs/leakage_audit_v1_4.json`
+- GitHub tracking:
+  - Commit code/config/docs and lightweight v1.4 outputs.
+  - No raw EEG, checkpoints, feature caches, or third-party dependency trees
+    should be uploaded.
+  - Local commit:
+    - `3e1383f Run SAS-Cert SCB-CU v1.4 ST PhysioNetMI`
+  - Push status:
+    - blocked locally by missing HTTPS GitHub credentials:
+      `could not read Username for 'https://github.com'`

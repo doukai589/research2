@@ -1,0 +1,15 @@
+{
+  "trial": "sascert_v1_4_scb_cu_riskmixed_steegformer_physionetmi",
+  "created_at": "2026-06-24T11:30:00",
+  "status": "completed",
+  "promoted": false,
+  "runner_reused": "workbench/20260623_sascert_softar_ls_v1_1_steegformer_physionetmi/runner_v1_1.py",
+  "experiments": [
+    "v1_4_regular",
+    "v1_4_riskmixed"
+  ],
+  "primary_output": "outputs/SASCERT_V1_4_SCB_CU_RISKMIXED_REPORT.md",
+  "compact_result": "outputs/compact_sascert_v1_4_result.json",
+  "decision": "limit_training_use_to_diagnostic_or_riskmixed",
+  "completed_at": "2026-06-24T12:05:00"
+}

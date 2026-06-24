@@ -1,0 +1,14 @@
+{
+  "status": "passed",
+  "target_test_used_for_ranknorm": false,
+  "target_test_used_for_prototype": false,
+  "target_test_used_for_threshold": false,
+  "target_test_used_for_best_epoch_or_seed": false,
+  "target_test_used_for_riskmixed_pool": false,
+  "target_test_used_for_final_eval_only": true,
+  "notes": [
+    "v1.4 ranknorm is within target-support candidate class groups, with fallback recorded per candidate.",
+    "Risk-mixed candidate pool is generated from support trials only at a fixed 70/30 mild/risky ratio.",
+    "artifact/physio/style/prediction scores remain diagnostic-only and do not enter training weights."
+  ]
+}

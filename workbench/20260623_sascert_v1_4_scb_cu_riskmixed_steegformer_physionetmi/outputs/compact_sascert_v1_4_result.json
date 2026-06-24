@@ -1,0 +1,134 @@
+{
+  "task": "SASCERT_V1_4_SUBJECT_CLASS_BALANCED_CU_AND_RISK_MIXED_STRESS_TEST",
+  "status": "completed",
+  "localization_audit": {
+    "weak_proto_subjects": [
+      "101"
+    ],
+    "class_unfair_subjects": [],
+    "mean_subject_delta_macro_f1": 0.0002947992557783607,
+    "subject_win_rate_macro_f1_vs_naive": 0.3,
+    "mean_subject_delta_bacc": 0.0006255735793274375,
+    "class_balance_min_over_max_mean": 1.0,
+    "component_corr_mean": {
+      "E_content": {
+        "spearman_raw_CE_loss": -0.5668992325328263,
+        "spearman_correctness": 0.3305460963113224
+      },
+      "E_embed": {
+        "spearman_raw_CE_loss": -0.07480145316705647,
+        "spearman_correctness": 0.0794151044846301
+      },
+      "E_proto": {
+        "spearman_raw_CE_loss": -0.8502974475788093,
+        "spearman_correctness": 0.4572056376402097
+      }
+    },
+    "v1_4_weight_mean_by_subject_class_min": 1.0,
+    "v1_4_weight_mean_by_subject_class_max": 1.0,
+    "ranknorm_scopes": [
+      "subject_class"
+    ]
+  },
+  "leakage_audit": {
+    "status": "passed",
+    "target_test_used_for_ranknorm": false,
+    "target_test_used_for_prototype": false,
+    "target_test_used_for_threshold": false,
+    "target_test_used_for_best_epoch_or_seed": false,
+    "target_test_used_for_riskmixed_pool": false,
+    "target_test_used_for_final_eval_only": true,
+    "notes": [
+      "v1.4 ranknorm is within target-support candidate class groups, with fallback recorded per candidate.",
+      "Risk-mixed candidate pool is generated from support trials only at a fixed 70/30 mild/risky ratio.",
+      "artifact/physio/style/prediction scores remain diagnostic-only and do not enter training weights."
+    ]
+  },
+  "regular_pool": {
+    "groups": {
+      "NaiveAug_LS010": {
+        "balanced_accuracy": 0.7567000024356447,
+        "macro_f1": 0.7523544247967905,
+        "auroc": 0.8212034693155821,
+        "ece": 0.18565865956913175,
+        "nll": 0.6221221053010547,
+        "brier": 0.35944342727772893,
+        "mean_aug_weight_all": 1.0
+      },
+      "SAS-Cert-CU-LS-v1.3": {
+        "balanced_accuracy": 0.7587782284322144,
+        "macro_f1": 0.7542889264320487,
+        "auroc": 0.8235249199229712,
+        "ece": 0.18610228832041714,
+        "nll": 0.6206318096418283,
+        "brier": 0.3586803687736392,
+        "mean_aug_weight_all": 1.0000000083446503
+      },
+      "SAS-Cert-SCB-CU-LS-v1.4": {
+        "balanced_accuracy": 0.7573255760149722,
+        "macro_f1": 0.752649224052569,
+        "auroc": 0.8235840915206043,
+        "ece": 0.18424626369391536,
+        "nll": 0.6202144384583059,
+        "brier": 0.358466075155884,
+        "mean_aug_weight_all": 1.000000005364418
+      }
+    },
+    "v1_4_vs_naive": {
+      "delta_balanced_accuracy": 0.0006255735793274653,
+      "delta_macro_f1": 0.0002947992557784662,
+      "delta_ece": -0.0014123958752163823,
+      "delta_nll": -0.0019076668427487897,
+      "delta_brier": -0.00097735212184491
+    },
+    "v1_4_vs_v1_3": {
+      "delta_balanced_accuracy": -0.0014526524172422395,
+      "delta_macro_f1": -0.001639702379479746,
+      "delta_ece": -0.0018560246265017788,
+      "delta_nll": -0.0004173711835223637,
+      "delta_brier": -0.00021429361775515687
+    },
+    "v1_4_vs_naive_win_rates": {
+      "subject_win_rate_macro_f1": 0.0,
+      "seed_win_rate_macro_f1": 0.0
+    },
+    "v1_4_vs_v1_3_win_rates": {
+      "subject_win_rate_macro_f1": 0.0,
+      "seed_win_rate_macro_f1": 0.0
+    }
+  },
+  "riskmixed_pool": {
+    "groups": {
+      "RiskMixed_NaiveAug_LS010": {
+        "balanced_accuracy": 0.7530474503008171,
+        "macro_f1": 0.7485384183602207,
+        "auroc": 0.821045266895557,
+        "ece": 0.18456321635048575,
+        "nll": 0.6276850043054398,
+        "brier": 0.3634826979320496,
+        "mean_aug_weight_all": 1.0
+      },
+      "RiskMixed_SAS-Cert-SCB-CU-LS-v1.4": {
+        "balanced_accuracy": 0.7535234369474694,
+        "macro_f1": 0.7489884506096167,
+        "auroc": 0.8230577603478823,
+        "ece": 0.1834424717358605,
+        "nll": 0.6238837744318915,
+        "brier": 0.3612468956038356,
+        "mean_aug_weight_all": 1.0000000256299972
+      }
+    },
+    "v1_4_vs_riskmixed_naive": {
+      "delta_balanced_accuracy": 0.0004759866466522711,
+      "delta_macro_f1": 0.00045003224939599296,
+      "delta_ece": -0.0011207446146252464,
+      "delta_nll": -0.003801229873548362,
+      "delta_brier": -0.0022358023282140205
+    },
+    "win_rates": {
+      "subject_win_rate_macro_f1": 0.0,
+      "seed_win_rate_macro_f1": 0.0
+    }
+  },
+  "decision": "limit_training_use_to_diagnostic_or_riskmixed"
+}

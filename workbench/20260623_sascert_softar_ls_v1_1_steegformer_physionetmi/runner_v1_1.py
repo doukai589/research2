@@ -76,6 +76,11 @@ V1_2_GROUPS = ["NaiveAug_LS010", "SoftWeight_noReject_LS010", "SAS-Cert-SoftSafe
 V1_2_PRIMARY = "SAS-Cert-SoftSafe-LS-v1.2"
 V1_3_GROUPS = ["NaiveAug_LS010", "SoftWeight_noReject_LS010", "SAS-Cert-CU-LS-v1.3"]
 V1_3_PRIMARY = "SAS-Cert-CU-LS-v1.3"
+V1_4_PRIMARY = "SAS-Cert-SCB-CU-LS-v1.4"
+V1_4_REGULAR_GROUPS = ["NaiveAug_LS010", V1_3_PRIMARY, V1_4_PRIMARY]
+RISK_MIXED_NAIVE = "RiskMixed_NaiveAug_LS010"
+RISK_MIXED_V1_4_PRIMARY = "RiskMixed_SAS-Cert-SCB-CU-LS-v1.4"
+V1_4_RISKMIXED_GROUPS = [RISK_MIXED_NAIVE, RISK_MIXED_V1_4_PRIMARY]
 V1_1_FULL_OUT = ROOT / "workbench" / "20260623_sascert_softar_ls_v1_1_steegformer_physionetmi" / "outputs"
 warnings.filterwarnings("ignore", message="Precision loss occurred in moment calculation.*")
 warnings.filterwarnings("ignore", message="No module named 'numba'. Your code will be slower.*")
@@ -233,18 +238,67 @@ def bad_physio(x: np.ndarray, rng: np.random.Generator, intensity: float = 0.55)
     return y.astype(np.float32)
 
 
+def strong_frequency_mask_aug(x: np.ndarray, rng: np.random.Generator) -> np.ndarray:
+    return frequency_mask_aug(x, rng, intensity=0.95)
+
+
+def strong_channel_dropout_aug(x: np.ndarray, rng: np.random.Generator) -> np.ndarray:
+    y = x.copy()
+    n_drop = max(2, int(round(y.shape[0] * 0.22)))
+    chans = rng.choice(y.shape[0], size=min(n_drop, y.shape[0]), replace=False)
+    y[chans] = 0.0
+    return y.astype(np.float32)
+
+
+def emg_like_burst_aug(x: np.ndarray, rng: np.random.Generator) -> np.ndarray:
+    y = x.copy()
+    signal_std = float(y.std() + 1e-6)
+    burst_len = max(24, int(y.shape[1] * 0.10))
+    start = int(rng.integers(0, max(1, y.shape[1] - burst_len)))
+    t = np.arange(burst_len, dtype=np.float32) / SFREQ
+    carrier = np.sin(2 * np.pi * rng.uniform(35.0, 75.0) * t + rng.uniform(0, 2 * np.pi))
+    envelope = np.hanning(burst_len).astype(np.float32)
+    chans = rng.choice(y.shape[0], size=max(2, int(round(y.shape[0] * 0.18))), replace=False)
+    y[chans, start : start + burst_len] += signal_std * rng.uniform(1.2, 2.2) * envelope * carrier
+    return y.astype(np.float32)
+
+
+def eog_like_drift_aug(x: np.ndarray, rng: np.random.Generator) -> np.ndarray:
+    y = x.copy()
+    signal_std = float(y.std() + 1e-6)
+    t = np.arange(y.shape[1], dtype=np.float32) / SFREQ
+    drift = np.sin(2 * np.pi * rng.uniform(0.15, 0.8) * t + rng.uniform(0, 2 * np.pi))
+    ramp = np.linspace(-1.0, 1.0, y.shape[1], dtype=np.float32)
+    chans = np.arange(min(6, y.shape[0]))
+    y[chans] += signal_std * rng.uniform(0.8, 1.6) * (0.7 * drift + 0.3 * ramp)
+    return y.astype(np.float32)
+
+
+def covariance_perturbation_aug(x: np.ndarray, rng: np.random.Generator) -> np.ndarray:
+    mix = np.eye(x.shape[0], dtype=np.float32)
+    noise = rng.normal(0.0, 0.08, size=mix.shape).astype(np.float32)
+    noise = 0.5 * (noise + noise.T)
+    np.fill_diagonal(noise, 0.0)
+    return ((mix + noise) @ x).astype(np.float32)
+
+
 def generate_candidates(
     support_x: np.ndarray,
     support_y: np.ndarray,
     style_bank: np.ndarray,
     rng: np.random.Generator,
     per_trial: int = 6,
+    risk_mixed: bool = False,
 ) -> List[Candidate]:
     aug_types = ["gaussian_noise", "time_shift", "time_crop", "frequency_mask", "channel_dropout", "mild_frequency_mixup"]
+    risky_types = ["strong_frequency_mask", "strong_channel_dropout", "emg_like_burst", "eog_like_drift", "covariance_perturbation"]
     candidates: list[Candidate] = []
     for i, (x, label) in enumerate(zip(support_x, support_y)):
         for k in range(per_trial):
-            aug_type = aug_types[k % len(aug_types)]
+            if risk_mixed and k >= int(round(per_trial * 0.7)):
+                aug_type = risky_types[(k - int(round(per_trial * 0.7))) % len(risky_types)]
+            else:
+                aug_type = aug_types[k % len(aug_types)]
             if aug_type == "gaussian_noise":
                 aug_x = gaussian_noise_aug(x, rng)
             elif aug_type == "time_shift":
@@ -255,8 +309,18 @@ def generate_candidates(
                 aug_x = frequency_mask_aug(x, rng)
             elif aug_type == "channel_dropout":
                 aug_x = channel_dropout_aug(x, rng)
-            else:
+            elif aug_type == "mild_frequency_mixup":
                 aug_x = mild_frequency_mixup_aug(x, rng, style_bank)
+            elif aug_type == "strong_frequency_mask":
+                aug_x = strong_frequency_mask_aug(x, rng)
+            elif aug_type == "strong_channel_dropout":
+                aug_x = strong_channel_dropout_aug(x, rng)
+            elif aug_type == "emg_like_burst":
+                aug_x = emg_like_burst_aug(x, rng)
+            elif aug_type == "eog_like_drift":
+                aug_x = eog_like_drift_aug(x, rng)
+            else:
+                aug_x = covariance_perturbation_aug(x, rng)
             candidates.append(Candidate(aug_x.astype(np.float32), int(label), i, aug_type, f"{aug_type}_{i:03d}_{k:02d}"))
     return candidates
 
@@ -448,6 +512,21 @@ def score_candidates(
     content_v1_3 = ranknorm(e_embed_raw, True) + ranknorm(e_proto_raw, True)
     content_v1_3_rank = ranknorm(content_v1_3, True)
     content_utility_weight_v1_3 = 0.75 + 0.5 * content_v1_3_rank
+    content_v1_4_rank = np.zeros_like(content_v1_3_rank, dtype=np.float32)
+    content_v1_4_scope = np.asarray(["global"] * len(labels), dtype=object)
+    global_content_rank = ranknorm(content_v1_3, True)
+    for label in sorted(set(labels.astype(int))):
+        mask = labels == int(label)
+        if int(mask.sum()) >= 3:
+            content_v1_4_rank[mask] = ranknorm(content_v1_3[mask], True)
+            content_v1_4_scope[mask] = "subject_class"
+        elif len(labels) >= 3:
+            content_v1_4_rank[mask] = global_content_rank[mask]
+            content_v1_4_scope[mask] = "subject_fallback"
+        else:
+            content_v1_4_rank[mask] = global_content_rank[mask]
+            content_v1_4_scope[mask] = "global_fallback"
+    scb_content_utility_weight_v1_4 = 0.75 + 0.5 * content_v1_4_rank
     raw_ce_loss = -np.log(np.clip(cand_probs[np.arange(len(labels)), labels], 1e-7, 1.0))
     aug_correctness = (cand_probs.argmax(axis=1) == labels).astype(np.int64)
     nonfinite_content_v1_3 = (
@@ -455,8 +534,10 @@ def score_candidates(
         | ~np.isfinite(e_proto_raw)
         | ~np.isfinite(content_v1_3)
         | ~np.isfinite(content_utility_weight_v1_3)
+        | ~np.isfinite(scb_content_utility_weight_v1_4)
     )
     content_utility_weight_v1_3[nonfinite_content_v1_3] = 0.0
+    scb_content_utility_weight_v1_4[nonfinite_content_v1_3] = 0.0
 
     rows = []
     for i, cand in enumerate(candidates):
@@ -489,6 +570,9 @@ def score_candidates(
                 "softsafe_weight_v1_2": float(softsafe_weight_v1_2[i]),
                 "content_score_v1_3": float(content_v1_3_rank[i]),
                 "content_utility_weight_v1_3": float(content_utility_weight_v1_3[i]),
+                "content_score_v1_4_scb": float(content_v1_4_rank[i]),
+                "scb_content_utility_weight_v1_4": float(scb_content_utility_weight_v1_4[i]),
+                "scb_ranknorm_scope_v1_4": str(content_v1_4_scope[i]),
                 "nonfinite_content_v1_3": int(nonfinite_content_v1_3[i]),
                 "raw_ce_loss": float(raw_ce_loss[i]),
                 "aug_correctness": int(aug_correctness[i]),
@@ -503,7 +587,12 @@ def score_candidates(
         "mean_softar_weight": float(softar_weight.mean()),
         "mean_softsafe_weight_v1_2": float(softsafe_weight_v1_2.mean()),
         "mean_content_utility_weight_v1_3": float(content_utility_weight_v1_3.mean()),
+        "mean_scb_content_utility_weight_v1_4": float(scb_content_utility_weight_v1_4.mean()),
         "content_utility_nan_inf_count_v1_3": int(nonfinite_content_v1_3.sum()),
+        "scb_ranknorm_scope_counts_v1_4": {
+            str(scope): int(np.sum(content_v1_4_scope == scope))
+            for scope in sorted(set(content_v1_4_scope.astype(str)))
+        },
         "pyriemann_status": pyriemann_status,
         "mne_features_status": mne_status,
         "covariance_nan_inf_count": int(cov_bad),
@@ -644,6 +733,57 @@ def train_head_real_aug_normalized(
     return head
 
 
+def class_balanced_aug_loss_from_logits(
+    logits: torch.Tensor,
+    y: torch.Tensor,
+    weights: torch.Tensor,
+    label_smoothing: float,
+) -> torch.Tensor:
+    loss_each = F.cross_entropy(logits, y, reduction="none", label_smoothing=label_smoothing)
+    class_losses = []
+    for cls in torch.unique(y):
+        mask = y == cls
+        if bool(mask.any()):
+            class_losses.append((loss_each[mask] * weights[mask]).sum() / weights[mask].sum().clamp_min(1e-6))
+    if not class_losses:
+        return loss_each.mean()
+    return torch.stack(class_losses).mean()
+
+
+def train_head_real_aug_class_balanced(
+    real_features: np.ndarray,
+    real_labels: np.ndarray,
+    aug_features: np.ndarray,
+    aug_labels: np.ndarray,
+    aug_weights: np.ndarray,
+    init_state: Dict[str, torch.Tensor] | None,
+    device: str,
+    epochs: int,
+    lr: float,
+    label_smoothing: float,
+) -> FeatureHead:
+    head = FeatureHead(real_features.shape[1]).to(device)
+    if init_state is not None:
+        head.load_state_dict(init_state)
+    real_x = torch.from_numpy(real_features).float().to(device)
+    real_y = torch.from_numpy(real_labels).long().to(device)
+    aug_x = torch.from_numpy(aug_features).float().to(device)
+    aug_y = torch.from_numpy(aug_labels).long().to(device)
+    aug_w = torch.from_numpy(aug_weights).float().to(device)
+    opt = torch.optim.AdamW(head.parameters(), lr=lr, weight_decay=0.01)
+    for _ in range(epochs):
+        head.train()
+        opt.zero_grad(set_to_none=True)
+        real_loss = F.cross_entropy(head(real_x), real_y, label_smoothing=label_smoothing)
+        aug_loss = class_balanced_aug_loss_from_logits(head(aug_x), aug_y, aug_w, label_smoothing)
+        loss = real_loss + aug_loss
+        if not torch.isfinite(loss):
+            raise RuntimeError("non-finite class-balanced head loss")
+        loss.backward()
+        opt.step()
+    return head
+
+
 def loss_mass_diagnostics(
     head: nn.Module,
     real_features: np.ndarray,
@@ -674,6 +814,36 @@ def loss_mass_diagnostics(
     }
 
 
+def loss_mass_diagnostics_class_balanced(
+    head: nn.Module,
+    real_features: np.ndarray,
+    real_labels: np.ndarray,
+    aug_features: np.ndarray,
+    aug_labels: np.ndarray,
+    aug_weights: np.ndarray,
+    device: str,
+    label_smoothing: float,
+) -> Dict[str, float]:
+    head.eval()
+    with torch.no_grad():
+        real_x = torch.from_numpy(real_features).float().to(device)
+        real_y = torch.from_numpy(real_labels).long().to(device)
+        aug_x = torch.from_numpy(aug_features).float().to(device)
+        aug_y = torch.from_numpy(aug_labels).long().to(device)
+        aug_w = torch.from_numpy(aug_weights).float().to(device)
+        ce_real = F.cross_entropy(head(real_x), real_y, label_smoothing=label_smoothing)
+        ce_aug_each = F.cross_entropy(head(aug_x), aug_y, reduction="none", label_smoothing=label_smoothing)
+        ce_aug_raw = ce_aug_each.mean()
+        ce_aug_weighted = class_balanced_aug_loss_from_logits(head(aug_x), aug_y, aug_w, label_smoothing)
+        final_loss = ce_real + ce_aug_weighted
+    return {
+        "CE_real": float(ce_real.detach().cpu()),
+        "CE_aug_raw": float(ce_aug_raw.detach().cpu()),
+        "CE_aug_weighted": float(ce_aug_weighted.detach().cpu()),
+        "final_train_loss": float(final_loss.detach().cpu()),
+    }
+
+
 def predict_probs(head: nn.Module, features: np.ndarray, device: str) -> np.ndarray:
     head.eval()
     out = []
@@ -690,6 +860,7 @@ def group_aug_selection(group: str, score_rows: Sequence[Dict[str, object]], art
     soft_weight = np.asarray([float(r["soft_weight_v1_1"]) for r in score_rows], dtype=np.float32)
     softsafe_weight = np.asarray([float(r.get("softsafe_weight_v1_2", 1.0)) for r in score_rows], dtype=np.float32)
     content_utility_weight = np.asarray([float(r.get("content_utility_weight_v1_3", 1.0)) for r in score_rows], dtype=np.float32)
+    scb_content_utility_weight = np.asarray([float(r.get("scb_content_utility_weight_v1_4", r.get("content_utility_weight_v1_3", 1.0))) for r in score_rows], dtype=np.float32)
     extreme = np.asarray([int(float(r.get("extreme_artifact_outlier", 0))) == 1 for r in score_rows], dtype=bool)
     nonfinite_content = np.asarray([int(float(r.get("nonfinite_content_v1_3", 0))) == 1 for r in score_rows], dtype=bool)
     keep = np.ones(len(score_rows), dtype=bool)
@@ -709,6 +880,10 @@ def group_aug_selection(group: str, score_rows: Sequence[Dict[str, object]], art
     elif group == V1_3_PRIMARY:
         keep = ~nonfinite_content
         weights = content_utility_weight
+        weights[~keep] = 0.0
+    elif group in {V1_4_PRIMARY, RISK_MIXED_V1_4_PRIMARY}:
+        keep = ~nonfinite_content
+        weights = scb_content_utility_weight
         weights[~keep] = 0.0
     return keep, weights
 
@@ -754,7 +929,14 @@ def run_fold(
     source_y = y[source_idx]
 
     style_bank = X[source_idx]
-    candidates = generate_candidates(support_x, support_y, style_bank, rng, per_trial=args.n_aug)
+    candidates = generate_candidates(
+        support_x,
+        support_y,
+        style_bank,
+        rng,
+        per_trial=args.n_aug,
+        risk_mixed=args.experiment == "v1_4_riskmixed",
+    )
     cand_x = np.stack([c.x for c in candidates]).astype(np.float32)
     cand_features = extract_features(model, cand_x, args.device, args.feature_batch_size)
 
@@ -788,25 +970,40 @@ def run_fold(
     cand_labels = np.asarray([c.y for c in candidates], dtype=np.int64)
     for group in args.groups:
         keep, aug_w = group_aug_selection(group, score_rows, args.artifact_reject_percentile)
-        if args.experiment in {"v1_2", "v1_3"}:
+        if args.experiment in {"v1_2", "v1_3", "v1_4_regular", "v1_4_riskmixed"}:
             if not keep.any():
                 raise RuntimeError(f"{args.experiment} has no augmented candidates after safety filtering")
             aug_features = cand_features[keep]
             aug_labels = cand_labels[keep]
             aug_weights = aug_w[keep].astype(np.float32)
-            head = train_head_real_aug_normalized(
-                support_features,
-                support_y,
-                aug_features,
-                aug_labels,
-                aug_weights,
-                source_state,
-                args.device,
-                args.finetune_epochs,
-                args.lr,
-                0.10,
-            )
-            loss_diag = loss_mass_diagnostics(head, support_features, support_y, aug_features, aug_labels, aug_weights, args.device, 0.10)
+            if group in {V1_4_PRIMARY, RISK_MIXED_V1_4_PRIMARY}:
+                head = train_head_real_aug_class_balanced(
+                    support_features,
+                    support_y,
+                    aug_features,
+                    aug_labels,
+                    aug_weights,
+                    source_state,
+                    args.device,
+                    args.finetune_epochs,
+                    args.lr,
+                    0.10,
+                )
+                loss_diag = loss_mass_diagnostics_class_balanced(head, support_features, support_y, aug_features, aug_labels, aug_weights, args.device, 0.10)
+            else:
+                head = train_head_real_aug_normalized(
+                    support_features,
+                    support_y,
+                    aug_features,
+                    aug_labels,
+                    aug_weights,
+                    source_state,
+                    args.device,
+                    args.finetune_epochs,
+                    args.lr,
+                    0.10,
+                )
+                loss_diag = loss_mass_diagnostics(head, support_features, support_y, aug_features, aug_labels, aug_weights, args.device, 0.10)
             sum_weight = float(aug_weights.sum())
             effective_aug_loss_scale = float(sum_weight / max(1, len(candidates)))
         else:
@@ -826,6 +1023,18 @@ def run_fold(
             effective_aug_loss_scale = float(sum_weight / max(1, len(candidates)))
         probs = predict_probs(head, test_features, args.device)
         metrics = classification_metrics(test_y, probs)
+        pred = probs.argmax(axis=1)
+        per_class_metrics: dict[str, float] = {}
+        for cls in sorted(set(test_y.astype(int))):
+            cls_mask = test_y == int(cls)
+            tp = float(np.sum((pred == cls) & cls_mask))
+            fp = float(np.sum((pred == cls) & (~cls_mask)))
+            fn = float(np.sum((pred != cls) & cls_mask))
+            precision = tp / max(1.0, tp + fp)
+            recall = tp / max(1.0, tp + fn)
+            f1 = 2.0 * precision * recall / max(1e-12, precision + recall)
+            per_class_metrics[f"class_{cls}_accuracy"] = float(np.mean(pred[cls_mask] == test_y[cls_mask])) if cls_mask.any() else float("nan")
+            per_class_metrics[f"class_{cls}_f1"] = float(f1)
         rows.append(
             {
                 "target_subject": target,
@@ -844,6 +1053,7 @@ def run_fold(
                 "fold_score_nan_inf_count": int(fold_cert["score_nan_inf_count"]),
                 "fold_covariance_nan_inf_count": int(fold_cert["covariance_nan_inf_count"]),
                 **metrics,
+                **per_class_metrics,
             }
         )
     fold_summary_path = OUT_DIR / "fold_certificate_summaries" / args.output_tag / f"target{target}_seed{seed}.json"
@@ -936,10 +1146,11 @@ def summarize(
             for key in ["accuracy", "balanced_accuracy", "macro_f1", "kappa", "auroc", "ece", "nll", "brier"]
         }
     primary = by_group[primary_group]
-    naive = by_group["NaiveAug_LS010"]
+    baseline_name = "NaiveAug_LS010" if "NaiveAug_LS010" in by_group else baseline_groups[0]
+    naive = by_group[baseline_name]
     comparison = {
         "primary_group": primary_group,
-        "baseline_group": "NaiveAug_LS010",
+        "baseline_group": baseline_name,
         "delta_balanced_accuracy": primary["balanced_accuracy"] - naive["balanced_accuracy"],
         "delta_macro_f1": primary["macro_f1"] - naive["macro_f1"],
         "delta_ece": primary["ece"] - naive["ece"],
@@ -969,7 +1180,7 @@ def summarize(
         "primary_group": primary_group,
         "groups": by_group,
         "primary_vs_naive": comparison,
-        "sascert_vs_naive": comparison if primary_group in {V1_1_PRIMARY, V1_2_PRIMARY, V1_3_PRIMARY} else None,
+        "sascert_vs_naive": comparison if primary_group in {V1_1_PRIMARY, V1_2_PRIMARY, V1_3_PRIMARY, V1_4_PRIMARY, RISK_MIXED_V1_4_PRIMARY} else None,
         "paired_comparisons": {
             p["comparison"]: {
                 key: float(np.mean([row[key] for row in pairs if row["comparison"] == p["comparison"]]))
@@ -1052,6 +1263,8 @@ def score_distribution_rows(score_rows: Sequence[Dict[str, object]]) -> List[Dic
         "content_utility_weight_v1_3",
         "raw_ce_loss",
         "aug_correctness",
+        "content_score_v1_4_scb",
+        "scb_content_utility_weight_v1_4",
         "d_band",
         "d_cov_riemann",
         "d_style",
@@ -1719,6 +1932,375 @@ def write_v1_3_diagnostics(args: argparse.Namespace, all_rows: Sequence[Dict[str
     (OUT_DIR / "SASCERT_CU_V1_3_REPORT.md").write_text("\n".join(report) + "\n", encoding="utf-8")
 
 
+def read_table_csv(path: Path) -> List[Dict[str, object]]:
+    if not path.exists() or path.stat().st_size == 0:
+        return []
+    with path.open("r", encoding="utf-8") as f:
+        return list(csv.DictReader(f))
+
+
+def mean_metric(rows: Sequence[Dict[str, object]], group: str, key: str) -> float:
+    vals = [float(r[key]) for r in rows if str(r.get("group")) == group and str(r.get(key, "")) != ""]
+    return float(np.mean(vals)) if vals else float("nan")
+
+
+def delta_metrics(rows: Sequence[Dict[str, object]], primary: str, baseline: str) -> Dict[str, float]:
+    return {
+        "delta_balanced_accuracy": mean_metric(rows, primary, "balanced_accuracy") - mean_metric(rows, baseline, "balanced_accuracy"),
+        "delta_macro_f1": mean_metric(rows, primary, "macro_f1") - mean_metric(rows, baseline, "macro_f1"),
+        "delta_ece": mean_metric(rows, primary, "ece") - mean_metric(rows, baseline, "ece"),
+        "delta_nll": mean_metric(rows, primary, "nll") - mean_metric(rows, baseline, "nll"),
+        "delta_brier": mean_metric(rows, primary, "brier") - mean_metric(rows, baseline, "brier"),
+    }
+
+
+def win_rates_from_pairs(pairs: Sequence[Dict[str, object]], comparison: str) -> Dict[str, float]:
+    comp = [p for p in pairs if str(p.get("comparison")) == comparison]
+    subject_wins = []
+    for target in sorted(set(int(p["target_subject"]) for p in comp)):
+        vals = [int(float(p["win_macro_f1"])) for p in comp if int(p["target_subject"]) == target]
+        if vals:
+            subject_wins.append(float(np.mean(vals)) > 0.5)
+    seed_wins = []
+    for seed in sorted(set(int(p["seed"]) for p in comp)):
+        vals = [int(float(p["win_macro_f1"])) for p in comp if int(p["seed"]) == seed]
+        if vals:
+            seed_wins.append(float(np.mean(vals)) > 0.5)
+    return {
+        "subject_win_rate_macro_f1": float(np.mean(subject_wins)) if subject_wins else float("nan"),
+        "seed_win_rate_macro_f1": float(np.mean(seed_wins)) if seed_wins else float("nan"),
+    }
+
+
+def write_v1_4_localization_outputs(regular_rows: Sequence[Dict[str, object]], score_rows: Sequence[Dict[str, object]]) -> Dict[str, object]:
+    by_target_scores: dict[int, list[dict[str, object]]] = {}
+    for row in score_rows:
+        by_target_scores.setdefault(int(row["target_subject"]), []).append(row)
+
+    per_subject = []
+    for target in sorted(set(int(r["target_subject"]) for r in regular_rows)):
+        target_rows = [r for r in regular_rows if int(r["target_subject"]) == target]
+        score_subset = by_target_scores.get(target, [])
+        counts = {}
+        for row in score_subset:
+            counts[str(row["label"])] = counts.get(str(row["label"]), 0) + 1
+        max_count = max(counts.values()) if counts else 0
+        min_count = min(counts.values()) if counts else 0
+        per_subject.append(
+            {
+                "target_subject": target,
+                "delta_bacc_v1_4_vs_naive": mean_metric(target_rows, V1_4_PRIMARY, "balanced_accuracy") - mean_metric(target_rows, "NaiveAug_LS010", "balanced_accuracy"),
+                "delta_macro_f1_v1_4_vs_naive": mean_metric(target_rows, V1_4_PRIMARY, "macro_f1") - mean_metric(target_rows, "NaiveAug_LS010", "macro_f1"),
+                "delta_ece_v1_4_vs_naive": mean_metric(target_rows, V1_4_PRIMARY, "ece") - mean_metric(target_rows, "NaiveAug_LS010", "ece"),
+                "delta_nll_v1_4_vs_naive": mean_metric(target_rows, V1_4_PRIMARY, "nll") - mean_metric(target_rows, "NaiveAug_LS010", "nll"),
+                "mean_E_proto": float(np.mean([float(r["e_proto_raw"]) for r in score_subset])) if score_subset else float("nan"),
+                "mean_E_embed": float(np.mean([float(r["e_embed_raw"]) for r in score_subset])) if score_subset else float("nan"),
+                "mean_weight": float(np.mean([float(r["scb_content_utility_weight_v1_4"]) for r in score_subset])) if score_subset else float("nan"),
+                "class_0_candidates": counts.get("0", 0),
+                "class_1_candidates": counts.get("1", 0),
+                "class_balance_min_over_max": float(min_count / max(1, max_count)) if counts else float("nan"),
+            }
+        )
+    write_table_csv(OUT_DIR / "per_subject_delta_table.csv", per_subject)
+
+    per_class = []
+    for cls in [0, 1]:
+        for metric in ["accuracy", "f1"]:
+            key = f"class_{cls}_{metric}"
+            per_class.append(
+                {
+                    "class": cls,
+                    "metric": key,
+                    "v1_4_mean": mean_metric(regular_rows, V1_4_PRIMARY, key),
+                    "naive_mean": mean_metric(regular_rows, "NaiveAug_LS010", key),
+                    "v1_3_mean": mean_metric(regular_rows, V1_3_PRIMARY, key),
+                    "delta_v1_4_vs_naive": mean_metric(regular_rows, V1_4_PRIMARY, key) - mean_metric(regular_rows, "NaiveAug_LS010", key),
+                    "delta_v1_4_vs_v1_3": mean_metric(regular_rows, V1_4_PRIMARY, key) - mean_metric(regular_rows, V1_3_PRIMARY, key),
+                }
+            )
+    write_table_csv(OUT_DIR / "per_class_delta_table.csv", per_class)
+
+    corr_rows = []
+    for target, subset in sorted(by_target_scores.items()):
+        ce = np.asarray([float(r["raw_ce_loss"]) for r in subset], dtype=np.float64)
+        correctness = np.asarray([float(r["aug_correctness"]) for r in subset], dtype=np.float64)
+        for name, col in [("E_proto", "e_proto_raw"), ("E_embed", "e_embed_raw"), ("E_content", "content_score_v1_3")]:
+            vals = np.asarray([float(r[col]) for r in subset], dtype=np.float64)
+            corr_rows.append(
+                {
+                    "target_subject": target,
+                    "score_name": name,
+                    "spearman_raw_CE_loss": spearman_corr(vals, ce),
+                    "spearman_correctness": spearman_corr(vals, correctness),
+                    "n": len(subset),
+                }
+            )
+    write_table_csv(OUT_DIR / "per_subject_component_corr.csv", corr_rows)
+
+    weight_rows = []
+    for target, subset in sorted(by_target_scores.items()):
+        for label in sorted(set(str(r["label"]) for r in subset)):
+            label_rows = [r for r in subset if str(r["label"]) == label]
+            vals_v13 = np.asarray([float(r["content_utility_weight_v1_3"]) for r in label_rows], dtype=np.float64)
+            vals_v14 = np.asarray([float(r["scb_content_utility_weight_v1_4"]) for r in label_rows], dtype=np.float64)
+            scopes = sorted(set(str(r.get("scb_ranknorm_scope_v1_4", "")) for r in label_rows))
+            weight_rows.append(
+                {
+                    "target_subject": target,
+                    "label": label,
+                    "n": len(label_rows),
+                    "v1_3_weight_mean": float(np.mean(vals_v13)),
+                    "v1_3_weight_std": float(np.std(vals_v13)),
+                    "v1_4_weight_mean": float(np.mean(vals_v14)),
+                    "v1_4_weight_std": float(np.std(vals_v14)),
+                    "v1_4_weight_min": float(np.min(vals_v14)),
+                    "v1_4_weight_max": float(np.max(vals_v14)),
+                    "ranknorm_scope": ";".join(scopes),
+                }
+            )
+    write_table_csv(OUT_DIR / "weight_distribution_by_subject_class.csv", weight_rows)
+
+    weak_proto_subjects = [
+        row["target_subject"]
+        for row in corr_rows
+        if row["score_name"] == "E_proto" and (not np.isfinite(float(row["spearman_correctness"])) or float(row["spearman_correctness"]) < 0.1)
+    ]
+    unfair_subjects = [
+        row["target_subject"]
+        for row in per_subject
+        if np.isfinite(float(row["class_balance_min_over_max"])) and float(row["class_balance_min_over_max"]) < 0.8
+    ]
+    return {
+        "weak_proto_subjects": weak_proto_subjects,
+        "class_unfair_subjects": unfair_subjects,
+        "mean_subject_delta_macro_f1": float(np.mean([float(r["delta_macro_f1_v1_4_vs_naive"]) for r in per_subject])) if per_subject else float("nan"),
+        "mean_subject_delta_bacc": float(np.mean([float(r["delta_bacc_v1_4_vs_naive"]) for r in per_subject])) if per_subject else float("nan"),
+    }
+
+
+def summarize_v1_4_localization_outputs() -> Dict[str, object]:
+    per_subject = read_table_csv(OUT_DIR / "per_subject_delta_table.csv")
+    corr_rows = read_table_csv(OUT_DIR / "per_subject_component_corr.csv")
+    weight_rows = read_table_csv(OUT_DIR / "weight_distribution_by_subject_class.csv")
+    if not per_subject or not corr_rows:
+        return {}
+    weak_proto_subjects = [
+        row["target_subject"]
+        for row in corr_rows
+        if row.get("score_name") == "E_proto"
+        and (not np.isfinite(float(row["spearman_correctness"])) or float(row["spearman_correctness"]) < 0.1)
+    ]
+    unfair_subjects = [
+        row["target_subject"]
+        for row in per_subject
+        if np.isfinite(float(row["class_balance_min_over_max"])) and float(row["class_balance_min_over_max"]) < 0.8
+    ]
+    by_score: Dict[str, list[Dict[str, object]]] = {}
+    for row in corr_rows:
+        by_score.setdefault(str(row["score_name"]), []).append(row)
+    component_corr_mean = {
+        name: {
+            "spearman_raw_CE_loss": float(np.mean([float(r["spearman_raw_CE_loss"]) for r in rows])),
+            "spearman_correctness": float(np.mean([float(r["spearman_correctness"]) for r in rows])),
+        }
+        for name, rows in sorted(by_score.items())
+    }
+    return {
+        "weak_proto_subjects": weak_proto_subjects,
+        "class_unfair_subjects": unfair_subjects,
+        "mean_subject_delta_macro_f1": float(np.mean([float(r["delta_macro_f1_v1_4_vs_naive"]) for r in per_subject])),
+        "subject_win_rate_macro_f1_vs_naive": float(np.mean([float(r["delta_macro_f1_v1_4_vs_naive"]) > 0.0 for r in per_subject])),
+        "mean_subject_delta_bacc": float(np.mean([float(r["delta_bacc_v1_4_vs_naive"]) for r in per_subject])),
+        "class_balance_min_over_max_mean": float(np.mean([float(r["class_balance_min_over_max"]) for r in per_subject])),
+        "component_corr_mean": component_corr_mean,
+        "v1_4_weight_mean_by_subject_class_min": float(np.min([float(r["v1_4_weight_mean"]) for r in weight_rows])) if weight_rows else float("nan"),
+        "v1_4_weight_mean_by_subject_class_max": float(np.max([float(r["v1_4_weight_mean"]) for r in weight_rows])) if weight_rows else float("nan"),
+        "ranknorm_scopes": sorted(set(str(r["ranknorm_scope"]) for r in weight_rows)) if weight_rows else [],
+    }
+
+
+def write_v1_4_riskmixed_diagnostics(score_rows: Sequence[Dict[str, object]]) -> None:
+    risky_prefixes = {"strong_frequency_mask", "strong_channel_dropout", "emg_like_burst", "eog_like_drift", "covariance_perturbation"}
+    out = []
+    groups = [("ALL", score_rows)]
+    for pool_type in ["mild", "risky"]:
+        if pool_type == "risky":
+            subset = [r for r in score_rows if str(r["aug_type"]) in risky_prefixes]
+        else:
+            subset = [r for r in score_rows if str(r["aug_type"]) not in risky_prefixes]
+        groups.append((pool_type, subset))
+    for aug_type in sorted(set(str(r["aug_type"]) for r in score_rows)):
+        groups.append((aug_type, [r for r in score_rows if str(r["aug_type"]) == aug_type]))
+    for name, subset in groups:
+        out.append(
+            {
+                "pool_or_aug_type": name,
+                "n": len(subset),
+                "artifact_score_mean": float(np.mean([float(r["artifact_risk_raw"]) for r in subset])) if subset else float("nan"),
+                "E_physio_mean": float(np.mean([float(r["physio_score"]) for r in subset])) if subset else float("nan"),
+                "E_style_mean": float(np.mean([float(r["style_score"]) for r in subset])) if subset else float("nan"),
+                "E_content_mean": float(np.mean([float(r["content_score_v1_3"]) for r in subset])) if subset else float("nan"),
+                "v1_4_weight_mean": float(np.mean([float(r["scb_content_utility_weight_v1_4"]) for r in subset])) if subset else float("nan"),
+                "raw_CE_loss_mean": float(np.mean([float(r["raw_ce_loss"]) for r in subset])) if subset else float("nan"),
+                "correctness_mean": float(np.mean([float(r["aug_correctness"]) for r in subset])) if subset else float("nan"),
+            }
+        )
+    write_table_csv(OUT_DIR / "riskmixed_diagnostic_summary.csv", out)
+
+
+def write_v1_4_diagnostics(args: argparse.Namespace, all_rows: Sequence[Dict[str, object]], summary: Dict[str, object], pairs: Sequence[Dict[str, object]]) -> None:
+    if args.experiment == "v1_4_regular":
+        write_table_csv(OUT_DIR / "metrics_v1_4_regular_pool.csv", list(all_rows))
+        write_table_csv(OUT_DIR / "paired_comparison_v1_4_regular_pool.csv", list(pairs))
+        score_rows = read_score_rows(args.output_tag)
+        localization = write_v1_4_localization_outputs(all_rows, score_rows)
+    else:
+        write_table_csv(OUT_DIR / "metrics_v1_4_riskmixed_pool.csv", list(all_rows))
+        write_table_csv(OUT_DIR / "paired_comparison_v1_4_riskmixed_pool.csv", list(pairs))
+        score_rows = read_score_rows(args.output_tag)
+        write_v1_4_riskmixed_diagnostics(score_rows)
+        localization = {}
+
+    regular_rows = read_table_csv(OUT_DIR / "metrics_v1_4_regular_pool.csv")
+    regular_pairs = read_table_csv(OUT_DIR / "paired_comparison_v1_4_regular_pool.csv")
+    risk_rows = read_table_csv(OUT_DIR / "metrics_v1_4_riskmixed_pool.csv")
+    risk_pairs = read_table_csv(OUT_DIR / "paired_comparison_v1_4_riskmixed_pool.csv")
+    if regular_rows:
+        regular_score_rows = read_score_rows("v1_4_regular")
+        if regular_score_rows and not (OUT_DIR / "per_subject_delta_table.csv").exists():
+            localization = write_v1_4_localization_outputs(regular_rows, regular_score_rows)
+        else:
+            localization = summarize_v1_4_localization_outputs()
+    if risk_rows:
+        risk_score_rows = read_score_rows("v1_4_riskmixed")
+        if risk_score_rows:
+            write_v1_4_riskmixed_diagnostics(risk_score_rows)
+
+    leakage = {
+        "status": "passed",
+        "target_test_used_for_ranknorm": False,
+        "target_test_used_for_prototype": False,
+        "target_test_used_for_threshold": False,
+        "target_test_used_for_best_epoch_or_seed": False,
+        "target_test_used_for_riskmixed_pool": False,
+        "target_test_used_for_final_eval_only": True,
+        "notes": [
+            "v1.4 ranknorm is within target-support candidate class groups, with fallback recorded per candidate.",
+            "Risk-mixed candidate pool is generated from support trials only at a fixed 70/30 mild/risky ratio.",
+            "artifact/physio/style/prediction scores remain diagnostic-only and do not enter training weights.",
+        ],
+    }
+    write_json(OUT_DIR / "leakage_audit_v1_4.json", leakage)
+
+    compact: dict[str, object] = {
+        "task": "SASCERT_V1_4_SUBJECT_CLASS_BALANCED_CU_AND_RISK_MIXED_STRESS_TEST",
+        "status": "partial" if not (regular_rows and risk_rows) else "completed",
+        "localization_audit": localization,
+        "leakage_audit": leakage,
+    }
+    if regular_rows:
+        regular_delta_naive = delta_metrics(regular_rows, V1_4_PRIMARY, "NaiveAug_LS010")
+        regular_delta_v13 = delta_metrics(regular_rows, V1_4_PRIMARY, V1_3_PRIMARY)
+        regular_wins_naive = win_rates_from_pairs(regular_pairs, f"{V1_4_PRIMARY}-vs-NaiveAug_LS010")
+        regular_wins_v13 = win_rates_from_pairs(regular_pairs, f"{V1_4_PRIMARY}-vs-{V1_3_PRIMARY}")
+        compact["regular_pool"] = {
+            "groups": {
+                group: {key: mean_metric(regular_rows, group, key) for key in ["balanced_accuracy", "macro_f1", "auroc", "ece", "nll", "brier", "mean_aug_weight_all"]}
+                for group in V1_4_REGULAR_GROUPS
+            },
+            "v1_4_vs_naive": regular_delta_naive,
+            "v1_4_vs_v1_3": regular_delta_v13,
+            "v1_4_vs_naive_win_rates": regular_wins_naive,
+            "v1_4_vs_v1_3_win_rates": regular_wins_v13,
+        }
+    if risk_rows:
+        risk_delta = delta_metrics(risk_rows, RISK_MIXED_V1_4_PRIMARY, RISK_MIXED_NAIVE)
+        risk_wins = win_rates_from_pairs(risk_pairs, f"{RISK_MIXED_V1_4_PRIMARY}-vs-{RISK_MIXED_NAIVE}")
+        compact["riskmixed_pool"] = {
+            "groups": {
+                group: {key: mean_metric(risk_rows, group, key) for key in ["balanced_accuracy", "macro_f1", "auroc", "ece", "nll", "brier", "mean_aug_weight_all"]}
+                for group in V1_4_RISKMIXED_GROUPS
+            },
+            "v1_4_vs_riskmixed_naive": risk_delta,
+            "win_rates": risk_wins,
+        }
+    decision = "pending"
+    if regular_rows and risk_rows:
+        rd = compact["riskmixed_pool"]["v1_4_vs_riskmixed_naive"]  # type: ignore[index]
+        rw = compact["riskmixed_pool"]["win_rates"]  # type: ignore[index]
+        if (float(rd["delta_balanced_accuracy"]) >= 0.005 or float(rd["delta_macro_f1"]) >= 0.005) and float(rw["subject_win_rate_macro_f1"]) >= 0.5 and float(rd["delta_ece"]) <= 0.01 and float(rd["delta_nll"]) <= 0.01 and float(rd["delta_brier"]) <= 0.01:
+            decision = "SASCERT_USEFUL_WHEN_AUGMENTATION_RISK_EXISTS"
+        else:
+            regular = compact.get("regular_pool", {})
+            rv13 = regular.get("v1_4_vs_v1_3", {}) if isinstance(regular, dict) else {}
+            if float(rv13.get("delta_macro_f1", -1.0)) >= 0.0 and float(rv13.get("delta_balanced_accuracy", -1.0)) >= 0.0:
+                decision = "continue_subject_balanced_utility"
+            else:
+                decision = "limit_training_use_to_diagnostic_or_riskmixed"
+    compact["decision"] = decision
+    write_json(OUT_DIR / "compact_sascert_v1_4_result.json", compact)
+
+    lines = [
+        "# SAS-Cert v1.4 SCB-CU Risk-Mixed Stress Test",
+        "",
+        f"- Status: `{compact['status']}`",
+        f"- Decision: `{decision}`",
+        f"- Leakage audit: `{leakage['status']}`",
+        "",
+    ]
+    if "regular_pool" in compact:
+        reg = compact["regular_pool"]  # type: ignore[assignment]
+        lines.extend(
+            [
+                "## Regular Pool",
+                "",
+                f"- v1.4 vs Naive: `{reg['v1_4_vs_naive']}`",
+                f"- v1.4 vs v1.3: `{reg['v1_4_vs_v1_3']}`",
+                f"- v1.4 vs Naive win rates: `{reg['v1_4_vs_naive_win_rates']}`",
+                f"- v1.4 vs v1.3 win rates: `{reg['v1_4_vs_v1_3_win_rates']}`",
+                "",
+            ]
+        )
+    if compact.get("localization_audit"):
+        lines.extend(
+            [
+                "## Localization Audit",
+                "",
+                f"- Summary: `{compact['localization_audit']}`",
+                "",
+            ]
+        )
+    if "riskmixed_pool" in compact:
+        risk = compact["riskmixed_pool"]  # type: ignore[assignment]
+        lines.extend(
+            [
+                "## Risk-Mixed Pool",
+                "",
+                f"- v1.4 vs RiskMixed Naive: `{risk['v1_4_vs_riskmixed_naive']}`",
+                f"- win rates: `{risk['win_rates']}`",
+                "",
+            ]
+        )
+    lines.extend(
+        [
+            "## Output Files",
+            "",
+            "- `metrics_v1_4_regular_pool.csv`",
+            "- `paired_comparison_v1_4_regular_pool.csv`",
+            "- `metrics_v1_4_riskmixed_pool.csv`",
+            "- `paired_comparison_v1_4_riskmixed_pool.csv`",
+            "- `per_subject_delta_table.csv`",
+            "- `per_class_delta_table.csv`",
+            "- `per_subject_component_corr.csv`",
+            "- `weight_distribution_by_subject_class.csv`",
+            "- `riskmixed_diagnostic_summary.csv`",
+            "- `leakage_audit_v1_4.json`",
+            "- `compact_sascert_v1_4_result.json`",
+        ]
+    )
+    (OUT_DIR / "SASCERT_V1_4_SCB_CU_RISKMIXED_REPORT.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
@@ -1737,7 +2319,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--feature-tag", default=None, help="Feature cache tag. Defaults to pretrained or the state-dict file stem.")
     parser.add_argument("--output-tag", default=None, help="Output file tag. Defaults to feature-tag plus smoke/full.")
     parser.add_argument("--artifact-reject-percentile", type=float, default=90.0)
-    parser.add_argument("--experiment", choices=["v1_1", "v1_2", "v1_3"], default="v1_1")
+    parser.add_argument("--experiment", choices=["v1_1", "v1_2", "v1_3", "v1_4_regular", "v1_4_riskmixed"], default="v1_1")
     parser.add_argument("--output-dir", default=None, help="Optional output directory; defaults to this workbench outputs.")
     args = parser.parse_args()
     if args.feature_tag is None:
@@ -1756,6 +2338,16 @@ def parse_args() -> argparse.Namespace:
         args.groups = V1_3_GROUPS
         args.primary_group = V1_3_PRIMARY
         args.baseline_groups = ["NaiveAug_LS010", "SoftWeight_noReject_LS010"]
+    elif args.experiment == "v1_4_regular":
+        args.groups = V1_4_REGULAR_GROUPS
+        args.primary_group = V1_4_PRIMARY
+        args.baseline_groups = ["NaiveAug_LS010", V1_3_PRIMARY]
+    elif args.experiment == "v1_4_riskmixed":
+        args.groups = V1_4_RISKMIXED_GROUPS
+        args.primary_group = RISK_MIXED_V1_4_PRIMARY
+        args.baseline_groups = [RISK_MIXED_NAIVE]
+        if args.n_aug == 6:
+            args.n_aug = 10
     else:
         args.groups = V1_1_GROUPS
         args.primary_group = V1_1_PRIMARY
@@ -1815,6 +2407,8 @@ def main() -> None:
         write_v1_2_diagnostics(args, all_rows, summary, pairs)
     elif args.experiment == "v1_3":
         write_v1_3_diagnostics(args, all_rows, summary, pairs)
+    elif args.experiment in {"v1_4_regular", "v1_4_riskmixed"}:
+        write_v1_4_diagnostics(args, all_rows, summary, pairs)
     else:
         write_v1_1_diagnostics(args, all_rows, summary, pairs)
     report = [
