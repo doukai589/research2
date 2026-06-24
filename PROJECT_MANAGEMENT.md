@@ -2045,3 +2045,44 @@ Primary report:
   - upload lightweight output files (`md/csv/json/txt/yaml/yml`)
   - do not upload raw data, checkpoints, large caches, third-party downloads,
     dependency snapshots, or local personal notes
+
+### 2026-06-24 GitHub Web/Keyword Verification
+
+- User asked to visit `https://github.com/doukai589/research2` and search key
+  terms with GitHub code search.
+- GitHub repository web page:
+  - Accessible.
+  - Repository is visible as `doukai589/research2`.
+  - Page shows `Public`, branch `main`, `4 Commits`, and expected project
+    directories including `outputs`, `workbench`, `sas_core`, `scripts`,
+    `docs`, `paper`, `sas_cert_mve_outputs`, and `sas_cert_cbramod_mve`.
+- GitHub code search:
+  - Direct GitHub code search URL returned HTTP `429 Too Many Requests`.
+  - Because web code search was rate-limited, keyword verification was performed
+    against the synchronized local checkout.
+- Local sync status during verification:
+  - `git status -sb`: clean, `main...origin/main`.
+  - `HEAD` and `origin/main`: `00894f8 Record GitHub upload verification`.
+  - `git ls-remote` hit a transient TLS termination error, but local branch
+    tracking and repository web page both indicate the repository is uploaded.
+- Keyword hit counts in the synchronized checkout:
+  - `sascert`: `2605`
+  - `SAS-Cert`: `1415`
+  - `SoftAR`: `2747`
+  - `SoftSafe`: `877`
+  - `ST-EEGFormer`: `628`
+  - `PhysioNetMI`: `785`
+  - `pyriemann`: `255`
+  - `mne_features`: `216`
+  - `artifact_score`: `20`
+  - `E_content`: `1134`
+  - `E_physio`: `363`
+  - `ranknorm`: `307`
+  - `label_smoothing`: `82`
+  - `v1_1`: `322`
+  - `v1_2`: `385`
+- Conclusion:
+  - GitHub upload is visible from the web.
+  - The uploaded project contains the expected SAS-Cert, SoftAR/SoftSafe,
+    ST-EEGFormer, PhysioNetMI, pyRiemann, MNE-Features, and v1.1/v1.2
+    references.
